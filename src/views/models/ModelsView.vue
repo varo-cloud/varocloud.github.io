@@ -97,7 +97,7 @@ onMounted(() => {
 
       <div class="models-hero__content">
         <h1 id="models-hero-title" class="models-hero__title">
-          {{ t('pages.models.heroTitleLine1') }}<br />{{ t('pages.models.heroTitleLine2') }}
+          {{ t('common.slogan') }}
         </h1>
         <p class="models-hero__subtitle">
           {{ t('pages.models.heroSubtitle') }}

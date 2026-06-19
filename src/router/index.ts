@@ -17,11 +17,13 @@ const router = createRouter({
         {
           path: 'models/:id',
           name: 'model-detail',
+          meta: { fullBleed: true, transparentHeader: true },
           component: () => import('@/views/models/ModelDetailView.vue'),
         },
         {
           path: 'pricing',
           name: 'pricing',
+          meta: { fullBleed: true, transparentHeader: true },
           component: () => import('@/views/pricing/PricingView.vue'),
         },
         {

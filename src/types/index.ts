@@ -1,3 +1,13 @@
+import type { InputSchema } from './schema'
+
+export type {
+  InputSchema,
+  SchemaFormValues,
+  SchemaProperty,
+  ResolvedSchemaField,
+  SchemaWidget,
+} from './schema'
+
 export interface ApiResponse<T> {
   code: number
   message: string
@@ -19,14 +29,11 @@ export interface Model {
 }
 
 export interface ModelDetail extends Model {
-  parameters: ModelParameter[]
-}
-
-export interface ModelParameter {
-  name: string
-  type: string
-  required: boolean
-  description: string
+  modelPath: string
+  inputSchema: InputSchema
+  isHot?: boolean
+  perRunPriceUsd?: number
+  runsPerTenUsd?: number
 }
 
 export interface UserProfile {
@@ -84,4 +91,20 @@ export interface Transaction {
 
 export interface BalanceInfo {
   balanceUsd: number
+}
+
+export type PricingCategory = 'image-video' | 'language' | 'serverless'
+
+export type PricingMediaType = 'video' | 'image' | 'llm'
+
+export interface PricingItem {
+  id: string
+  modelId?: string
+  name: string
+  standardPriceUsd: number
+  startingPriceUsd: number
+  priceUnit: string
+  discountPercent?: number
+  category: PricingCategory
+  mediaType: PricingMediaType
 }

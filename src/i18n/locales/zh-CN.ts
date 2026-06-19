@@ -1,6 +1,7 @@
 export default {
   common: {
     appName: 'Varo.cloud',
+    slogan: 'The port of ai value',
     designPending: '设计稿待交付 — 页面内容将在设计完成后填充。',
     balance: '余额',
     login: '登录',
@@ -25,8 +26,6 @@ export default {
     models: {
       title: '模型',
       placeholder: '浏览可用的视频生成模型。',
-      heroTitleLine1: '最快的方式',
-      heroTitleLine2: '用 AI 生成视频',
       heroSubtitle: '一个 API 接入全球最佳视频模型，按输出计费，美元结算。',
       heroCtaPrimary: '免费开始 · $3 体验金',
       heroCtaSecondary: '查看文档',
@@ -56,7 +55,30 @@ export default {
     },
     modelDetail: {
       title: '模型详情',
-      placeholder: 'Playground 与 API 示例将在此实现。',
+      loadError: '加载模型失败，请重试。',
+      notFound: '未找到该模型。',
+      backToModels: '返回模型列表',
+      inputTitle: 'Input',
+      from: 'From',
+      run: 'Run',
+      reset: '重置表单',
+      credits: 'Credits',
+      topUp: 'Top Up',
+      myGenerations: 'My Generations',
+      code: 'Code',
+      settings: 'Settings',
+      noGenerations: '运行模型后，生成结果将显示在这里。',
+      perRun: 'per run',
+      apiPlaceholder: 'API 文档与代码示例将在此提供。',
+      placeholder: {
+        multiAudioUploader: '组件尚未实现，请告诉我如何实现。',
+        multiVideoUploader: '组件尚未实现，请告诉我如何实现。',
+        unknownWidget: '暂不支持的字段类型，待实现。',
+      },
+      tabs: {
+        playground: 'Playground',
+        api: 'API',
+      },
     },
     apiKeys: {
       title: 'API 密钥',
@@ -64,7 +86,31 @@ export default {
     },
     pricing: {
       title: '价格',
-      placeholder: '查看各模型的定价方案。',
+      heroTitle: '图像与视频模型',
+      heroSubtitle: 'WaveSpeed、OpenAI、Google 等顶尖模型的最新生成能力。',
+      categoryLabel: '价格分类',
+      mediaTypeLabel: '媒体类型',
+      startFrom: '起价',
+      view: '查看',
+      loadError: '加载价格失败，请重试。',
+      retry: '重试',
+      empty: '没有符合筛选条件的价格项。',
+      categories: {
+        imageVideo: '图像与视频模型',
+        language: '语言模型',
+        serverless: 'Serverless GPU',
+      },
+      mediaTypes: {
+        video: '视频',
+        image: '图像',
+        llm: 'LLM',
+      },
+      columns: {
+        model: '模型',
+        standardPrice: '标准价格（USD）',
+        price: '价格',
+        discount: '折扣',
+      },
     },
     billing: {
       title: '账单',

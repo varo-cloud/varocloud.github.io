@@ -1,6 +1,7 @@
 export default {
   common: {
     appName: 'Varo.cloud',
+    slogan: 'The port of ai value',
     designPending: 'Design pending — content will be added after design delivery.',
     balance: 'Balance',
     login: 'Log in',
@@ -25,8 +26,6 @@ export default {
     models: {
       title: 'Models',
       placeholder: 'Explore available video generation models.',
-      heroTitleLine1: 'The fastest way to',
-      heroTitleLine2: 'generate video with AI',
       heroSubtitle: "One API for the world's best video models. Pay per output — in USD.",
       heroCtaPrimary: 'Star Free-$3 Credit',
       heroCtaSecondary: 'View Docs',
@@ -56,7 +55,30 @@ export default {
     },
     modelDetail: {
       title: 'Model Detail',
-      placeholder: 'Playground and API examples will be implemented here.',
+      loadError: 'Failed to load model. Please try again.',
+      notFound: 'Model not found.',
+      backToModels: 'Back to models',
+      inputTitle: 'Input',
+      from: 'From',
+      run: 'Run',
+      reset: 'Reset form',
+      credits: 'Credits',
+      topUp: 'Top Up',
+      myGenerations: 'My Generations',
+      code: 'Code',
+      settings: 'Settings',
+      noGenerations: 'Run the model to see your generation here.',
+      perRun: 'per run',
+      apiPlaceholder: 'API documentation and code examples will be available here.',
+      placeholder: {
+        multiAudioUploader: 'Component not implemented yet — tell me how to build it.',
+        multiVideoUploader: 'Component not implemented yet — tell me how to build it.',
+        unknownWidget: 'Unsupported field type — implementation pending.',
+      },
+      tabs: {
+        playground: 'Playground',
+        api: 'API',
+      },
     },
     apiKeys: {
       title: 'API Keys',
@@ -64,7 +86,32 @@ export default {
     },
     pricing: {
       title: 'Pricing',
-      placeholder: 'View pricing plans for each model.',
+      heroTitle: 'Image & Video Models',
+      heroSubtitle:
+        'State-of-the-art generation with models from WaveSpeed, OpenAI, Google, and more.',
+      categoryLabel: 'Pricing categories',
+      mediaTypeLabel: 'Media type',
+      startFrom: 'Start from',
+      view: 'View',
+      loadError: 'Failed to load pricing. Please try again.',
+      retry: 'Retry',
+      empty: 'No pricing items match your filters.',
+      categories: {
+        imageVideo: 'Image & Video Models',
+        language: 'Language Models',
+        serverless: 'Serverless GPU',
+      },
+      mediaTypes: {
+        video: 'Video',
+        image: 'Image',
+        llm: 'LLM',
+      },
+      columns: {
+        model: 'Model',
+        standardPrice: 'Standard Price (USD)',
+        price: 'Price',
+        discount: 'Discount',
+      },
     },
     billing: {
       title: 'Billing',

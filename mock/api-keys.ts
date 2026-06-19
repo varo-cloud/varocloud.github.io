@@ -59,8 +59,8 @@ export default [
   {
     url: '/api/api-keys/:id',
     method: 'delete',
-    response: ({ params }: { params: { id: string } }) => {
-      apiKeys = apiKeys.filter((item) => item.id !== params.id)
+    response: ({ query }: { query: Record<string, string> }) => {
+      apiKeys = apiKeys.filter((item) => item.id !== query.id)
       return success(null)
     },
   },
