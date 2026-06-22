@@ -210,11 +210,13 @@ export default {
       billingColumns: {
         time: '时间',
         style: '类型',
-        key: '详情',
+        detail: '详情',
+        apiKey: 'API Key',
         value: '金额',
       },
       styles: {
         api: 'API',
+        web: '网页',
         topup: '充值',
         bonus: '赠送',
       },

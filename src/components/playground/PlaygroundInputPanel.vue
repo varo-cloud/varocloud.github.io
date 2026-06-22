@@ -63,7 +63,7 @@ function goTopUp() {
       </button>
     </div>
 
-    <div class="input-panel__form scrollbar-subtle">
+    <div class="input-panel__form">
       <PlaygroundSchemaForm v-model="formValues" :schema="schema" />
     </div>
 
@@ -126,7 +126,6 @@ function goTopUp() {
   border: 0.5px solid #2d2d38;
   border-radius: 16px;
   padding: 24px;
-  min-height: 600px;
 }
 
 .input-panel__header {
@@ -134,6 +133,7 @@ function goTopUp() {
   align-items: center;
   justify-content: space-between;
   margin-bottom: 16px;
+  flex-shrink: 0;
 }
 
 .input-panel__title {
@@ -157,8 +157,6 @@ function goTopUp() {
 }
 
 .input-panel__form {
-  flex: 1;
-  overflow-y: auto;
   margin-bottom: 20px;
 }
 
@@ -166,6 +164,7 @@ function goTopUp() {
   display: flex;
   gap: 8px;
   margin-bottom: 12px;
+  flex-shrink: 0;
 }
 
 .input-panel__reset {
@@ -236,6 +235,7 @@ function goTopUp() {
   gap: 8px;
   font-size: 12px;
   color: #ebf4fb;
+  flex-shrink: 0;
 }
 
 .input-panel__credits-value {

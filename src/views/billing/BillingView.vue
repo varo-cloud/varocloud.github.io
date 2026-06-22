@@ -202,7 +202,8 @@ function handleExportCsv() {
   const headers = [
     t('pages.billing.billingColumns.time'),
     t('pages.billing.billingColumns.style'),
-    t('pages.billing.billingColumns.key'),
+    t('pages.billing.billingColumns.detail'),
+    t('pages.billing.billingColumns.apiKey'),
     t('pages.billing.billingColumns.value'),
   ]
 
@@ -212,6 +213,7 @@ function handleExportCsv() {
       formatTimestamp(record.createdAt, locale.value, 'compactDatetime'),
       t(`pages.billing.styles.${record.style}`),
       record.key,
+      record.apiKey ?? '',
       `${prefix}$${Math.abs(record.amountUsd).toFixed(2)}`,
     ]
   })
@@ -516,7 +518,8 @@ onMounted(loadBilling)
             >
               <span role="columnheader">{{ t('pages.billing.billingColumns.time') }}</span>
               <span role="columnheader">{{ t('pages.billing.billingColumns.style') }}</span>
-              <span role="columnheader">{{ t('pages.billing.billingColumns.key') }}</span>
+              <span role="columnheader">{{ t('pages.billing.billingColumns.detail') }}</span>
+              <span role="columnheader">{{ t('pages.billing.billingColumns.apiKey') }}</span>
               <span role="columnheader">{{ t('pages.billing.billingColumns.value') }}</span>
             </div>
 
@@ -1016,7 +1019,12 @@ onMounted(loadBilling)
 }
 
 .billing-table__header--records {
-  grid-template-columns: minmax(110px, 0.9fr) minmax(72px, 0.55fr) minmax(180px, 2.2fr) minmax(80px, 0.65fr);
+  grid-template-columns:
+    minmax(110px, 0.9fr)
+    minmax(72px, 0.55fr)
+    minmax(140px, 1.5fr)
+    minmax(120px, 1fr)
+    minmax(80px, 0.65fr);
 }
 
 .billing-table__header--records span:last-child {

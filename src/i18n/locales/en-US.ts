@@ -212,11 +212,13 @@ export default {
       billingColumns: {
         time: 'Time',
         style: 'Style',
-        key: 'Key',
+        detail: 'Detail',
+        apiKey: 'API Key',
         value: 'Value',
       },
       styles: {
         api: 'API',
+        web: 'Web',
         topup: 'Top Up',
         bonus: 'Bonus',
       },

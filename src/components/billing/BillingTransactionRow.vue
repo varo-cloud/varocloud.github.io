@@ -11,7 +11,7 @@ const props = defineProps<{
 const { t, locale } = useI18n()
 
 const dateLabel = computed(() =>
-  formatTimestamp(props.item.createdAt, locale.value, 'date'),
+  formatTimestamp(props.item.createdAt, locale.value, 'compactDatetime'),
 )
 
 const amountLabel = computed(() => {

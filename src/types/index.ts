@@ -148,12 +148,15 @@ export interface UpdateAutoTopUpPayload {
   topUpAmountUsd: number
 }
 
-export type BillingRecordStyle = 'api' | 'topup' | 'bonus'
+export type BillingRecordStyle = 'api' | 'web' | 'topup' | 'bonus'
 
 export interface BillingRecord {
   id: string
   style: BillingRecordStyle
+  /** Usage or payment detail, e.g. model · resolution · duration */
   key: string
+  /** Masked API key when style is `api`; empty for web and other types */
+  apiKey?: string | null
   amountUsd: number
   createdAt: number
 }

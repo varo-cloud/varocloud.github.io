@@ -8,7 +8,7 @@ export function toMillis(timestamp: number): number {
 
 export type TimestampFormatStyle = 'date' | 'datetime' | 'compactDatetime' | 'time'
 
-const FORMAT_PRESETS: Record<TimestampFormatStyle, Intl.DateTimeFormatOptions> = {
+const FORMAT_PRESETS: Record<Exclude<TimestampFormatStyle, 'compactDatetime'>, Intl.DateTimeFormatOptions> = {
   date: { month: 'short', day: 'numeric', year: 'numeric' },
   datetime: {
     month: 'short',
@@ -17,14 +17,18 @@ const FORMAT_PRESETS: Record<TimestampFormatStyle, Intl.DateTimeFormatOptions> =
     hour: 'numeric',
     minute: '2-digit',
   },
-  compactDatetime: {
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false,
-  },
   time: { hour: 'numeric', minute: '2-digit', second: '2-digit' },
+}
+
+/** e.g. 2026/6/13 16:51:37 */
+function formatCompactDatetime(date: Date): string {
+  const year = date.getFullYear()
+  const month = date.getMonth() + 1
+  const day = date.getDate()
+  const hour = date.getHours()
+  const minute = String(date.getMinutes()).padStart(2, '0')
+  const second = String(date.getSeconds()).padStart(2, '0')
+  return `${year}/${month}/${day} ${hour}:${minute}:${second}`
 }
 
 export function formatTimestamp(
@@ -35,6 +39,10 @@ export function formatTimestamp(
 ): string {
   const date = new Date(toMillis(timestamp))
   if (Number.isNaN(date.getTime())) return ''
+
+  if (style === 'compactDatetime') {
+    return formatCompactDatetime(date)
+  }
 
   return new Intl.DateTimeFormat(locale, { ...FORMAT_PRESETS[style], ...options }).format(date)
 }

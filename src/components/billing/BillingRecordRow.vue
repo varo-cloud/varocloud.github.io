@@ -22,6 +22,8 @@ const valueLabel = computed(() => {
   const prefix = isPositive.value ? '+' : '-'
   return `${prefix}$${Math.abs(props.item.amountUsd).toFixed(2)}`
 })
+
+const apiKeyLabel = computed(() => props.item.apiKey || '—')
 </script>
 
 <template>
@@ -37,6 +39,13 @@ const valueLabel = computed(() => {
     </span>
     <span class="billing-record-row__key" role="cell">{{ item.key }}</span>
     <span
+      class="billing-record-row__api-key"
+      :class="{ 'billing-record-row__api-key--empty': !item.apiKey }"
+      role="cell"
+    >
+      {{ apiKeyLabel }}
+    </span>
+    <span
       class="billing-record-row__value"
       :class="{ 'billing-record-row__value--positive': isPositive }"
       role="cell"
@@ -49,7 +58,12 @@ const valueLabel = computed(() => {
 <style scoped>
 .billing-record-row {
   display: grid;
-  grid-template-columns: minmax(110px, 0.9fr) minmax(72px, 0.55fr) minmax(180px, 2.2fr) minmax(80px, 0.65fr);
+  grid-template-columns:
+    minmax(110px, 0.9fr)
+    minmax(72px, 0.55fr)
+    minmax(140px, 1.5fr)
+    minmax(120px, 1fr)
+    minmax(80px, 0.65fr);
   gap: 12px;
   align-items: center;
   min-height: 41px;
@@ -81,6 +95,11 @@ const valueLabel = computed(() => {
   color: var(--text-secondary);
 }
 
+.billing-record-row__badge--web {
+  background: rgba(6, 182, 212, 0.08);
+  color: #06b6d4;
+}
+
 .billing-record-row__badge--topup,
 .billing-record-row__badge--bonus {
   background: rgba(0, 216, 141, 0.06);
@@ -89,6 +108,18 @@ const valueLabel = computed(() => {
 
 .billing-record-row__key {
   color: var(--text-primary);
+}
+
+.billing-record-row__api-key {
+  color: var(--text-primary);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 13px;
+}
+
+.billing-record-row__api-key--empty {
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: 14px;
 }
 
 .billing-record-row__value {
@@ -106,7 +137,8 @@ const valueLabel = computed(() => {
     padding: 12px 16px;
   }
 
-  .billing-record-row__key {
+  .billing-record-row__key,
+  .billing-record-row__api-key {
     grid-column: 1 / -1;
   }
 
