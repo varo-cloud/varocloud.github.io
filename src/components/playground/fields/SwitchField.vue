@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import SchemaFieldLabel from '../SchemaFieldLabel.vue'
-
 const model = defineModel<boolean>({ required: true })
 
 defineProps<{

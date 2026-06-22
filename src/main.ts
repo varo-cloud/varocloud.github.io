@@ -6,10 +6,19 @@ import App from './App.vue'
 import router from './router'
 import i18n from './i18n'
 
-const app = createApp(App)
+async function bootstrap() {
+  if (import.meta.env.PROD && import.meta.env.VITE_USE_MOCK === 'true') {
+    const { setupProdMockServer } = await import('@/mock/setupProdMockServer')
+    await setupProdMockServer()
+  }
 
-app.use(createPinia())
-app.use(router)
-app.use(i18n)
+  const app = createApp(App)
 
-app.mount('#app')
+  app.use(createPinia())
+  app.use(router)
+  app.use(i18n)
+
+  app.mount('#app')
+}
+
+bootstrap()

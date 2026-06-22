@@ -1,4 +1,5 @@
 import type { MockMethod } from 'vite-plugin-mock'
+import type { ModelDetail } from '../src/types'
 import type { InputSchema } from '../src/types/schema'
 import { success } from './_util'
 
@@ -346,8 +347,8 @@ const VARIANT_TEMPLATES = [
   },
 ]
 
-function buildModelCatalog() {
-  const catalog = [...baseModels]
+function buildModelCatalog(): ModelDetail[] {
+  const catalog: ModelDetail[] = [...baseModels]
   let index = 0
 
   while (catalog.length < 48) {
@@ -371,7 +372,7 @@ function buildModelCatalog() {
       perRunPriceUsd: perRun,
       runsPerTenUsd: Math.max(1, Math.floor(10 / perRun)),
       priceDetail: `${4 + (index % 8)}s · ${['480p', '720p', '1080p'][index % 3]}`,
-      discountPercent: index % 4 === 0 ? undefined : [20, 25, 30][index % 3],
+      ...(index % 4 !== 0 ? { discountPercent: [20, 25, 30][index % 3] } : {}),
       isHot: index % 7 === 0,
       description: `${family} ${template.capability.replace(/-/g, ' ')} generation powered by ${provider}.`,
       thumbnailUrl:
