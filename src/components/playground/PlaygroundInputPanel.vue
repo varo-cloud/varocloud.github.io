@@ -73,11 +73,8 @@ function goTopUp() {
       <button type="button" class="input-panel__reset" :aria-label="t('pages.modelDetail.reset')" @click="resetForm">
         <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
           <path
-            d="M5 14h8a3 3 0 1 0 0-6H9M5 14l2-2M5 14l2 2M5 6l2-2M5 6l2 2"
-            stroke="currentColor"
-            stroke-width="1.2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
+            d="M7.4395 7.6435L3.727 11.356L7.6225 15.2515H8.5V15.25H9.379L12.2125 12.4165L7.4395 7.6435V7.6435ZM8.5 6.583L13.273 11.356L15.394 9.23425L10.621 4.46125L8.5 6.583ZM11.5 15.25H16.75V16.75H10L7.0015 16.7515L2.13625 11.8863C1.99565 11.7456 1.91666 11.5549 1.91666 11.356C1.91666 11.1571 1.99565 10.9664 2.13625 10.8258L10.09 2.8705C10.1597 2.80077 10.2424 2.74545 10.3334 2.70771C10.4245 2.66996 10.5221 2.65054 10.6206 2.65054C10.7192 2.65054 10.8168 2.66996 10.9078 2.70771C10.9989 2.74545 11.0816 2.80077 11.1512 2.8705L16.9847 8.704C17.1254 8.84465 17.2043 9.03538 17.2043 9.23425C17.2043 9.43312 17.1254 9.62385 16.9847 9.7645L11.5 15.25Z"
+            fill="currentColor"
           />
         </svg>
       </button>
@@ -172,8 +169,8 @@ function goTopUp() {
 
 .input-panel__reset {
   flex-shrink: 0;
-  width: 48px;
-  height: 48px;
+  width: 60px;
+  height: 40px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -182,6 +179,15 @@ function goTopUp() {
   background: rgba(255, 255, 255, 0.1);
   color: #ebf4fb;
   cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.input-panel__reset:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.input-panel__reset:active {
+  background: rgba(255, 255, 255, 0.22);
 }
 
 .input-panel__run {
@@ -189,7 +195,7 @@ function goTopUp() {
   display: flex;
   align-items: center;
   gap: 8px;
-  height: 48px;
+  height: 40px;
   padding: 0 12px;
   border: none;
   border-radius: 8px;
@@ -197,6 +203,15 @@ function goTopUp() {
   color: #fff;
   cursor: pointer;
   font-family: inherit;
+  transition: background 0.15s ease;
+}
+
+.input-panel__run:hover:not(:disabled) {
+  background: #0891b2;
+}
+
+.input-panel__run:active:not(:disabled) {
+  background: #0e7490;
 }
 
 .input-panel__run:disabled {
