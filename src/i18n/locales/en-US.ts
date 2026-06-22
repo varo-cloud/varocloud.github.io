@@ -1,7 +1,7 @@
 export default {
   common: {
     appName: 'Varo.cloud',
-    slogan: 'The port of ai value',
+    slogan: 'The Port of AI Value',
     designPending: 'Design pending — content will be added after design delivery.',
     balance: 'Balance',
     login: 'Log in',

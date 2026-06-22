@@ -1,5 +1,6 @@
 import axios from 'axios'
 import type { ApiResponse } from '@/types'
+import { getCurrentLocale } from '@/i18n'
 import { apiBaseUrl } from '@/utils/apiBaseUrl'
 
 const TOKEN_KEY = 'auth_token'
@@ -10,6 +11,10 @@ export const http = axios.create({
 })
 
 http.interceptors.request.use((config) => {
+  const locale = getCurrentLocale()
+  config.headers.set('Accept-Language', locale)
+  config.headers.set('X-Locale', locale)
+
   const token = localStorage.getItem(TOKEN_KEY)
   if (token) {
     config.headers.Authorization = `Bearer ${token}`

@@ -28,4 +28,12 @@ const i18n = createI18n({
   },
 })
 
+export function getCurrentLocale(): LocaleType {
+  const current = i18n.global.locale.value
+  if (current === 'zh-CN' || current === 'en-US') {
+    return current
+  }
+  return getStoredLocale()
+}
+
 export default i18n
