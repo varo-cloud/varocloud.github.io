@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { assetUrl } from '@/utils/assetUrl'
+
 withDefaults(
   defineProps<{
     variant?: 'light' | 'dark'
@@ -17,14 +19,14 @@ withDefaults(
   >
     <img
       class="varo-cloud-logo__mascot"
-      src="/assets/brand/varo-mascot.svg"
+      :src="assetUrl('/assets/brand/varo-mascot.svg')"
       alt=""
       width="46"
       height="40"
     />
     <img
       class="varo-cloud-logo__wordmark"
-      src="/assets/brand/varo-wordmark.svg"
+      :src="assetUrl('/assets/brand/varo-wordmark.svg')"
       alt=""
       width="141"
       height="20"

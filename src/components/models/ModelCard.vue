@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { assetUrl } from '@/utils/assetUrl'
 import type { Model } from '@/types'
 
 const props = defineProps<{
@@ -13,6 +14,10 @@ const { t } = useI18n()
 const isFavourite = ref(false)
 
 const displayName = computed(() => props.model.displayName ?? props.model.name)
+
+const thumbnailSrc = computed(() =>
+  assetUrl(props.model.thumbnailUrl ?? '/assets/models/card-thumb.jpg'),
+)
 
 const capabilityBadge = computed(() => {
   const cap = props.model.capabilities[0]
@@ -42,7 +47,7 @@ function toggleFavourite(event: Event) {
     <div class="model-card__media">
       <img
         class="model-card__thumb"
-        :src="model.thumbnailUrl ?? '/assets/models/card-thumb.jpg'"
+        :src="thumbnailSrc"
         :alt="displayName"
         loading="lazy"
       />
@@ -54,7 +59,7 @@ function toggleFavourite(event: Event) {
         :aria-label="t('pages.models.favourite')"
         @click="toggleFavourite"
       >
-        <img src="/assets/models/heart.svg" alt="" aria-hidden="true" />
+        <img :src="assetUrl('/assets/models/heart.svg')" alt="" aria-hidden="true" />
       </button>
 
       <div v-if="capabilityBadge" class="model-card__badge">
@@ -67,7 +72,7 @@ function toggleFavourite(event: Event) {
         <h3 class="model-card__title">{{ displayName }}</h3>
         <img
           class="model-card__chart"
-          src="/assets/models/chart-dot.svg"
+          :src="assetUrl('/assets/models/chart-dot.svg')"
           alt=""
           aria-hidden="true"
         />

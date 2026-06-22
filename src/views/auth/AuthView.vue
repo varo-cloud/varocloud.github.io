@@ -8,6 +8,7 @@ import { useUserStore } from '@/stores/user'
 import AppHeader from '@/components/layout/AppHeader.vue'
 import AppFooter from '@/components/layout/AppFooter.vue'
 import AppIcon from '@/components/common/AppIcon.vue'
+import { assetUrl } from '@/utils/assetUrl'
 
 const route = useRoute()
 const router = useRouter()
@@ -111,7 +112,7 @@ onMounted(() => {
             @click="handleGoogleLogin"
           >
             <img
-              src="/assets/icons/google.svg"
+              :src="assetUrl('/assets/icons/google.svg')"
               alt=""
               aria-hidden="true"
               class="auth-card__google-icon"

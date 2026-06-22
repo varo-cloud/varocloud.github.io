@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n'
 import { NSpin, useDialog, useMessage } from 'naive-ui'
 import AppIcon from '@/components/common/AppIcon.vue'
 import ApiKeyTableRow from '@/components/api-keys/ApiKeyTableRow.vue'
+import { assetUrl } from '@/utils/assetUrl'
 import { createApiKey, deleteApiKey, fetchApiKeys } from '@/api/api-keys'
 import type { ApiKey } from '@/types'
 
@@ -171,7 +172,7 @@ onMounted(loadKeys)
             <div class="api-keys-reveal__title-wrap">
               <img
                 class="api-keys-reveal__icon"
-                src="/assets/icons/check-circle.svg"
+                :src="assetUrl('/assets/icons/check-circle.svg')"
                 alt=""
                 width="24"
                 height="24"

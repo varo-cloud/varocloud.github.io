@@ -1,17 +1,24 @@
 <script setup lang="ts">
-defineProps<{
+import { computed } from 'vue'
+import { assetUrl } from '@/utils/assetUrl'
+
+const props = defineProps<{
   title: string
   modelPath: string
   description: string
   thumbnailUrl?: string
 }>()
+
+const thumbnailSrc = computed(() =>
+  assetUrl(props.thumbnailUrl || '/assets/model-detail/model-thumb.jpg'),
+)
 </script>
 
 <template>
   <header class="model-header">
     <img
       class="model-header__thumb"
-      :src="thumbnailUrl || '/assets/model-detail/model-thumb.jpg'"
+      :src="thumbnailSrc"
       alt=""
     />
     <div class="model-header__content">

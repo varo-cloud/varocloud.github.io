@@ -16,6 +16,7 @@ import {
 } from '@/api/billing'
 import { useUserStore } from '@/stores/user'
 import { downloadCsv } from '@/utils/csv'
+import { assetUrl } from '@/utils/assetUrl'
 import { formatTimestamp } from '@/utils/time'
 import type { BillingRecord, BillingSummary, PaymentMethodId, TopUpPreset, Transaction } from '@/types'
 
@@ -23,10 +24,10 @@ type AmountSelection = number | 'custom'
 type HistoryTab = 'topup' | 'billing'
 
 const PAYMENT_METHODS: Array<{ id: PaymentMethodId; logo: string; alt: string }> = [
-  { id: 'stripe', logo: '/assets/billing/stripe.svg', alt: 'Stripe' },
-  { id: 'paypal', logo: '/assets/billing/paypal.svg', alt: 'PayPal' },
-  { id: 'npay', logo: '/assets/billing/npay.svg', alt: 'N pay' },
-  { id: 'alipay', logo: '/assets/billing/alipay-wechat.svg', alt: 'Alipay / WeChat Pay' },
+  { id: 'stripe', logo: assetUrl('/assets/billing/stripe.svg'), alt: 'Stripe' },
+  { id: 'paypal', logo: assetUrl('/assets/billing/paypal.svg'), alt: 'PayPal' },
+  { id: 'npay', logo: assetUrl('/assets/billing/npay.svg'), alt: 'N pay' },
+  { id: 'alipay', logo: assetUrl('/assets/billing/alipay-wechat.svg'), alt: 'Alipay / WeChat Pay' },
 ]
 
 const { t, locale } = useI18n()
@@ -315,9 +316,11 @@ onMounted(loadBilling)
                   <img
                     class="billing-amount-option__radio"
                     :src="
-                      selectedAmount === preset.amountUsd
-                        ? '/assets/icons/radio-checked.svg'
-                        : '/assets/icons/radio-unchecked.svg'
+                      assetUrl(
+                        selectedAmount === preset.amountUsd
+                          ? '/assets/icons/radio-checked.svg'
+                          : '/assets/icons/radio-unchecked.svg',
+                      )
                     "
                     alt=""
                     width="16"
@@ -344,9 +347,11 @@ onMounted(loadBilling)
                   <img
                     class="billing-amount-option__radio"
                     :src="
-                      selectedAmount === 'custom'
-                        ? '/assets/icons/radio-checked.svg'
-                        : '/assets/icons/radio-unchecked.svg'
+                      assetUrl(
+                        selectedAmount === 'custom'
+                          ? '/assets/icons/radio-checked.svg'
+                          : '/assets/icons/radio-unchecked.svg',
+                      )
                     "
                     alt=""
                     width="16"
@@ -433,7 +438,7 @@ onMounted(loadBilling)
               <p class="billing-panel__note">{{ t('pages.billing.autoTopUpStripeOnly') }}</p>
 
               <button type="button" class="billing-add-card" @click="handleAddCard">
-                <img src="/assets/icons/bank-card.svg" alt="" width="16" height="16" />
+                <img :src="assetUrl('/assets/icons/bank-card.svg')" alt="" width="16" height="16" />
                 <span>{{ t('pages.billing.addCard') }}</span>
                 <AppIcon name="add" :size="20" />
               </button>

@@ -8,6 +8,7 @@ import ModelDetailHeader from '@/components/models/ModelDetailHeader.vue'
 import PlaygroundInputPanel from '@/components/playground/PlaygroundInputPanel.vue'
 import PlaygroundOutputPanel from '@/components/playground/PlaygroundOutputPanel.vue'
 import { useUserStore } from '@/stores/user'
+import { assetUrl } from '@/utils/assetUrl'
 import type { ModelDetail } from '@/types'
 import type { SchemaFormValues } from '@/types/schema'
 
@@ -19,7 +20,7 @@ const model = ref<ModelDetail | null>(null)
 const loading = ref(true)
 const error = ref<string | null>(null)
 const activeTab = ref<'playground' | 'api'>('playground')
-const outputUrl = ref<string | null>('/assets/model-detail/sample-output.jpg')
+const outputUrl = ref<string | null>(assetUrl('/assets/model-detail/sample-output.jpg'))
 
 const creditsUsd = computed(() => userStore.balanceUsd ?? 1.0)
 
@@ -43,7 +44,7 @@ async function loadModel(id: string) {
 }
 
 function handleRun(_values: SchemaFormValues) {
-  outputUrl.value = '/assets/model-detail/sample-output.jpg'
+  outputUrl.value = assetUrl('/assets/model-detail/sample-output.jpg')
 }
 
 watch(

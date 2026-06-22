@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
+import { assetUrl } from '@/utils/assetUrl'
 
 const { t } = useI18n()
 </script>
@@ -20,7 +21,7 @@ const { t } = useI18n()
           rel="noopener noreferrer"
           :aria-label="t('footer.twitter')"
         >
-          <img src="/assets/footer/twitter.svg" alt="" aria-hidden="true" />
+          <img :src="assetUrl('/assets/footer/twitter.svg')" alt="" aria-hidden="true" />
         </a>
         <a
           class="app-footer__social-link"
@@ -29,7 +30,7 @@ const { t } = useI18n()
           rel="noopener noreferrer"
           :aria-label="t('footer.telegram')"
         >
-          <img src="/assets/footer/telegram.svg" alt="" aria-hidden="true" />
+          <img :src="assetUrl('/assets/footer/telegram.svg')" alt="" aria-hidden="true" />
         </a>
       </div>
     </div>

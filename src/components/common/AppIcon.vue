@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+import { assetUrl } from '@/utils/assetUrl'
+
 const ICONS = {
   globe: '/assets/icons/globe.svg',
   wallet: '/assets/icons/wallet.svg',
@@ -22,6 +25,8 @@ const props = withDefaults(
     size: 16,
   },
 )
+
+const iconUrl = computed(() => assetUrl(ICONS[props.name]))
 </script>
 
 <template>
@@ -30,8 +35,8 @@ const props = withDefaults(
     :style="{
       width: `${props.size}px`,
       height: `${props.size}px`,
-      WebkitMaskImage: `url(${ICONS[props.name]})`,
-      maskImage: `url(${ICONS[props.name]})`,
+      WebkitMaskImage: `url(${iconUrl})`,
+      maskImage: `url(${iconUrl})`,
     }"
     aria-hidden="true"
   />

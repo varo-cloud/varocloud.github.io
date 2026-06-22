@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n'
 import { NEmpty, NSpin } from 'naive-ui'
 import { fetchModels } from '@/api/models'
 import ModelCard from '@/components/models/ModelCard.vue'
+import { assetUrl } from '@/utils/assetUrl'
 import type { Model } from '@/types'
 
 const PAGE_SIZE = 20
@@ -116,7 +117,7 @@ onMounted(() => {
     <section class="models-hero" aria-labelledby="models-hero-title">
       <img
         class="models-hero__bg"
-        src="/assets/models/hero-bg.jpg"
+        :src="assetUrl('/assets/models/hero-bg.jpg')"
         alt=""
         aria-hidden="true"
       />
@@ -160,7 +161,7 @@ onMounted(() => {
           </div>
 
           <label class="models-search">
-            <img src="/assets/models/search.svg" alt="" aria-hidden="true" />
+            <img :src="assetUrl('/assets/models/search.svg')" alt="" aria-hidden="true" />
             <input
               v-model="searchQuery"
               type="search"

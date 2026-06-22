@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n'
 import { NEmpty, NSpin } from 'naive-ui'
 import { fetchPricing } from '@/api/pricing'
 import PricingTableRow from '@/components/pricing/PricingTableRow.vue'
+import { assetUrl } from '@/utils/assetUrl'
 import type { PricingCategory, PricingItem, PricingMediaType } from '@/types'
 
 const router = useRouter()
@@ -80,7 +81,7 @@ onMounted(() => {
     <section class="pricing-hero" aria-labelledby="pricing-hero-title">
       <img
         class="pricing-hero__bg"
-        src="/assets/pricing/hero-bg.jpg"
+        :src="assetUrl('/assets/pricing/hero-bg.jpg')"
         alt=""
         aria-hidden="true"
       />
