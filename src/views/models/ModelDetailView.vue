@@ -108,6 +108,7 @@ onMounted(() => {
 
       <div v-if="activeTab === 'playground'" class="model-detail-page__playground">
         <PlaygroundInputPanel
+          v-if="model.inputSchema"
           :schema="model.inputSchema"
           :price-usd="model.startingPriceUsd"
           :original-price-usd="model.originalPriceUsd"

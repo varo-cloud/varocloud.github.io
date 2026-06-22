@@ -8,7 +8,7 @@ import { useUserStore } from '@/stores/user'
 import PlaygroundSchemaForm from './PlaygroundSchemaForm.vue'
 
 const props = defineProps<{
-  schema: InputSchema
+  schema?: InputSchema
   priceUsd: number
   originalPriceUsd?: number
   creditsUsd: number

@@ -1,5 +1,7 @@
+import axios, { getAdapter, type AxiosResponse, type InternalAxiosRequestConfig } from 'axios'
 import type { MockMethod } from 'vite-plugin-mock'
-import { match as matchPath, pathToRegexp } from 'path-to-regexp'
+import { match as matchPath } from 'path-to-regexp'
+import { http } from '@/api/http'
 import { toProdMockUrl } from '@/utils/apiBaseUrl'
 import apiKeysMock from '../../mock/api-keys'
 import authMock from '../../mock/auth'
@@ -15,24 +17,12 @@ const mockModules: MockMethod[] = [
   ...pricingMock,
 ]
 
-type MockRuntime = {
-  XHR: {
-    prototype: {
-      send: (...args: unknown[]) => void
-      open: (...args: unknown[]) => void
-      __send?: (...args: unknown[]) => void
-      proxy_open?: (...args: unknown[]) => void
-      custom: {
-        xhr?: XMLHttpRequest
-        requestHeaders?: Record<string, string>
-        options?: { headers?: Record<string, string> }
-      }
-      withCredentials: boolean
-      responseType: XMLHttpRequestResponseType
-    }
-  }
-  mock: (rurl: RegExp, rtype: string, template: unknown) => void
-  setup: (config: { timeout?: number }) => void
+function joinUrl(base: string, path: string): string {
+  if (!path || /^https?:\/\//i.test(path)) return path
+
+  const normalizedBase = base.replace(/\/+$/, '')
+  const normalizedPath = path.replace(/^\/+/, '')
+  return normalizedPath ? `${normalizedBase}/${normalizedPath}` : normalizedBase
 }
 
 function queryFromUrl(url: string): Record<string, string> {
@@ -44,89 +34,103 @@ function queryFromUrl(url: string): Record<string, string> {
   )
 }
 
-function createRequestHandler(mockUrl: string, handle: MockMethod['response']) {
-  return function requestHandler(options: {
-    body: string
-    type: string
-    url: string
-    headers: Record<string, string>
-  }) {
-    if (typeof handle !== 'function') {
-      return handle
+function normalizeHeaders(
+  headers: InternalAxiosRequestConfig['headers'],
+): Record<string, string> {
+  if (!headers) return {}
+
+  const normalized: Record<string, string> = {}
+
+  if (typeof headers === 'object' && !Array.isArray(headers)) {
+    for (const [key, value] of Object.entries(headers)) {
+      if (typeof value === 'string') {
+        normalized[key.toLowerCase()] = value
+      }
     }
+  }
 
-    const { body, type, url, headers } = options
-    let parsedBody: unknown = body
+  return normalized
+}
 
+function resolveRequestUrl(config: InternalAxiosRequestConfig): string {
+  const combined = joinUrl(config.baseURL ?? '', config.url ?? '')
+
+  if (/^https?:\/\//i.test(combined)) {
+    const url = new URL(combined)
+    return `${url.pathname}${url.search}`
+  }
+
+  return combined
+}
+
+function resolveMockResponse(config: InternalAxiosRequestConfig): unknown | null {
+  const method = (config.method ?? 'get').toLowerCase()
+  const requestUrl = resolveRequestUrl(config)
+  const pathname = requestUrl.split('?')[0] ?? requestUrl
+  const query: Record<string, string> = {
+    ...queryFromUrl(requestUrl),
+  }
+
+  if (config.params && typeof config.params === 'object') {
+    for (const [key, value] of Object.entries(config.params)) {
+      if (value !== undefined && value !== null) {
+        query[key] = String(value)
+      }
+    }
+  }
+
+  let parsedBody: unknown = config.data
+  if (typeof parsedBody === 'string') {
     try {
-      parsedBody = JSON.parse(body)
+      parsedBody = JSON.parse(parsedBody)
     } catch {
       // keep raw body for non-JSON payloads
     }
+  }
 
-    const pathname = url.split('?')[0] ?? url
-    const query = queryFromUrl(url)
-    const urlMatcher = matchPath(mockUrl, { decode: decodeURIComponent })
-    const matched = urlMatcher(pathname)
+  for (const mock of mockModules) {
+    const mockUrl = toProdMockUrl(mock.url)
+    const mockMethod = (mock.method ?? 'get').toLowerCase()
+    if (mockMethod !== method) continue
 
-    if (matched !== false) {
-      Object.assign(query, matched.params)
+    const matched = matchPath(mockUrl, { decode: decodeURIComponent })(pathname)
+    if (matched === false) continue
+
+    Object.assign(query, matched.params)
+
+    if (typeof mock.response === 'function') {
+      return mock.response({
+        method,
+        body: parsedBody as Record<string, unknown>,
+        query,
+        headers: normalizeHeaders(config.headers),
+        url: requestUrl,
+      })
     }
 
-    return handle({
-      method: type,
-      body: parsedBody as Record<string, unknown>,
-      query,
-      headers,
-      url,
-    })
+    return mock.response
   }
+
+  return null
 }
 
 export async function setupProdMockServer(): Promise<void> {
-  const Mock = (await import('mockjs')).default as unknown as MockRuntime
-  const xhrProto = Mock.XHR.prototype
+  const realAdapter = getAdapter(http.defaults.adapter ?? axios.defaults.adapter)
 
-  xhrProto.__send = xhrProto.send
-  xhrProto.send = function send(this: MockRuntime['XHR']['prototype']) {
-    if (this.custom.xhr) {
-      this.custom.xhr.withCredentials = this.withCredentials || false
-      if (this.responseType) {
-        this.custom.xhr.responseType = this.responseType
+  http.defaults.adapter = async (config): Promise<AxiosResponse> => {
+    const mockData = resolveMockResponse(config)
+
+    if (mockData !== null) {
+      return {
+        data: mockData,
+        status: 200,
+        statusText: 'OK',
+        headers: { 'content-type': 'application/json' },
+        config,
+        request: {},
       }
     }
 
-    if (this.custom.requestHeaders) {
-      const headers: Record<string, string> = {}
-      for (const key in this.custom.requestHeaders) {
-        headers[key.toLowerCase()] = this.custom.requestHeaders[key]
-      }
-      this.custom.options = { ...this.custom.options, headers }
-    }
-
-    xhrProto.__send?.apply(this, arguments as unknown as Parameters<typeof xhrProto.send>)
-  }
-
-  xhrProto.proxy_open = xhrProto.open
-  xhrProto.open = function open(this: MockRuntime['XHR']['prototype'], ...args: unknown[]) {
-    const responseType = this.responseType
-    xhrProto.proxy_open?.apply(this, args)
-    if (this.custom.xhr && responseType) {
-      this.custom.xhr.responseType = responseType
-    }
-  }
-
-  for (const { url, method, response, timeout } of mockModules) {
-    if (timeout) {
-      Mock.setup({ timeout })
-    }
-
-    const mockUrl = toProdMockUrl(url)
-
-    Mock.mock(
-      pathToRegexp(mockUrl, undefined, { end: false }),
-      method || 'get',
-      createRequestHandler(mockUrl, response),
-    )
+    return realAdapter(config)
   }
 }

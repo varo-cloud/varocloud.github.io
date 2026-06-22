@@ -18,7 +18,7 @@ import NumberField from './fields/NumberField.vue'
 import SchemaFieldPlaceholder from './fields/SchemaFieldPlaceholder.vue'
 
 const props = defineProps<{
-  schema: InputSchema
+  schema?: InputSchema
 }>()
 
 const model = defineModel<SchemaFormValues>({ required: true })

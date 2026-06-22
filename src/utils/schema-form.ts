@@ -84,7 +84,9 @@ export function resolveWidget(key: string, property: SchemaProperty): SchemaWidg
   return 'text'
 }
 
-export function resolveSchemaFields(schema: InputSchema): ResolvedSchemaField[] {
+export function resolveSchemaFields(schema: InputSchema | undefined): ResolvedSchemaField[] {
+  if (!schema?.properties) return []
+
   const requiredSet = new Set(schema.required ?? [])
   const order = schema['x-order-properties'] ?? Object.keys(schema.properties)
   const seen = new Set<string>()
@@ -144,7 +146,9 @@ function defaultForProperty(key: string, property: SchemaProperty, widget: Schem
   }
 }
 
-export function createDefaultFormValues(schema: InputSchema): SchemaFormValues {
+export function createDefaultFormValues(schema: InputSchema | undefined): SchemaFormValues {
+  if (!schema) return {}
+
   const values: SchemaFormValues = {}
 
   for (const field of resolveSchemaFields(schema)) {
