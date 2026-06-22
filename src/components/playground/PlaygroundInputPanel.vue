@@ -12,6 +12,7 @@ const props = defineProps<{
   priceUsd: number
   originalPriceUsd?: number
   creditsUsd: number
+  generating?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -39,6 +40,7 @@ function resetForm() {
 }
 
 function handleRun() {
+  if (props.generating) return
   if (!userStore.isLoggedIn) {
     router.push({ name: 'auth' })
     return
@@ -84,6 +86,7 @@ function goTopUp() {
         type="button"
         class="input-panel__run"
         :class="{ 'input-panel__run--cta': !userStore.isLoggedIn }"
+        :disabled="generating"
         @click="handleRun"
       >
         <span class="input-panel__run-label">{{ runLabel }}</span>
@@ -194,6 +197,11 @@ function goTopUp() {
   color: #fff;
   cursor: pointer;
   font-family: inherit;
+}
+
+.input-panel__run:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .input-panel__run--cta {

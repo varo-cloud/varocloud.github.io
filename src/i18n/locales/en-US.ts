@@ -74,7 +74,7 @@ export default {
       topUp: 'Top Up',
       myGenerations: 'My Generations',
       code: 'Code',
-      settings: 'Settings',
+      codeNoResult: 'Run the model to view the API response JSON.',
       noGenerations: 'Run the model to see your generation here.',
       perRun: 'per run',
       apiPlaceholder: 'API documentation and code examples will be available here.',
@@ -86,6 +86,13 @@ export default {
       tabs: {
         playground: 'Playground',
         api: 'API',
+      },
+      generation: {
+        queued: 'Queued',
+        processing: 'Processing…',
+        processingStep: 'Processing',
+        completed: 'Completed',
+        failed: 'Failed',
       },
     },
     apiKeys: {

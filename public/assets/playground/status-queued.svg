@@ -1,0 +1,16 @@
+<svg preserveAspectRatio="none" width="100%" height="100%" overflow="visible" style="display: block;" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="queued 1">
+<path id="Vector" d="M80 148C117.555 148 148 117.555 148 80C148 42.4446 117.555 12 80 12C42.4446 12 12 42.4446 12 80C12 117.555 42.4446 148 80 148Z" stroke="var(--stroke-0, white)" stroke-opacity="0.18" stroke-width="2" stroke-dasharray="4 6"/>
+<path id="Vector_2" d="M80 126C105.405 126 126 105.405 126 80C126 54.5949 105.405 34 80 34C54.5949 34 34 54.5949 34 80C34 105.405 54.5949 126 80 126Z" stroke="var(--stroke-0, white)" stroke-opacity="0.14" stroke-width="2" stroke-dasharray="4 6"/>
+<path id="Vector_3" d="M80 104C93.2548 104 104 93.2548 104 80C104 66.7452 93.2548 56 80 56C66.7452 56 56 66.7452 56 80C56 93.2548 66.7452 104 80 104Z" stroke="var(--stroke-0, white)" stroke-opacity="0.12" stroke-width="2" stroke-dasharray="4 6"/>
+<path id="Vector_4" d="M103.3 21.6C106.338 21.6 108.8 19.1376 108.8 16.1C108.8 13.0624 106.338 10.6 103.3 10.6C100.262 10.6 97.8 13.0624 97.8 16.1C97.8 19.1376 100.262 21.6 103.3 21.6Z" fill="var(--fill-0, #F5A623)"/>
+<path id="Vector_5" d="M64.3 128.7C67.3376 128.7 69.8 126.238 69.8 123.2C69.8 120.162 67.3376 117.7 64.3 117.7C61.2624 117.7 58.8 120.162 58.8 123.2C58.8 126.238 61.2624 128.7 64.3 128.7Z" fill="var(--fill-0, white)" fill-opacity="0.4"/>
+<path id="Vector_6" d="M80 92C86.6274 92 92 86.6274 92 80C92 73.3726 86.6274 68 80 68C73.3726 68 68 73.3726 68 80C68 86.6274 73.3726 92 80 92Z" fill="url(#paint0_radial_0_23)"/>
+</g>
+<defs>
+<radialGradient id="paint0_radial_0_23" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(80 80) scale(12)">
+<stop stop-color="white"/>
+<stop offset="1" stop-color="#F5A623"/>
+</radialGradient>
+</defs>
+</svg>

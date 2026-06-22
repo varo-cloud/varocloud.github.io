@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { NSpin } from 'naive-ui'
@@ -10,7 +10,7 @@ import PlaygroundOutputPanel from '@/components/playground/PlaygroundOutputPanel
 import { useUserStore } from '@/stores/user'
 import { useModelPreferencesStore } from '@/stores/modelPreferences'
 import { assetUrl } from '@/utils/assetUrl'
-import type { ModelDetail } from '@/types'
+import type { GenerationStatus, ModelDetail, PlaygroundGenerationResult } from '@/types'
 import type { SchemaFormValues } from '@/types/schema'
 
 const route = useRoute()
@@ -22,18 +22,102 @@ const model = ref<ModelDetail | null>(null)
 const loading = ref(true)
 const error = ref<string | null>(null)
 const activeTab = ref<'playground' | 'api'>('playground')
-const outputUrl = ref<string | null>(assetUrl('/assets/model-detail/sample-output.jpg'))
+const outputUrl = ref<string | null>(null)
+const generationResult = ref<PlaygroundGenerationResult | null>(null)
+const generationStatus = ref<GenerationStatus>('idle')
+const generationProgress = ref(0)
+const estimatedSeconds = 40
 
 const creditsUsd = computed(() => userStore.balanceUsd ?? 1.0)
+
+const isGenerating = computed(
+  () => generationStatus.value === 'queued' || generationStatus.value === 'processing',
+)
 
 const displayTitle = computed(() => {
   if (!model.value) return ''
   return `${model.value.name} by ${model.value.provider}`
 })
 
+let generationTimers: ReturnType<typeof setTimeout>[] = []
+let progressInterval: ReturnType<typeof setInterval> | null = null
+
+function clearGenerationTimers() {
+  generationTimers.forEach(clearTimeout)
+  generationTimers = []
+  if (progressInterval) {
+    clearInterval(progressInterval)
+    progressInterval = null
+  }
+}
+
+function resetGeneration() {
+  clearGenerationTimers()
+  generationStatus.value = 'idle'
+  generationProgress.value = 0
+  outputUrl.value = null
+  generationResult.value = null
+}
+
+function buildGenerationResult(url: string): PlaygroundGenerationResult {
+  const currentModel = model.value
+  return {
+    id: `gen_${Date.now()}`,
+    object: 'generation',
+    status: 'completed',
+    model: currentModel?.modelPath ?? '',
+    created_at: Math.floor(Date.now() / 1000),
+    output: {
+      type: 'image',
+      url,
+    },
+    usage: {
+      cost_usd: currentModel?.perRunPriceUsd ?? currentModel?.startingPriceUsd ?? 0,
+    },
+  }
+}
+
+function simulateGeneration() {
+  clearGenerationTimers()
+  generationStatus.value = 'queued'
+  generationProgress.value = 0
+  outputUrl.value = null
+  generationResult.value = null
+
+  generationTimers.push(
+    setTimeout(() => {
+      generationStatus.value = 'processing'
+      const durationMs = 3500
+      const tickMs = 50
+      const steps = durationMs / tickMs
+      let step = 0
+
+      progressInterval = setInterval(() => {
+        step += 1
+        generationProgress.value = Math.min(100, Math.round((step / steps) * 100))
+        if (step >= steps && progressInterval) {
+          clearInterval(progressInterval)
+          progressInterval = null
+        }
+      }, tickMs)
+
+      generationTimers.push(
+        setTimeout(() => {
+          const url = assetUrl('/assets/model-detail/sample-output.jpg')
+          generationStatus.value = 'completed'
+          generationProgress.value = 100
+          outputUrl.value = url
+          generationResult.value = buildGenerationResult(url)
+        }, durationMs),
+      )
+    }, 800),
+  )
+}
+
 async function loadModel(id: string) {
   loading.value = true
   error.value = null
+  resetGeneration()
 
   try {
     model.value = await fetchModelDetail(id)
@@ -49,7 +133,7 @@ async function loadModel(id: string) {
 }
 
 function handleRun(_values: SchemaFormValues) {
-  outputUrl.value = assetUrl('/assets/model-detail/sample-output.jpg')
+  simulateGeneration()
 }
 
 watch(
@@ -62,6 +146,10 @@ watch(
 
 onMounted(() => {
   userStore.loadProfile()
+})
+
+onUnmounted(() => {
+  clearGenerationTimers()
 })
 </script>
 
@@ -118,10 +206,15 @@ onMounted(() => {
           :price-usd="model.startingPriceUsd"
           :original-price-usd="model.originalPriceUsd"
           :credits-usd="creditsUsd"
+          :generating="isGenerating"
           @run="handleRun"
         />
         <PlaygroundOutputPanel
           :output-url="outputUrl"
+          :result="generationResult"
+          :status="generationStatus"
+          :progress="generationProgress"
+          :estimated-seconds="estimatedSeconds"
           :per-run-price-usd="model.perRunPriceUsd ?? model.startingPriceUsd"
           :runs-per-ten-usd="model.runsPerTenUsd"
         />

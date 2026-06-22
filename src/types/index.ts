@@ -176,3 +176,20 @@ export interface PricingItem {
   category: PricingCategory
   mediaType: PricingMediaType
 }
+
+export type GenerationStatus = 'idle' | 'queued' | 'processing' | 'completed' | 'failed'
+
+export interface PlaygroundGenerationResult {
+  id: string
+  object: 'generation'
+  status: 'completed' | 'failed'
+  model: string
+  created_at: number
+  output: {
+    type: 'image' | 'video'
+    url: string
+  }
+  usage?: {
+    cost_usd: number
+  }
+}

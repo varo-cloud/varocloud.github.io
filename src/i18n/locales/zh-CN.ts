@@ -74,7 +74,7 @@ export default {
       topUp: 'Top Up',
       myGenerations: 'My Generations',
       code: 'Code',
-      settings: 'Settings',
+      codeNoResult: '运行模型后可查看 API 返回的 JSON。',
       noGenerations: '运行模型后，生成结果将显示在这里。',
       perRun: 'per run',
       apiPlaceholder: 'API 文档与代码示例将在此提供。',
@@ -86,6 +86,13 @@ export default {
       tabs: {
         playground: 'Playground',
         api: 'API',
+      },
+      generation: {
+        queued: 'Queued',
+        processing: 'Processing…',
+        processingStep: 'Processing',
+        completed: 'Completed',
+        failed: 'Failed',
       },
     },
     apiKeys: {
