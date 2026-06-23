@@ -35,7 +35,7 @@ a {
 
 :root {
   --bg-page: #0a0a0e;
-  --bg-header: rgba(10, 10, 14, 0.92);
+  --bg-header: #0a0a0e;
   --bg-footer: #0d0913;
   --bg-card: #13131c;
   --bg-hover: rgba(255, 255, 255, 0.06);

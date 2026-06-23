@@ -5,7 +5,6 @@ import { fail, success } from './_util'
 const OTP_TTL_MS = 10 * 60 * 1000
 const OTP_RATE_WINDOW_MS = 15 * 60 * 1000
 const OTP_RATE_LIMIT = 3
-const MAX_OTP_ATTEMPTS = 5
 const REFRESH_TTL_MS = 7 * 24 * 60 * 60 * 1000
 
 interface OtpEntry {
@@ -146,18 +145,8 @@ export default [
         return fail('Invalid email address', 422)
       }
 
-      const entry = otpStore.get(email)
-      if (!entry || Date.now() > entry.expiresAt) {
-        otpStore.delete(email)
-        return fail('Invalid or expired verification code', 400)
-      }
-
-      if (entry.code !== code) {
-        entry.attempts += 1
-        if (entry.attempts >= MAX_OTP_ATTEMPTS) {
-          otpStore.delete(email)
-          return fail('Too many failed attempts. Please request a new code.', 400)
-        }
+      // Mock: any 6-digit code is accepted for easier local development
+      if (!/^\d{6}$/.test(code)) {
         return fail('Invalid or expired verification code', 400)
       }
 

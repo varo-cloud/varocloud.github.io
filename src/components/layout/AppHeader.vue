@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { NDropdown } from 'naive-ui'
@@ -15,6 +15,14 @@ const { t } = useI18n()
 const userStore = useUserStore()
 
 const headerSearch = ref('')
+const isScrolled = ref(false)
+
+const usesTransparentHeader = computed(() => route.meta.transparentHeader === true)
+const isHeaderSolid = computed(() => !usesTransparentHeader.value || isScrolled.value)
+
+function updateScrollState() {
+  isScrolled.value = window.scrollY > 0
+}
 
 const navItems = computed(() => [
   { label: t('nav.models'), name: 'models' },
@@ -91,13 +99,29 @@ watch(
   { immediate: true },
 )
 
+watch(
+  () => route.fullPath,
+  () => {
+    updateScrollState()
+  },
+)
+
 onMounted(() => {
   userStore.loadProfile()
+  updateScrollState()
+  window.addEventListener('scroll', updateScrollState, { passive: true })
+})
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', updateScrollState)
 })
 </script>
 
 <template>
-  <header class="app-header">
+  <header
+    class="app-header"
+    :class="{ 'app-header--solid': isHeaderSolid, 'app-header--transparent': !isHeaderSolid }"
+  >
     <div class="app-header__inner">
       <div class="app-header__left">
         <RouterLink :to="localePath('/')" class="app-header__logo" :aria-label="t('common.appName')">
@@ -179,7 +203,7 @@ onMounted(() => {
         <button
           v-else
           type="button"
-          class="app-header__login-link"
+          class="app-header__login-btn"
           @click="push({ name: 'auth' })"
         >
           {{ t('common.login') }}
@@ -194,11 +218,22 @@ onMounted(() => {
   position: sticky;
   top: 0;
   z-index: 100;
+  width: 100%;
   height: 80px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(10, 10, 14, 0.3);
-  backdrop-filter: blur(8px);
   color: #ebf4fb;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.app-header--solid {
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-page);
+}
+
+.app-header--transparent {
+  border-bottom: 1px solid transparent;
+  background: transparent;
 }
 
 .app-header__inner {
@@ -371,18 +406,30 @@ onMounted(() => {
   line-height: 1;
 }
 
-.app-header__login-link {
-  padding: 0;
+.app-header__login-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 116px;
+  height: 36px;
+  padding: 0 16px;
   border: none;
-  background: transparent;
-  color: #ebf4fb;
+  border-radius: 8px;
+  background: #fff;
+  color: #222;
   font-size: 14px;
   font-weight: 500;
+  line-height: 1;
   cursor: pointer;
+  transition: background 0.15s ease;
 }
 
-.app-header__login-link:hover {
-  opacity: 0.85;
+.app-header__login-btn:hover {
+  background: #e8e8ec;
+}
+
+.app-header__login-btn:active {
+  background: #d8d8dc;
 }
 
 @media (max-width: 767px) {
