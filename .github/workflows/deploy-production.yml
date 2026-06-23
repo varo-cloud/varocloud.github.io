@@ -1,4 +1,4 @@
-name: Deploy to GitHub Pages
+name: Deploy Production
 
 on:
   push:
@@ -11,7 +11,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: pages
+  group: pages-production
   cancel-in-progress: true
 
 jobs:
@@ -32,9 +32,6 @@ jobs:
 
       - name: Build
         run: npm run build
-        env:
-          GITHUB_PAGES: 'true'
-          VITE_USE_MOCK: 'true'
 
       - name: Setup SPA fallback
         run: cp dist/index.html dist/404.html

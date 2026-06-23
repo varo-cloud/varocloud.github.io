@@ -8,8 +8,8 @@ export default defineConfig(({ command, mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
 
   return {
-    // varo-cloud.github.io 为组织根站，部署在域名根路径 /
-    base: '/',
+    // 正式: /  |  测试 (staging.github.io 仓库): /staging.github.io/
+    base: env.VITE_BASE || '/',
     plugins: [
       vue(),
       UnoCSS(),
