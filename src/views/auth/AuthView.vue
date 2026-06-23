@@ -11,6 +11,11 @@ import AppFooter from '@/components/layout/AppFooter.vue'
 import AppIcon from '@/components/common/AppIcon.vue'
 import TurnstileWidget from '@/components/auth/TurnstileWidget.vue'
 import { assetUrl } from '@/utils/assetUrl'
+import {
+  getLastAuthMethod,
+  setLastAuthMethod,
+  type AuthLoginMethod,
+} from '@/utils/lastAuthMethod'
 
 const route = useRoute()
 const { push, replace, localePath } = useLocaleRouter()
@@ -27,8 +32,14 @@ const turnstileToken = ref<string | null>(null)
 const turnstileReady = ref(false)
 const turnstileFailed = ref(false)
 const turnstileWidgetRef = ref<InstanceType<typeof TurnstileWidget> | null>(null)
+const lastAuthMethod = ref<AuthLoginMethod | null>(getLastAuthMethod())
 
 let resendTimer: ReturnType<typeof setInterval> | null = null
+
+function rememberAuthMethod(method: AuthLoginMethod) {
+  setLastAuthMethod(method)
+  lastAuthMethod.value = method
+}
 
 const turnstileLanguage = computed(() => (locale.value === 'zh-CN' ? 'zh-CN' : 'en'))
 
@@ -148,6 +159,7 @@ async function handleLogin() {
 
   try {
     const tokens = await verifyOtp({ email: value, code })
+    rememberAuthMethod('email')
     userStore.establishSession(tokens)
     await userStore.loadProfile()
     const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : null
@@ -161,15 +173,19 @@ async function handleLogin() {
 
 function handleGoogleLogin() {
   if (!ensureHumanVerified()) return
+  // rememberAuthMethod('google') — call after OAuth succeeds
   message.info(t('pages.auth.googleComingSoon'))
 }
 
 function handleGithubLogin() {
   if (!ensureHumanVerified()) return
+  // rememberAuthMethod('github') — call after OAuth succeeds
   message.info(t('pages.auth.githubComingSoon'))
 }
 
 onMounted(() => {
+  lastAuthMethod.value = getLastAuthMethod()
+
   if (userStore.isLoggedIn) {
     const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : null
     replace(redirect || { name: 'models' })
@@ -269,7 +285,9 @@ onUnmounted(() => {
           </div>
 
           <div class="auth-card__social-wrap">
-            <span class="auth-card__last-used">{{ t('pages.auth.lastUsed') }}</span>
+            <span v-if="lastAuthMethod === 'google'" class="auth-card__last-used">
+              {{ t('pages.auth.lastUsed') }}
+            </span>
             <button
               type="button"
               class="auth-card__social auth-card__social--google"
@@ -286,20 +304,25 @@ onUnmounted(() => {
             </button>
           </div>
 
-          <button
-            type="button"
-            class="auth-card__social auth-card__social--github"
-            :disabled="loading || !isHumanVerified"
-            @click="handleGithubLogin"
-          >
-            <img
-              :src="assetUrl('/assets/icons/github.svg')"
-              alt=""
-              aria-hidden="true"
-              class="auth-card__social-icon"
-            />
-            <span>{{ t('pages.auth.githubLogin') }}</span>
-          </button>
+          <div class="auth-card__social-wrap">
+            <span v-if="lastAuthMethod === 'github'" class="auth-card__last-used">
+              {{ t('pages.auth.lastUsed') }}
+            </span>
+            <button
+              type="button"
+              class="auth-card__social auth-card__social--github"
+              :disabled="loading || !isHumanVerified"
+              @click="handleGithubLogin"
+            >
+              <img
+                :src="assetUrl('/assets/icons/github.svg')"
+                alt=""
+                aria-hidden="true"
+                class="auth-card__social-icon"
+              />
+              <span>{{ t('pages.auth.githubLogin') }}</span>
+            </button>
+          </div>
 
           <p class="auth-card__terms">
             {{ t('pages.auth.termsPrefix') }}
