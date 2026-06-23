@@ -8,9 +8,8 @@ export default defineConfig(({ command, mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
 
   return {
-    // 本地开发用 '/'；GitHub Pages 项目站默认路径为 /varocloud.github.io/
-    // 若使用组织根站 varo-cloud.github.io 或自定义域名，改为 '/'
-    base: process.env.GITHUB_PAGES === 'true' ? '/varocloud.github.io/' : '/',
+    // varo-cloud.github.io 为组织根站，部署在域名根路径 /
+    base: '/',
     plugins: [
       vue(),
       UnoCSS(),

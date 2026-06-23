@@ -2,8 +2,7 @@
  * Resolve API base path for subpath deployments (e.g. GitHub Pages).
  *
  * VITE_API_BASE_URL=/api is relative to the app base, not the domain root.
- * Local:  /api
- * Pages:  /varocloud.github.io/api
+ * Local / GitHub Pages root site: /api
  */
 export function apiBaseUrl(): string {
   const apiPath = (import.meta.env.VITE_API_BASE_URL || 'api').replace(/^\//, '')
