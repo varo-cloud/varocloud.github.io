@@ -345,6 +345,7 @@ onBeforeUnmount(() => {
               >
                 <span class="input-panel__run-label">{{ runLabel }}</span>
                 <span
+                  v-if="userStore.isLoggedIn"
                   class="input-panel__run-price"
                   :class="{ 'input-panel__run-price--loading': quoteLoading }"
                 >

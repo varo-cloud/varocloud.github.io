@@ -69,7 +69,9 @@ const playgroundQuote = usePlaygroundQuote({
   batchSize,
   fallbackUnitCostUsd,
   fallbackStandardUnitCostUsd,
-  enabled: computed(() => Boolean(model.value?.id && inputSchema.value)),
+  enabled: computed(
+    () => userStore.isLoggedIn && Boolean(model.value?.id && inputSchema.value),
+  ),
 })
 
 const quoteCostUsd = playgroundQuote.costUsd
@@ -285,8 +287,8 @@ onUnmounted(() => {
           :status="generationStatus"
           :progress="generationProgress"
           :estimated-seconds="estimatedSeconds"
-          :per-run-price-usd="quoteUnitCostUsd"
-          :runs-per-ten-usd="quoteRunsPerTenUsd"
+          :per-run-price-usd="userStore.isLoggedIn ? quoteUnitCostUsd : undefined"
+          :runs-per-ten-usd="userStore.isLoggedIn ? quoteRunsPerTenUsd : undefined"
           :example-url="inputSchema?.example_url"
         />
       </div>
