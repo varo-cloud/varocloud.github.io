@@ -1,7 +1,7 @@
 export default {
   common: {
     appName: 'Varo.cloud',
-    slogan: 'The Port of AI Value',
+    slogan: 'The AI Model Cloud, Built for Video.',
     designPending: '设计稿待交付 — 页面内容将在设计完成后填充。',
     balance: '余额',
     login: '登录',
@@ -34,7 +34,8 @@ export default {
     models: {
       title: '模型',
       placeholder: '浏览可用的视频生成模型。',
-      heroSubtitle: '一个 API 接入全球最佳视频模型，按输出计费，美元结算。',
+      heroSubtitle:
+        '通过统一 API 接入领先的视频、图像、音频与语言模型——更优价格与稳定性能。',
       heroCtaPrimary: '免费开始 · $3 体验金',
       heroCtaSecondary: '查看文档',
       heroSignup: '免费开始',

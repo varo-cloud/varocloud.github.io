@@ -1,7 +1,7 @@
 export default {
   common: {
     appName: 'Varo.cloud',
-    slogan: 'The Port of AI Value',
+    slogan: 'The AI Model Cloud, Built for Video.',
     designPending: 'Design pending — content will be added after design delivery.',
     balance: 'Balance',
     login: 'Log in',
@@ -34,7 +34,8 @@ export default {
     models: {
       title: 'Models',
       placeholder: 'Explore available video generation models.',
-      heroSubtitle: "One API for the world's best video models. Pay per output — in USD.",
+      heroSubtitle:
+        'Access leading video, image, audio, and language models through one unified API—with better pricing and reliable performance.',
       heroCtaPrimary: 'Star Free-$3 Credit',
       heroCtaSecondary: 'View Docs',
       heroSignup: 'Star Free',
