@@ -209,8 +209,14 @@ onUnmounted(() => {
           v-if="model.inputSchema"
           v-model:batch-size="batchSize"
           :schema="model.inputSchema"
-          :price-usd="model.startingPriceUsd"
-          :original-price-usd="model.originalPriceUsd"
+          :price-usd="model.perRunPriceUsd ?? model.startingPriceUsd"
+          :original-price-usd="
+            model.originalPriceUsd != null &&
+            model.perRunPriceUsd != null &&
+            model.startingPriceUsd
+              ? (model.originalPriceUsd / model.startingPriceUsd) * model.perRunPriceUsd
+              : model.originalPriceUsd
+          "
           :balance-usd="balanceUsd"
           :generating="isGenerating"
           @run="handleRun"

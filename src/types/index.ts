@@ -17,22 +17,35 @@ export interface ApiResponse<T> {
 export interface Model {
   id: string
   name: string
+  /** Maps from API field `display_name` */
   displayName?: string
   provider: string
   capabilities: string[]
+  /** Maps from API field `starting_price_usd` — unit rate in USD */
   startingPriceUsd: number
+  /** Maps from API field `standard_price_usd` — strikethrough reference price */
   originalPriceUsd?: number
+  /** Maps from API field `price_unit` */
+  priceUnit: PricingPriceUnit
+  /** Maps from API field `price_detail` — optional run context, e.g. "5s · 720p" */
   priceDetail?: string
+  /** Maps from API field `discount_percent` */
   discountPercent?: number
   description: string
+  /** Maps from API field `thumbnail_url` */
   thumbnailUrl?: string
 }
 
 export interface ModelDetail extends Model {
+  /** Maps from API field `model_path` */
   modelPath: string
+  /** Maps from API field `input_schema` */
   inputSchema: InputSchema
+  /** Maps from API field `is_hot` */
   isHot?: boolean
+  /** Maps from API field `per_run_price_usd` — total USD for default run config */
   perRunPriceUsd?: number
+  /** Maps from API field `runs_per_ten_usd` */
   runsPerTenUsd?: number
 }
 

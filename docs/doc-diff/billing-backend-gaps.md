@@ -209,7 +209,9 @@ Header 钱包余额、Playground 余额校验均读取 `profile.balance`。
 
 ---
 
-### 6. 模型费率 `GET /api/models`（控制台）
+### 6. 模型目录 `GET /api/models`（控制台 / 首页）
+
+> **完整规范见 [`models-backend-gaps.md`](./models-backend-gaps.md)**。以下为金额字段要点摘要。
 
 **现状（`rest-api-zh.md`）：**
 
@@ -219,16 +221,25 @@ Header 钱包余额、Playground 余额校验均读取 `profile.balance`。
 ]
 ```
 
-若控制台或定价页接入此接口，应改为 USD 单价：
+**应改为（列表项示例）：**
 
 ```json
-[
-  { "id": "seedance-1-5-pro-251215", "price_usd_per_second": 0.40, "active": true }
-]
+{
+  "id": "seedance-i2v",
+  "starting_price_usd": 0.084,
+  "standard_price_usd": 0.1,
+  "price_unit": "per_second",
+  "per_run_price_usd": 0.42
+}
 ```
 
-计费公式（后端内部）：`cost_usd = price_usd_per_second × duration`。  
-示例：40 credits/s、100 credits/USD → `0.40` USD/s，5 秒视频 `cost_usd = 2.00`。
+| 调整项 | 说明 |
+|---|---|
+| `credits_per_second` → `starting_price_usd` + `price_unit` | 单价以 USD + 枚举单位返回；`price_unit` 同定价页 |
+| 新增 `per_run_price_usd` | Playground 默认配置单次运行总价 |
+| 禁止返回 credits | 前端只感知 USD |
+
+计费公式（后端内部）：`per_run_price_usd ≈ starting_price_usd × duration`（视频按秒）。
 
 ---
 

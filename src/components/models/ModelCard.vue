@@ -5,6 +5,7 @@ import { useLocaleRouter } from '@/composables/useLocaleRouter'
 import { useModelPreferencesStore } from '@/stores/modelPreferences'
 import { useUserStore } from '@/stores/user'
 import { assetUrl } from '@/utils/assetUrl'
+import { formatPricingUsd, pricingUnitI18nKey } from '@/utils/pricing'
 import type { Model } from '@/types'
 
 const props = defineProps<{
@@ -32,9 +33,15 @@ const capabilityBadge = computed(() => {
   return translated === key ? cap : translated
 })
 
+const unitLabel = computed(() => t(pricingUnitI18nKey(props.model.priceUnit)))
+
+const startingPriceLabel = computed(() =>
+  formatPricingUsd(props.model.startingPriceUsd, props.model.priceUnit),
+)
+
 const originalPriceLabel = computed(() => {
   if (props.model.originalPriceUsd == null) return null
-  return `$${props.model.originalPriceUsd.toFixed(3)}/Pic`
+  return formatPricingUsd(props.model.originalPriceUsd, props.model.priceUnit)
 })
 
 function goToDetail() {
@@ -121,11 +128,13 @@ async function toggleFavourite(event: Event) {
       <div class="model-card__pricing">
         <p v-if="originalPriceLabel" class="model-card__from">
           {{ t('pages.models.from') }}
-          <span class="model-card__strike">{{ originalPriceLabel }}</span>
+          <span class="model-card__strike">{{ originalPriceLabel }}<span class="model-card__unit">{{ unitLabel }}</span></span>
         </p>
         <p class="model-card__price">
-          <strong>${{ model.startingPriceUsd.toFixed(2) }}</strong>
-          <template v-if="model.priceDetail"> / {{ model.priceDetail }}</template>
+          <strong>{{ startingPriceLabel }}</strong><span class="model-card__unit">{{ unitLabel }}</span>
+          <template v-if="model.priceDetail">
+            <span class="model-card__detail"> · {{ model.priceDetail }}</span>
+          </template>
         </p>
         <span
           v-if="model.discountPercent"
@@ -297,6 +306,16 @@ async function toggleFavourite(event: Event) {
   font-size: 16px;
   font-weight: 600;
   color: #333;
+}
+
+.model-card__unit {
+  margin-left: 1px;
+  color: #9b9dab;
+  font-weight: 400;
+}
+
+.model-card__detail {
+  color: #9b9dab;
 }
 
 .model-card__discount {
