@@ -32,11 +32,15 @@ function parseTimestamp(value: string | number | undefined | null): number | nul
   return Number.isFinite(parsed) ? parsed : null
 }
 
+function formatKeyMasked(prefix: string): string {
+  return `${prefix}******`
+}
+
 function mapApiKey(raw: ApiApiKey): ApiKey {
   return {
     id: raw.id,
     name: raw.name ?? raw.prefix,
-    keyMasked: raw.prefix,
+    keyMasked: formatKeyMasked(raw.prefix),
     createdAt: parseTimestamp(raw.created_at) ?? Date.now(),
     status: raw.is_active ? 'active' : 'revoked',
     totalCalls: raw.total_calls ?? 0,

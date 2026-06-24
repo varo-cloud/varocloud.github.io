@@ -104,7 +104,7 @@ export interface ApiKey {
   id: string
   /** User-defined label; maps from API `name` when present, else falls back to `prefix` */
   name: string
-  /** Masked key prefix for display; maps from API `prefix` */
+  /** Masked key for display; `{prefix}******` from API `prefix` */
   keyMasked: string
   /** Unix ms; maps from API `created_at` */
   createdAt: number
