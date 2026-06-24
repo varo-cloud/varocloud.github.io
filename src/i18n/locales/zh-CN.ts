@@ -213,7 +213,7 @@ export default {
       title: '账单',
       description: '管理余额、支付方式与账单记录。',
       placeholder: '查看余额与消费流水。',
-      cashBalance: 'Credits 余额',
+      cashBalance: '现金余额',
       spentThisMonth: '本月消费',
       spentTrend: '{arrow} 较上月 {percent}%',
       autoTopUp: '自动充值',

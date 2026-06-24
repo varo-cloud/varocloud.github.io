@@ -54,7 +54,7 @@ const languageMenuOptions = computed(() => [
 
 const balanceLabel = computed(() => {
   if (!userStore.isLoggedIn) return null
-  const value = userStore.balance
+  const value = userStore.balanceUsd
   if (value === null) return '—'
   return formatUsd(value)
 })

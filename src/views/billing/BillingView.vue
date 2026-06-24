@@ -390,7 +390,7 @@ onMounted(async () => {
           <article class="billing-summary__card billing-summary__card--balance">
             <p class="billing-summary__label">{{ t('pages.billing.cashBalance') }}</p>
             <div class="billing-summary__balance-row">
-              <p class="billing-summary__value">{{ formatCredits(summary.balance) }}</p>
+              <p class="billing-summary__value">{{ formatUsd(summary.balanceUsd) }}</p>
               <button type="button" class="billing-summary__topup-btn" @click="scrollToRecharge">
                 {{ t('pages.billing.topUp') }}
               </button>
@@ -400,7 +400,7 @@ onMounted(async () => {
           <article class="billing-summary__card">
             <p class="billing-summary__label">{{ t('pages.billing.spentThisMonth') }}</p>
             <div class="billing-summary__spent-row">
-              <p class="billing-summary__value">{{ formatCredits(summary.spentThisMonthCredits) }}</p>
+              <p class="billing-summary__value">{{ formatUsd(summary.spentThisMonthUsd) }}</p>
               <p
                 class="billing-summary__trend"
                 :class="{

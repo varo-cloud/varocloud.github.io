@@ -171,7 +171,7 @@ export interface Transaction {
 }
 
 export interface BalanceInfo {
-  balance: number
+  balanceUsd: number
 }
 
 export interface BillingAutoTopUp {
@@ -181,8 +181,8 @@ export interface BillingAutoTopUp {
 }
 
 export interface BillingSummary {
-  balance: number
-  spentThisMonthCredits: number
+  balanceUsd: number
+  spentThisMonthUsd: number
   spentChangePercent: number
   autoTopUp: BillingAutoTopUp
 }

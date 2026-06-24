@@ -215,7 +215,7 @@ export default {
       title: 'Billing',
       description: 'Manage your balance, payment methods, and billing history.',
       placeholder: 'View balance and transaction history.',
-      cashBalance: 'Credit Balance',
+      cashBalance: 'Cash Balance',
       spentThisMonth: 'Spent this Month',
       spentTrend: '{arrow} {percent}% vs last month',
       autoTopUp: 'Auto top-up',

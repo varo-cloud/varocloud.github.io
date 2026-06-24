@@ -10,7 +10,7 @@ export const useUserStore = defineStore('user', () => {
   const loading = ref(false)
 
   const isLoggedIn = computed(() => Boolean(token.value))
-  const balance = computed(() => profile.value?.balance ?? null)
+  const balanceUsd = computed(() => profile.value?.balanceUsd ?? null)
 
   function establishSession(tokens: TokenPair) {
     token.value = tokens.access_token
@@ -49,7 +49,7 @@ export const useUserStore = defineStore('user', () => {
     profile,
     loading,
     isLoggedIn,
-    balance,
+    balanceUsd,
     establishSession,
     loadProfile,
     setProfile,
