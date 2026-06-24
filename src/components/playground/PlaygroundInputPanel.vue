@@ -163,6 +163,7 @@ watch(inputViewMode, (mode, previousMode) => {
 function syncFormValuesFromJsonDraft() {
   if (applyParsedJsonDraft()) {
     validationError.value = null
+    invalidFields.value = []
     return true
   }
 

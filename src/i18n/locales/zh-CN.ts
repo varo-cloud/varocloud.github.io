@@ -84,6 +84,7 @@ export default {
       insufficientBalance: '余额不足，无法生成。请充值后再试。',
       schemaUnavailable: '该模型暂无输入 Schema，无法使用 Playground。',
       requiredFieldsMissing: '请填写所有必填字段。',
+      fieldRequired: '请填写此字段',
       invalidJsonInput: 'JSON 格式无效，请修正后再运行。',
       copyCode: '复制',
       codeCopied: '已复制到剪贴板。',
