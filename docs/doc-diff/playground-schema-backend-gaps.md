@@ -170,3 +170,4 @@
 - `docs/api-doc/rest-api-zh.md` — 新增 Schema 接口说明；从模型详情移除 `input_schema`
 - `docs/doc-diff/models-api-comparison.md` — 更新：Schema 不再来自详情接口
 - [`playground-run-backend-gaps.md`](./playground-run-backend-gaps.md) — Playground **运行**、代码示例（HTTP/Python/JS）、OpenAI SDK 对接、**按调用方式计费统计**
+- [`model-docs-backend-gaps.md`](./model-docs-backend-gaps.md) — API Tab **README / FAQ / api_model_id**

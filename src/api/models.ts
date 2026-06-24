@@ -3,6 +3,7 @@ import type {
   FetchModelsParams,
   Model,
   ModelDetail,
+  ModelFaqItem,
   ModelsPage,
   PricingPriceUnit,
 } from '@/types'
@@ -24,9 +25,12 @@ interface ApiModel {
 
 interface ApiModelDetail extends ApiModel {
   model_path: string
+  api_model_id?: string | null
   is_hot?: boolean
   per_run_price_usd?: number | null
   runs_per_ten_usd?: number | null
+  readme_md?: string | null
+  faq?: ModelFaqItem[] | null
 }
 
 interface ApiModelsPage {
@@ -57,9 +61,12 @@ function mapModelDetail(raw: ApiModelDetail): ModelDetail {
   return {
     ...mapModel(raw),
     modelPath: raw.model_path,
+    apiModelId: raw.api_model_id ?? undefined,
     isHot: raw.is_hot,
     perRunPriceUsd: raw.per_run_price_usd ?? undefined,
     runsPerTenUsd: raw.runs_per_ten_usd ?? undefined,
+    readmeMd: raw.readme_md ?? undefined,
+    faq: raw.faq ?? undefined,
   }
 }
 

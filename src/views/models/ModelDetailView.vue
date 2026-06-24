@@ -7,11 +7,13 @@ import { NSpin } from 'naive-ui'
 import { fetchModelDetail } from '@/api/models'
 import { fetchModelInputSchema } from '@/api/modelSchema'
 import ModelDetailHeader from '@/components/models/ModelDetailHeader.vue'
+import ModelApiTab from '@/components/models/ModelApiTab.vue'
 import PlaygroundInputPanel from '@/components/playground/PlaygroundInputPanel.vue'
 import PlaygroundOutputPanel from '@/components/playground/PlaygroundOutputPanel.vue'
 import { useUserStore } from '@/stores/user'
 import { useModelPreferencesStore } from '@/stores/modelPreferences'
 import { assetUrl } from '@/utils/assetUrl'
+import { createDefaultFormValues } from '@/utils/schema-form'
 import type { GenerationStatus, ModelDetail, PlaygroundGenerationResult } from '@/types'
 import type { InputSchema, SchemaFormValues } from '@/types/schema'
 
@@ -29,11 +31,17 @@ const activeTab = ref<'playground' | 'api'>('playground')
 const outputUrls = ref<string[]>([])
 const generationResults = ref<PlaygroundGenerationResult[]>([])
 const batchSize = ref(1)
+const formValues = ref<SchemaFormValues>({})
 const generationStatus = ref<GenerationStatus>('idle')
 const generationProgress = ref(0)
 const estimatedSeconds = 40
 
 const balanceUsd = computed(() => userStore.balanceUsd ?? 0)
+
+const apiModelId = computed(() => {
+  if (!model.value) return ''
+  return model.value.apiModelId ?? model.value.modelPath.replace(/\//g, '-')
+})
 
 const isGenerating = computed(
   () => generationStatus.value === 'queued' || generationStatus.value === 'processing',
@@ -120,6 +128,10 @@ function simulateGeneration(count: number) {
     }, 800),
   )
 }
+
+watch(inputSchema, (schema) => {
+  formValues.value = createDefaultFormValues(schema ?? undefined)
+})
 
 async function loadModel(id: string) {
   loading.value = true
@@ -217,8 +229,10 @@ onUnmounted(() => {
         <PlaygroundInputPanel
           v-if="inputSchema"
           v-model:batch-size="batchSize"
+          v-model:form-values="formValues"
           :schema="inputSchema"
-          :model-path="model.modelPath"
+          :model-id="model.id"
+          :api-model-id="apiModelId"
           :price-usd="model.perRunPriceUsd ?? model.startingPriceUsd"
           :original-price-usd="
             model.originalPriceUsd != null &&
@@ -246,9 +260,18 @@ onUnmounted(() => {
         />
       </div>
 
+      <ModelApiTab
+        v-else-if="inputSchema"
+        :schema="inputSchema"
+        :api-model-id="apiModelId"
+        :form-values="formValues"
+        :readme-md="model.readmeMd"
+        :faq="model.faq"
+      />
+
       <div v-else class="model-detail-page__api">
         <p class="model-detail-page__api-placeholder">
-          {{ t('pages.modelDetail.apiPlaceholder') }}
+          {{ t('pages.modelDetail.schemaUnavailable') }}
         </p>
       </div>
     </template>
@@ -333,16 +356,16 @@ onUnmounted(() => {
 .model-detail-page__api {
   max-width: 1360px;
   margin: 0 auto;
-  padding: 48px 24px;
-  background: #13131c;
-  border: 0.5px solid rgba(255, 255, 255, 0.1);
-  border-radius: 16px;
 }
 
 .model-detail-page__api-placeholder {
   margin: 0;
+  padding: 48px 24px;
   text-align: center;
   color: #9b9dab;
+  background: #13131c;
+  border: 0.5px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
 }
 
 @media (max-width: 1023px) {

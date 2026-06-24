@@ -7,7 +7,7 @@ import type { InputSchema, SchemaFormValues } from '@/types/schema'
 import { createDefaultFormValues, validateSchemaForm } from '@/utils/schema-form'
 import {
   buildInputViewSnippet,
-  buildJsonSnippet,
+  buildPlaygroundJsonSnippet,
   parseJsonInputDraft,
   type PlaygroundInputViewMode,
 } from '@/utils/playground-request-snippets'
@@ -19,7 +19,8 @@ const BATCH_SIZE_OPTIONS = [1, 2, 3, 4] as const
 
 const props = defineProps<{
   schema?: InputSchema
-  modelPath: string
+  modelId: string
+  apiModelId: string
   priceUsd: number
   originalPriceUsd?: number
   balanceUsd: number
@@ -27,6 +28,7 @@ const props = defineProps<{
 }>()
 
 const batchSize = defineModel<number>('batchSize', { default: 1 })
+const formValues = defineModel<SchemaFormValues>('formValues', { required: true })
 
 const emit = defineEmits<{
   run: [values: SchemaFormValues, batchSize: number]
@@ -38,8 +40,7 @@ const userStore = useUserStore()
 const message = useMessage()
 
 const inputViewMode = ref<PlaygroundInputViewMode>('form')
-const formValues = ref<SchemaFormValues>(createDefaultFormValues(props.schema))
-const jsonDraft = ref(buildJsonSnippet(props.modelPath, formValues.value))
+const jsonDraft = ref(buildPlaygroundJsonSnippet(props.modelId, formValues.value, batchSize.value))
 const jsonDraftDirty = ref(false)
 const validationError = ref<string | null>(null)
 const batchOpen = ref(false)
@@ -79,7 +80,13 @@ const isRunDisabled = computed(() => props.generating || isInsufficientBalance.v
 
 const codeSnippet = computed(() => {
   if (inputViewMode.value === 'form' || inputViewMode.value === 'json') return ''
-  return buildInputViewSnippet(inputViewMode.value, props.modelPath, formValues.value)
+  return buildInputViewSnippet(
+    inputViewMode.value,
+    props.modelId,
+    props.apiModelId,
+    formValues.value,
+    batchSize.value,
+  )
 })
 
 function applyParsedJsonDraft() {
@@ -98,7 +105,7 @@ watch(
   (schema) => {
     formValues.value = createDefaultFormValues(schema)
     jsonDraftDirty.value = false
-    jsonDraft.value = buildJsonSnippet(props.modelPath, formValues.value)
+    jsonDraft.value = buildPlaygroundJsonSnippet(props.modelId, formValues.value, batchSize.value)
     validationError.value = null
   },
 )
@@ -107,17 +114,23 @@ watch(
   formValues,
   (values) => {
     if (inputViewMode.value === 'form' && !jsonDraftDirty.value) {
-      jsonDraft.value = buildJsonSnippet(props.modelPath, values)
+      jsonDraft.value = buildPlaygroundJsonSnippet(props.modelId, values, batchSize.value)
     }
   },
   { deep: true },
 )
 
+watch(batchSize, (size) => {
+  if (inputViewMode.value === 'form' && !jsonDraftDirty.value) {
+    jsonDraft.value = buildPlaygroundJsonSnippet(props.modelId, formValues.value, size)
+  }
+})
+
 watch(
-  () => props.modelPath,
-  (modelPath) => {
+  () => props.modelId,
+  (modelId) => {
     if (!jsonDraftDirty.value) {
-      jsonDraft.value = buildJsonSnippet(modelPath, formValues.value)
+      jsonDraft.value = buildPlaygroundJsonSnippet(modelId, formValues.value, batchSize.value)
     }
   },
 )
@@ -127,7 +140,11 @@ watch(inputViewMode, (mode, previousMode) => {
 
   if (mode === 'json') {
     if (previousMode === 'form' || !jsonDraftDirty.value) {
-      jsonDraft.value = buildJsonSnippet(props.modelPath, formValues.value)
+      jsonDraft.value = buildPlaygroundJsonSnippet(
+        props.modelId,
+        formValues.value,
+        batchSize.value,
+      )
       jsonDraftDirty.value = false
     }
     return
@@ -156,7 +173,7 @@ function onJsonDraftInput() {
 function resetForm() {
   formValues.value = createDefaultFormValues(props.schema)
   jsonDraftDirty.value = false
-  jsonDraft.value = buildJsonSnippet(props.modelPath, formValues.value)
+  jsonDraft.value = buildPlaygroundJsonSnippet(props.modelId, formValues.value, batchSize.value)
   validationError.value = null
 }
 

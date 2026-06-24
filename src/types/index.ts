@@ -37,12 +37,23 @@ export interface Model {
 export interface ModelDetail extends Model {
   /** Maps from API field `model_path` */
   modelPath: string
+  /** Maps from API field `api_model_id` — used in external /v1/generations examples */
+  apiModelId?: string
   /** Maps from API field `is_hot` */
   isHot?: boolean
   /** Maps from API field `per_run_price_usd` — total USD for default run config */
   perRunPriceUsd?: number
   /** Maps from API field `runs_per_ten_usd` */
   runsPerTenUsd?: number
+  /** Maps from API field `readme_md` — model README rendered in API tab */
+  readmeMd?: string
+  /** Maps from API field `faq` */
+  faq?: ModelFaqItem[]
+}
+
+export interface ModelFaqItem {
+  question: string
+  answer: string
 }
 
 export interface ModelsPage {

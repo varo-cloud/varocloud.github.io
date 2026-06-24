@@ -1,6 +1,7 @@
 import type { SchemaFormValues } from '@/types/schema'
 
 export type PlaygroundInputViewMode = 'form' | 'json' | 'http' | 'python' | 'javascript'
+export type ApiCodeViewMode = Exclude<PlaygroundInputViewMode, 'form' | 'json'>
 
 export const PLAYGROUND_INPUT_VIEW_MODES: PlaygroundInputViewMode[] = [
   'form',
@@ -10,10 +11,54 @@ export const PLAYGROUND_INPUT_VIEW_MODES: PlaygroundInputViewMode[] = [
   'javascript',
 ]
 
-export function buildRequestBody(modelPath: string, values: SchemaFormValues) {
+export const API_CODE_VIEW_MODES: ApiCodeViewMode[] = ['http', 'python', 'javascript']
+
+function pruneApiValues(values: SchemaFormValues): SchemaFormValues {
+  const result: SchemaFormValues = {}
+
+  for (const [key, value] of Object.entries(values)) {
+    if (value === '' || value === null || value === undefined) continue
+    if (Array.isArray(value) && value.length === 0) continue
+    result[key] = value
+  }
+
+  return result
+}
+
+export function resolveV1BaseUrl(): string {
+  if (typeof window !== 'undefined') {
+    return `${window.location.origin}/v1`
+  }
+
+  return 'https://<your-host>/v1'
+}
+
+export function resolveCreateGenerationUrl(): string {
+  return `${resolveV1BaseUrl()}/generations`
+}
+
+export function resolveGetGenerationUrl(taskId: string): string {
+  return `${resolveV1BaseUrl()}/generations/${taskId}`
+}
+
+/** External API Key calls — flat body with `model` (api_model_id). */
+export function buildExternalApiBody(apiModelId: string, values: SchemaFormValues) {
   return {
-    model: modelPath,
-    input: values,
+    model: apiModelId,
+    ...pruneApiValues(values),
+  }
+}
+
+/** Playground JWT run — wrapped body with `model_id` + `input`. */
+export function buildPlaygroundRunBody(
+  modelId: string,
+  values: SchemaFormValues,
+  batchSize = 1,
+) {
+  return {
+    model_id: modelId,
+    input: { ...values },
+    batch_size: batchSize,
   }
 }
 
@@ -48,26 +93,20 @@ export function parseJsonInputDraft(
   }
 }
 
-export function resolvePredictionsEndpoint(): string {
-  if (typeof window !== 'undefined') {
-    const origin = window.location.origin
-    const apiPath = (import.meta.env.VITE_API_BASE_URL || '/api').replace(/\/$/, '')
-    return `${origin}${apiPath}/v1/predictions`
-  }
-
-  return 'https://<your-host>/api/v1/predictions'
+export function buildPlaygroundJsonSnippet(
+  modelId: string,
+  values: SchemaFormValues,
+  batchSize = 1,
+): string {
+  return JSON.stringify(buildPlaygroundRunBody(modelId, values, batchSize), null, 2)
 }
 
-export function buildJsonSnippet(modelPath: string, values: SchemaFormValues): string {
-  return JSON.stringify(buildRequestBody(modelPath, values), null, 2)
-}
-
-export function buildHttpSnippet(modelPath: string, values: SchemaFormValues): string {
-  const url = resolvePredictionsEndpoint()
-  const body = JSON.stringify(buildRequestBody(modelPath, values), null, 2)
+export function buildHttpSnippet(apiModelId: string, values: SchemaFormValues): string {
+  const url = resolveCreateGenerationUrl()
+  const body = JSON.stringify(buildExternalApiBody(apiModelId, values), null, 2)
 
   return `POST ${url}
-Authorization: Bearer YOUR_API_KEY
+Authorization: Bearer sk_live_...
 Content-Type: application/json
 
 ${body}`
@@ -100,64 +139,83 @@ function toPythonLiteral(value: unknown, indent = 0): string {
   return JSON.stringify(value)
 }
 
-export function buildPythonSnippet(modelPath: string, values: SchemaFormValues): string {
-  const url = resolvePredictionsEndpoint()
-  const payload = toPythonLiteral(buildRequestBody(modelPath, values))
+export function buildPythonSnippet(apiModelId: string, values: SchemaFormValues): string {
+  const baseUrl = resolveV1BaseUrl()
+  const body = toPythonLiteral(buildExternalApiBody(apiModelId, values))
 
-  return `import httpx
+  return `import time
+from openai import OpenAI
 
-API_KEY = "YOUR_API_KEY"
-url = "${url}"
+API_KEY = "sk_live_..."
+client = OpenAI(api_key=API_KEY, base_url="${baseUrl}")
 
-headers = {
-    "Authorization": f"Bearer {API_KEY}",
-    "Content-Type": "application/json",
+body = ${body}
+
+generation = client.post("/generations", body=body, cast_to=dict)
+task_id = generation["id"]
+
+while True:
+    status = client.get(f"/generations/{task_id}", cast_to=dict)
+    if status["status"] in ("completed", "succeeded"):
+        print(status.get("url") or status.get("output", {}).get("url"))
+        break
+    if status["status"] == "failed":
+        raise RuntimeError(status.get("error", {}).get("message", "Generation failed"))
+    time.sleep(5)`
 }
 
-payload = ${payload}
+export function buildJavaScriptSnippet(apiModelId: string, values: SchemaFormValues): string {
+  const baseUrl = resolveV1BaseUrl()
+  const body = JSON.stringify(buildExternalApiBody(apiModelId, values), null, 2)
+    .split('\n')
+    .map((line, index) => (index === 0 ? line : `    ${line}`))
+    .join('\n')
 
-with httpx.Client(timeout=60) as client:
-    response = client.post(url, headers=headers, json=payload)
-    response.raise_for_status()
-    print(response.json())`
-}
+  return `import OpenAI from "openai";
 
-export function buildJavaScriptSnippet(modelPath: string, values: SchemaFormValues): string {
-  const url = resolvePredictionsEndpoint()
-  const body = JSON.stringify(buildRequestBody(modelPath, values), null, 2)
-
-  return `const API_KEY = "YOUR_API_KEY";
-
-const response = await fetch("${url}", {
-  method: "POST",
-  headers: {
-    Authorization: \`Bearer \${API_KEY}\`,
-    "Content-Type": "application/json",
-  },
-  body: JSON.stringify(${body}),
+const client = new OpenAI({
+  apiKey: "sk_live_...",
+  baseURL: "${baseUrl}",
 });
 
-if (!response.ok) {
-  throw new Error(\`Request failed: \${response.status}\`);
+const generation = await client.post("/generations", {
+  body: ${body},
+});
+
+let status = generation;
+while (status.status === "queued" || status.status === "processing" || status.status === "running") {
+  await new Promise((resolve) => setTimeout(resolve, 5000));
+  status = await client.get(\`/generations/\${generation.id}\`);
 }
 
-const result = await response.json();
-console.log(result);`
+if (status.status === "completed" || status.status === "succeeded") {
+  console.log(status.url ?? status.output?.url);
+}`
 }
 
 export function buildInputViewSnippet(
   mode: Exclude<PlaygroundInputViewMode, 'form'>,
-  modelPath: string,
+  modelId: string,
+  apiModelId: string,
   values: SchemaFormValues,
+  batchSize = 1,
 ): string {
   switch (mode) {
     case 'json':
-      return buildJsonSnippet(modelPath, values)
+      return buildPlaygroundJsonSnippet(modelId, values, batchSize)
     case 'http':
-      return buildHttpSnippet(modelPath, values)
+      return buildHttpSnippet(apiModelId, values)
     case 'python':
-      return buildPythonSnippet(modelPath, values)
+      return buildPythonSnippet(apiModelId, values)
     case 'javascript':
-      return buildJavaScriptSnippet(modelPath, values)
+      return buildJavaScriptSnippet(apiModelId, values)
   }
+}
+
+export function buildApiCodeSnippet(
+  mode: ApiCodeViewMode,
+  apiModelId: string,
+  values: SchemaFormValues,
+): string {
+  return buildInputViewSnippet(mode, '', apiModelId, values)
 }

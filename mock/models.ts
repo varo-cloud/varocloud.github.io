@@ -1,5 +1,6 @@
 import type { MockMethod } from 'vite-plugin-mock'
 import type { PricingPriceUnit } from '../src/types'
+import { resolveApiModelId, resolveModelDoc } from './model-docs'
 import { success } from './_util'
 
 interface ModelCatalogEntry {
@@ -237,7 +238,14 @@ export default [
       if (!model) {
         return { code: 404, message: 'Model not found', data: null }
       }
-      return success(model)
+
+      const doc = resolveModelDoc(model.id)
+      return success({
+        ...model,
+        api_model_id: resolveApiModelId(model.id, model.model_path),
+        readme_md: doc.readme_md || null,
+        faq: doc.faq.length > 0 ? doc.faq : null,
+      })
     },
   },
 ] as MockMethod[]
