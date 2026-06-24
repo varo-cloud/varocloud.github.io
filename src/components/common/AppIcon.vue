@@ -16,6 +16,8 @@ const ICONS = {
   'code-box': '/assets/icons/code-box.svg',
   'file-paper': '/assets/icons/file-paper.svg',
   logout: '/assets/icons/logout.svg',
+  twitter: '/assets/footer/twitter.svg',
+  telegram: '/assets/footer/telegram.svg',
 } as const
 
 export type AppIconName = keyof typeof ICONS

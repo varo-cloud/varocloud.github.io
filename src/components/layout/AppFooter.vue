@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
-import { assetUrl } from '@/utils/assetUrl'
+import AppIcon from '@/components/common/AppIcon.vue'
 import { useLocaleRouter } from '@/composables/useLocaleRouter'
 
 const { t } = useI18n()
@@ -23,7 +23,7 @@ const { localePath } = useLocaleRouter()
           rel="noopener noreferrer"
           :aria-label="t('footer.twitter')"
         >
-          <img :src="assetUrl('/assets/footer/twitter.svg')" alt="" aria-hidden="true" />
+          <AppIcon name="twitter" :size="16" />
         </a>
         <a
           class="app-footer__social-link"
@@ -32,7 +32,7 @@ const { localePath } = useLocaleRouter()
           rel="noopener noreferrer"
           :aria-label="t('footer.telegram')"
         >
-          <img :src="assetUrl('/assets/footer/telegram.svg')" alt="" aria-hidden="true" />
+          <AppIcon name="telegram" :size="16" />
         </a>
       </div>
     </div>
@@ -79,27 +79,21 @@ const { localePath } = useLocaleRouter()
 .app-footer__social {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 20px;
 }
 
 .app-footer__social-link {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
-  opacity: 0.9;
-  transition: opacity 0.15s ease;
+  width: 16px;
+  height: 16px;
+  color: #808080;
+  transition: color 0.15s ease;
 }
 
 .app-footer__social-link:hover {
-  opacity: 1;
-}
-
-.app-footer__social-link img {
-  display: block;
-  width: 100%;
-  height: 100%;
+  color: #e0e0e0;
 }
 
 @media (max-width: 767px) {
