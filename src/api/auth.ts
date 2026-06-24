@@ -35,7 +35,7 @@ interface ApiUserProfile {
   id: string
   email: string
   name?: string
-  balance: number
+  balance_usd: number
 }
 
 function mapUserProfile(raw: ApiUserProfile): UserProfile {
@@ -44,7 +44,7 @@ function mapUserProfile(raw: ApiUserProfile): UserProfile {
     id: raw.id,
     email: raw.email,
     name: raw.name ?? localPart,
-    balance: raw.balance,
+    balanceUsd: raw.balance_usd,
   }
 }
 

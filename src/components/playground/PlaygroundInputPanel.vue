@@ -14,7 +14,7 @@ const props = defineProps<{
   schema?: InputSchema
   priceUsd: number
   originalPriceUsd?: number
-  creditsUsd: number
+  balanceUsd: number
   generating?: boolean
 }>()
 
@@ -50,7 +50,7 @@ const runLabel = computed(() =>
 )
 
 const isInsufficientBalance = computed(
-  () => userStore.isLoggedIn && props.creditsUsd < totalPriceUsd.value,
+  () => userStore.isLoggedIn && props.balanceUsd < totalPriceUsd.value,
 )
 
 const isRunDisabled = computed(() => props.generating || isInsufficientBalance.value)
@@ -245,9 +245,9 @@ onBeforeUnmount(() => {
       </Teleport>
     </div>
 
-    <div class="input-panel__credits">
-      <span>{{ t('pages.modelDetail.credits') }}</span>
-      <span class="input-panel__credits-value">${{ creditsUsd.toFixed(1) }}</span>
+    <div class="input-panel__balance">
+      <span>{{ t('pages.modelDetail.balance') }}</span>
+      <span class="input-panel__balance-value">${{ balanceUsd.toFixed(2) }}</span>
       <button type="button" class="input-panel__topup" @click="goTopUp">
         {{ t('pages.modelDetail.topUp') }}
       </button>
@@ -440,7 +440,7 @@ onBeforeUnmount(() => {
   transform: rotate(180deg);
 }
 
-.input-panel__credits {
+.input-panel__balance {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -449,7 +449,7 @@ onBeforeUnmount(() => {
   flex-shrink: 0;
 }
 
-.input-panel__credits-value {
+.input-panel__balance-value {
   margin-left: auto;
 }
 

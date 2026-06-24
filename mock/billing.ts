@@ -4,9 +4,9 @@ import { addAccountBalanceUsd, getAccountBalanceUsd } from './account-balance'
 import { fail, success } from './_util'
 
 const creditPackages = [
-  { id: 'starter' as const, price_usd: 10, credits: 1000 },
-  { id: 'pro' as const, price_usd: 25, credits: 3000 },
-  { id: 'business' as const, price_usd: 50, credits: 7000 },
+  { id: 'starter' as const, price_usd: 10 },
+  { id: 'pro' as const, price_usd: 25 },
+  { id: 'business' as const, price_usd: 50 },
 ]
 
 interface PendingCheckout {
@@ -14,14 +14,13 @@ interface PendingCheckout {
   packageId: CreditPackageId
   transactionId: string
   amountUsd: number
-  credits: number
 }
 
 const pendingCheckouts = new Map<string, PendingCheckout>()
 
 let summary = {
-  balance: Math.round(getAccountBalanceUsd() * 100),
-  spent_this_month_credits: 9628,
+  balance_usd: getAccountBalanceUsd(),
+  spent_this_month_usd: 96.28,
   spent_change_percent: -12,
   auto_top_up: {
     enabled: false,
@@ -38,7 +37,6 @@ const transactions: Transaction[] = [
     description: 'Top Up',
     createdAt: Date.parse('2026-05-12T10:00:00Z'),
     status: 'completed',
-    creditsGranted: 1000,
     paymentMethod: 'stripe',
     paymentDetail: 'Visa ••4242',
     packageId: 'starter',
@@ -52,7 +50,6 @@ const transactions: Transaction[] = [
     description: 'Top Up',
     createdAt: Date.parse('2026-05-12T09:30:00Z'),
     status: 'pending',
-    creditsGranted: 3000,
     paymentMethod: 'stripe',
     packageId: 'pro',
   },
@@ -63,7 +60,6 @@ const transactions: Transaction[] = [
     description: 'Top Up',
     createdAt: Date.parse('2026-05-12T09:00:00Z'),
     status: 'completed',
-    creditsGranted: 1000,
     paymentMethod: 'stripe',
     paymentDetail: 'Mastercard ••5555',
     packageId: 'starter',
@@ -104,12 +100,12 @@ function toApiTransaction(tx: Transaction) {
   return {
     id: tx.id,
     amount_usd: tx.amountUsd,
-    credits_granted: tx.creditsGranted ?? Math.round(tx.amountUsd * 100),
     status: tx.status ?? 'completed',
-    created_at: new Date(tx.createdAt).toISOString(),
+    created_at: tx.createdAt,
+    payment_method: tx.paymentMethod ?? 'stripe',
     payment_detail: tx.paymentDetail ?? null,
     package_id: tx.packageId ?? null,
-    completed_at: tx.completedAt ? new Date(tx.completedAt).toISOString() : null,
+    completed_at: tx.completedAt ?? null,
     receipt_url: tx.receiptUrl ?? null,
   }
 }
@@ -117,7 +113,7 @@ function toApiTransaction(tx: Transaction) {
 function syncSummaryBalance() {
   summary = {
     ...summary,
-    balance: Math.round(getAccountBalanceUsd() * 100),
+    balance_usd: getAccountBalanceUsd(),
   }
 }
 
@@ -162,7 +158,7 @@ export default [
   {
     url: '/api/billing/balance',
     method: 'get',
-    response: () => success({ balance: Math.round(getAccountBalanceUsd() * 100) }),
+    response: () => success({ balance_usd: getAccountBalanceUsd() }),
   },
   {
     url: '/api/billing/summary',
@@ -215,7 +211,6 @@ export default [
         description: 'Top Up',
         createdAt,
         status: 'pending',
-        creditsGranted: pkg.credits,
         paymentMethod: 'stripe',
         packageId: pkg.id,
       })
@@ -225,7 +220,6 @@ export default [
         packageId: pkg.id,
         transactionId,
         amountUsd: pkg.price_usd,
-        credits: pkg.credits,
       })
 
       const successBase = body.success_url?.split('?')[0] ?? 'http://localhost:5173/en/billing'

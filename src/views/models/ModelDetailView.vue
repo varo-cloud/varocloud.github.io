@@ -31,7 +31,7 @@ const generationStatus = ref<GenerationStatus>('idle')
 const generationProgress = ref(0)
 const estimatedSeconds = 40
 
-const creditsBalance = computed(() => userStore.balance ?? 0)
+const balanceUsd = computed(() => userStore.balanceUsd ?? 0)
 
 const isGenerating = computed(
   () => generationStatus.value === 'queued' || generationStatus.value === 'processing',
@@ -211,7 +211,7 @@ onUnmounted(() => {
           :schema="model.inputSchema"
           :price-usd="model.startingPriceUsd"
           :original-price-usd="model.originalPriceUsd"
-          :credits-usd="creditsBalance"
+          :balance-usd="balanceUsd"
           :generating="isGenerating"
           @run="handleRun"
         />

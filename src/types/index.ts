@@ -63,8 +63,8 @@ export interface UserProfile {
   id: string
   email: string
   name: string
-  /** Credits balance — maps from API field `balance` */
-  balance: number
+  /** USD balance — maps from API field `balance_usd` */
+  balanceUsd: number
 }
 
 export interface OtpRequestPayload {
@@ -143,7 +143,6 @@ export interface Transaction {
   description: string
   createdAt: number
   status?: TopUpTransactionStatus
-  creditsGranted?: number
   paymentMethod?: PaymentMethodId
   paymentDetail?: string | null
   packageId?: string | null
@@ -152,7 +151,7 @@ export interface Transaction {
 }
 
 export interface BalanceInfo {
-  balance: number
+  balanceUsd: number
 }
 
 export interface BillingAutoTopUp {
@@ -162,8 +161,8 @@ export interface BillingAutoTopUp {
 }
 
 export interface BillingSummary {
-  balance: number
-  spentThisMonthCredits: number
+  balanceUsd: number
+  spentThisMonthUsd: number
   spentChangePercent: number
   autoTopUp: BillingAutoTopUp
 }
@@ -179,7 +178,6 @@ export type CreditPackageId = 'starter' | 'pro' | 'business'
 export interface CreditPackage {
   id: CreditPackageId
   priceUsd: number
-  credits: number
 }
 
 export interface CreateCheckoutPayload {

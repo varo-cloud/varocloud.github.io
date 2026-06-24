@@ -18,12 +18,6 @@ const status = computed<TopUpTransactionStatus>(
   () => props.transaction?.status ?? 'completed',
 )
 
-const creditsGranted = computed(() => {
-  if (!props.transaction) return null
-  if (props.transaction.creditsGranted != null) return props.transaction.creditsGranted
-  return Math.round(props.transaction.amountUsd * 100)
-})
-
 const paymentDetail = computed(() => {
   if (!props.transaction) return '—'
   if (props.transaction.paymentDetail) return props.transaction.paymentDetail
@@ -63,7 +57,6 @@ const detailRows = computed(() => {
     { label: t('pages.billing.topUpDetail.transactionId'), value: props.transaction.id },
     { label: t('pages.billing.topUpDetail.status'), value: statusLabel.value, isStatus: true },
     { label: t('pages.billing.topUpDetail.amount'), value: amountLabel.value },
-    { label: t('pages.billing.topUpDetail.creditsGranted'), value: String(creditsGranted.value) },
     { label: t('pages.billing.topUpDetail.package'), value: packageLabel.value },
     { label: t('pages.billing.topUpDetail.paymentMethod'), value: 'Stripe' },
     { label: t('pages.billing.topUpDetail.paymentDetail'), value: paymentDetail.value },

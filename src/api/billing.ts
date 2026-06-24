@@ -13,7 +13,6 @@ import type {
 interface ApiCreditPackage {
   id: string
   price_usd: number
-  credits: number
 }
 
 interface ApiCheckoutResponse {
@@ -24,12 +23,11 @@ interface ApiAutoTopUp {
   enabled: boolean
   threshold_usd?: number
   top_up_amount_usd?: number
+  package_id?: string
 }
 
 interface ApiBillingSummary {
-  balance?: number
   balance_usd?: number
-  spent_this_month_credits?: number
   spent_this_month_usd?: number
   spent_change_percent?: number
   auto_top_up?: ApiAutoTopUp
@@ -41,9 +39,8 @@ interface ApiBillingRecord {
   style: string
   key: string
   api_key?: string | null
-  amount_credits?: number
   amount_usd?: number
-  created_at?: string
+  created_at?: string | number
   createdAt?: number
   apiKey?: string | null
   amountUsd?: number
@@ -52,19 +49,17 @@ interface ApiBillingRecord {
 interface ApiTransaction {
   id: string
   amount_usd?: number
-  credits_granted?: number
   status?: string
-  created_at?: string
+  created_at?: string | number
   payment_method?: string
   payment_detail?: string | null
   package_id?: string | null
-  completed_at?: string | null
+  completed_at?: string | number | null
   receipt_url?: string | null
   type?: string
   amountUsd?: number
   description?: string
   createdAt?: number
-  creditsGranted?: number
   paymentMethod?: string
   paymentDetail?: string | null
   packageId?: string | null
@@ -91,8 +86,8 @@ function mapAutoTopUp(raw: ApiAutoTopUp | BillingAutoTopUp): BillingAutoTopUp {
 
 function mapBillingSummary(raw: ApiBillingSummary): BillingSummary {
   return {
-    balance: raw.balance ?? raw.balance_usd ?? 0,
-    spentThisMonthCredits: raw.spent_this_month_credits ?? raw.spent_this_month_usd ?? 0,
+    balanceUsd: raw.balance_usd ?? 0,
+    spentThisMonthUsd: raw.spent_this_month_usd ?? 0,
     spentChangePercent: raw.spent_change_percent ?? 0,
     autoTopUp: mapAutoTopUp(raw.auto_top_up ?? raw.autoTopUp ?? { enabled: false }),
   }
@@ -115,7 +110,7 @@ function mapBillingRecord(raw: ApiBillingRecord): BillingRecord {
     style: raw.style as BillingRecord['style'],
     key: raw.key,
     apiKey: raw.api_key ?? null,
-    amountUsd: raw.amount_credits ?? raw.amount_usd ?? 0,
+    amountUsd: raw.amount_usd ?? 0,
     createdAt: parseTimestamp(raw.created_at),
   }
 }
@@ -129,7 +124,6 @@ function mapTransaction(raw: ApiTransaction): Transaction {
       description: raw.description ?? 'Top Up',
       createdAt: raw.createdAt ?? Date.now(),
       status: raw.status as Transaction['status'],
-      creditsGranted: raw.creditsGranted,
       paymentMethod: raw.paymentMethod as Transaction['paymentMethod'],
       paymentDetail: raw.paymentDetail ?? null,
       packageId: raw.packageId ?? null,
@@ -145,11 +139,10 @@ function mapTransaction(raw: ApiTransaction): Transaction {
     description: 'Top Up',
     createdAt: parseTimestamp(raw.created_at),
     status: raw.status as Transaction['status'],
-    creditsGranted: raw.credits_granted,
     paymentMethod: (raw.payment_method as Transaction['paymentMethod']) ?? 'stripe',
     paymentDetail: raw.payment_detail ?? null,
     packageId: raw.package_id ?? null,
-    completedAt: raw.completed_at ? parseTimestamp(raw.completed_at) : null,
+    completedAt: raw.completed_at != null ? parseTimestamp(raw.completed_at) : null,
     receiptUrl: raw.receipt_url ?? null,
   }
 }
@@ -158,7 +151,6 @@ function mapCreditPackage(raw: ApiCreditPackage): CreditPackage {
   return {
     id: raw.id as CreditPackage['id'],
     priceUsd: raw.price_usd,
-    credits: raw.credits,
   }
 }
 

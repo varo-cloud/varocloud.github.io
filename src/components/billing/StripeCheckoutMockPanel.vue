@@ -39,10 +39,6 @@ const amountLabel = computed(() => {
             <span>{{ t('pages.billing.stripeMock.amount') }}</span>
             <strong>{{ amountLabel }}</strong>
           </div>
-          <div class="stripe-mock__row">
-            <span>{{ t('pages.billing.stripeMock.credits') }}</span>
-            <strong>{{ pkg.credits }}</strong>
-          </div>
         </div>
 
         <p class="stripe-mock__hint">{{ t('pages.billing.stripeMock.testCard') }}</p>
