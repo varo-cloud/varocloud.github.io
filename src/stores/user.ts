@@ -1,8 +1,8 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
-import { clearToken, getToken, setToken } from '@/api/http'
-import { fetchUserProfile } from '@/api/auth'
-import type { UserProfile } from '@/types'
+import { clearAuthTokens, getToken } from '@/api/http'
+import { fetchUserProfile, logout as logoutApi, persistTokenPair } from '@/api/auth'
+import type { TokenPair, UserProfile } from '@/types'
 
 export const useUserStore = defineStore('user', () => {
   const token = ref<string | null>(getToken())
@@ -10,12 +10,11 @@ export const useUserStore = defineStore('user', () => {
   const loading = ref(false)
 
   const isLoggedIn = computed(() => Boolean(token.value))
-  const balanceUsd = computed(() => profile.value?.balanceUsd ?? null)
+  const balance = computed(() => profile.value?.balance ?? null)
 
-  function establishSession(authToken: string, user: UserProfile) {
-    token.value = authToken
-    setToken(authToken)
-    profile.value = user
+  function establishSession(tokens: TokenPair) {
+    token.value = tokens.access_token
+    persistTokenPair(tokens)
   }
 
   async function loadProfile() {
@@ -29,7 +28,7 @@ export const useUserStore = defineStore('user', () => {
     } catch {
       profile.value = null
       token.value = null
-      clearToken()
+      clearAuthTokens()
     } finally {
       loading.value = false
     }
@@ -39,9 +38,9 @@ export const useUserStore = defineStore('user', () => {
     profile.value = user
   }
 
-  function logout() {
+  async function logout() {
+    await logoutApi()
     token.value = null
-    clearToken()
     profile.value = null
   }
 
@@ -50,7 +49,7 @@ export const useUserStore = defineStore('user', () => {
     profile,
     loading,
     isLoggedIn,
-    balanceUsd,
+    balance,
     establishSession,
     loadProfile,
     setProfile,

@@ -8,6 +8,10 @@ const props = defineProps<{
   item: Transaction
 }>()
 
+const emit = defineEmits<{
+  view: [item: Transaction]
+}>()
+
 const { t, locale } = useI18n()
 
 const dateLabel = computed(() =>
@@ -26,7 +30,7 @@ const amountLabel = computed(() => {
     <span class="billing-tx-row__date" role="cell">{{ dateLabel }}</span>
     <span class="billing-tx-row__amount" role="cell">{{ amountLabel }}</span>
     <span class="billing-tx-row__action" role="cell">
-      <button type="button" class="billing-tx-row__view-btn">
+      <button type="button" class="billing-tx-row__view-btn" @click="emit('view', item)">
         {{ t('pages.billing.view') }}
       </button>
     </span>

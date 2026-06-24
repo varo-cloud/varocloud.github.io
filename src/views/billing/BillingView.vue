@@ -1,35 +1,42 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { NSpin, useMessage } from 'naive-ui'
 import AppIcon from '@/components/common/AppIcon.vue'
 import NumberStepperInput from '@/components/common/NumberStepperInput.vue'
 import BillingTransactionRow from '@/components/billing/BillingTransactionRow.vue'
 import BillingRecordRow from '@/components/billing/BillingRecordRow.vue'
+import BillingTopUpDetailDialog from '@/components/billing/BillingTopUpDetailDialog.vue'
+import StripeCheckoutMockPanel from '@/components/billing/StripeCheckoutMockPanel.vue'
 import {
-  createTopUp,
+  completeMockCheckout,
+  createCheckoutSession,
   fetchBillingRecords,
   fetchBillingSummary,
-  fetchTopUpPresets,
+  fetchCreditPackages,
   fetchTransactions,
   updateAutoTopUp,
 } from '@/api/billing'
+import { useLocaleRouter } from '@/composables/useLocaleRouter'
 import { useUserStore } from '@/stores/user'
 import { downloadCsv } from '@/utils/csv'
 import { assetUrl } from '@/utils/assetUrl'
 import { formatTimestamp } from '@/utils/time'
-import type { BillingRecord, BillingSummary, PaymentMethodId, TopUpPreset, Transaction } from '@/types'
+import type {
+  BillingRecord,
+  BillingSummary,
+  CreditPackage,
+  CreditPackageId,
+  Transaction,
+} from '@/types'
 
-type AmountSelection = number | 'custom'
 type HistoryTab = 'topup' | 'billing'
 
-const PAYMENT_METHODS: Array<{ id: PaymentMethodId; logo: string; alt: string }> = [
-  { id: 'stripe', logo: assetUrl('/assets/billing/stripe.svg'), alt: 'Stripe' },
-  { id: 'paypal', logo: assetUrl('/assets/billing/paypal.svg'), alt: 'PayPal' },
-  { id: 'npay', logo: assetUrl('/assets/billing/npay.svg'), alt: 'N pay' },
-  { id: 'alipay', logo: assetUrl('/assets/billing/alipay-wechat.svg'), alt: 'Alipay / WeChat Pay' },
-]
+const STRIPE_LOGO = assetUrl('/assets/billing/stripe.svg')
 
+const route = useRoute()
+const { localePath, replace } = useLocaleRouter()
 const { t, locale } = useI18n()
 const message = useMessage()
 const userStore = useUserStore()
@@ -37,14 +44,15 @@ const userStore = useUserStore()
 const loading = ref(true)
 const error = ref<string | null>(null)
 const summary = ref<BillingSummary | null>(null)
-const presets = ref<TopUpPreset[]>([])
+const packages = ref<CreditPackage[]>([])
 const transactions = ref<Transaction[]>([])
 const billingRecords = ref<BillingRecord[]>([])
 
-const selectedAmount = ref<AmountSelection>(5)
-const customAmount = ref('')
-const selectedPayment = ref<PaymentMethodId>('stripe')
+const selectedPackageId = ref<CreditPackageId | null>(null)
 const purchasing = ref(false)
+const checkoutProcessing = ref(false)
+const mockPaying = ref(false)
+const viewingTransaction = ref<Transaction | null>(null)
 
 const autoTopUpEnabled = ref(false)
 const autoTopUpThresholdNumber = ref(5)
@@ -54,17 +62,35 @@ const savingAutoTopUp = ref(false)
 const activeTab = ref<HistoryTab>('topup')
 const rechargeSectionRef = ref<HTMLElement | null>(null)
 
-const purchaseAmount = computed(() => {
-  if (selectedAmount.value === 'custom') {
-    const value = Number(customAmount.value)
-    return Number.isFinite(value) && value > 0 ? value : 0
-  }
-  return selectedAmount.value
+const selectedPackage = computed(() =>
+  packages.value.find((item) => item.id === selectedPackageId.value) ?? null,
+)
+
+const buyButtonLabel = computed(() => {
+  if (!selectedPackage.value) return t('pages.billing.continueToStripe', { amount: '—' })
+  return t('pages.billing.continueToStripe', {
+    amount: formatUsd(selectedPackage.value.priceUsd),
+  })
 })
 
-const buyButtonLabel = computed(() =>
-  t('pages.billing.buyAmount', { amount: formatUsd(purchaseAmount.value) }),
+const mockCheckoutSessionId = computed(() =>
+  typeof route.query.session_id === 'string' ? route.query.session_id : null,
 )
+
+const mockCheckoutPackageId = computed(() =>
+  typeof route.query.package === 'string' ? (route.query.package as CreditPackageId) : null,
+)
+
+const showStripeMock = computed(
+  () => route.query.stripe_checkout === '1' && Boolean(mockCheckoutSessionId.value),
+)
+
+const mockCheckoutPackage = computed(() => {
+  if (mockCheckoutPackageId.value) {
+    return packages.value.find((item) => item.id === mockCheckoutPackageId.value) ?? null
+  }
+  return selectedPackage.value
+})
 
 const spentTrendLabel = computed(() => {
   const percent = summary.value?.spentChangePercent ?? 0
@@ -96,38 +122,65 @@ function formatUsd(value: number) {
   return `$${value.toFixed(2)}`
 }
 
-async function loadBilling() {
-  loading.value = true
-  error.value = null
+function formatCredits(value: number) {
+  return value.toLocaleString()
+}
+
+function packageLabel(id: CreditPackageId) {
+  const key = `pages.billing.topUpDetail.packages.${id}`
+  const translated = t(key)
+  return translated === key ? id : translated
+}
+
+function sleep(ms: number) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms)
+  })
+}
+
+function resolveTransactionIdFromSession(sessionId: string | null) {
+  if (!sessionId?.startsWith('cs_mock_')) return null
+  return `tx-topup-${sessionId.slice('cs_mock_'.length)}`
+}
+
+async function loadBilling(options: { silent?: boolean } = {}) {
+  if (!options.silent) {
+    loading.value = true
+    error.value = null
+  }
 
   try {
-    const [summaryData, presetData, transactionData, recordData] = await Promise.all([
+    const [summaryData, packageData, transactionData, recordData] = await Promise.all([
       fetchBillingSummary(),
-      fetchTopUpPresets(),
+      fetchCreditPackages(),
       fetchTransactions(),
       fetchBillingRecords(),
     ])
 
     summary.value = summaryData
-    presets.value = presetData
+    packages.value = packageData
     transactions.value = transactionData
     billingRecords.value = recordData
 
-    if (presetData.length > 0) {
-      selectedAmount.value = presetData[0].amountUsd
+    if (packageData.length > 0 && !selectedPackageId.value) {
+      selectedPackageId.value = packageData[0].id
     }
 
     autoTopUpEnabled.value = summaryData.autoTopUp.enabled
     autoTopUpThresholdNumber.value = summaryData.autoTopUp.thresholdUsd
     autoTopUpAmountNumber.value = summaryData.autoTopUp.topUpAmountUsd
   } catch {
-    error.value = t('pages.billing.loadError')
-    summary.value = null
-    presets.value = []
-    transactions.value = []
-    billingRecords.value = []
+    if (!options.silent) {
+      error.value = t('pages.billing.loadError')
+      summary.value = null
+      packages.value = []
+      transactions.value = []
+      billingRecords.value = []
+    }
   } finally {
-    loading.value = false
+    if (!options.silent) {
+      loading.value = false
+    }
   }
 }
 
@@ -135,24 +188,98 @@ function scrollToRecharge() {
   rechargeSectionRef.value?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 }
 
+function buildCheckoutUrls() {
+  const base = `${window.location.origin}${localePath('/billing')}`
+  return {
+    successUrl: `${base}?checkout=success`,
+    cancelUrl: `${base}?checkout=cancelled`,
+  }
+}
+
 async function handleBuy() {
-  if (purchasing.value || purchaseAmount.value <= 0) return
+  if (!selectedPackageId.value || purchasing.value) return
 
   purchasing.value = true
 
   try {
-    await createTopUp({
-      amountUsd: purchaseAmount.value,
-      paymentMethod: selectedPayment.value,
+    const urls = buildCheckoutUrls()
+    const { checkoutUrl } = await createCheckoutSession({
+      package: selectedPackageId.value,
+      successUrl: urls.successUrl,
+      cancelUrl: urls.cancelUrl,
     })
-    message.success(t('pages.billing.topUpSuccess'))
-    await loadBilling()
-    await userStore.loadProfile()
-    activeTab.value = 'topup'
+    window.location.assign(checkoutUrl)
   } catch {
     message.error(t('pages.billing.topUpError'))
-  } finally {
     purchasing.value = false
+  }
+}
+
+async function handleMockPay() {
+  if (!mockCheckoutSessionId.value || mockPaying.value) return
+
+  mockPaying.value = true
+
+  try {
+    await completeMockCheckout(mockCheckoutSessionId.value)
+    const successUrl = `${buildCheckoutUrls().successUrl}&session_id=${encodeURIComponent(mockCheckoutSessionId.value)}`
+    window.location.assign(successUrl)
+  } catch {
+    message.error(t('pages.billing.topUpError'))
+    mockPaying.value = false
+  }
+}
+
+function handleMockCancel() {
+  window.location.assign(buildCheckoutUrls().cancelUrl)
+}
+
+async function pollCheckoutResult(sessionId: string | null) {
+  const transactionId = resolveTransactionIdFromSession(sessionId)
+
+  for (let attempt = 0; attempt < 12; attempt += 1) {
+    await Promise.all([loadBilling({ silent: true }), userStore.loadProfile()])
+
+    const target = transactionId
+      ? transactions.value.find((item) => item.id === transactionId)
+      : transactions.value.find(
+          (item) => item.type === 'topup' && item.status === 'completed' && item.createdAt > Date.now() - 10 * 60 * 1000,
+        )
+
+    if (target?.status === 'completed') return
+    if (target?.status === 'failed' || target?.status === 'expired') {
+      throw new Error('checkout-failed')
+    }
+
+    await sleep(1500)
+  }
+
+  throw new Error('checkout-timeout')
+}
+
+async function handleCheckoutReturn() {
+  const checkout = route.query.checkout
+
+  if (checkout === 'cancelled') {
+    message.info(t('pages.billing.checkoutCancelled'))
+    await replace({ name: 'billing' })
+    return
+  }
+
+  if (checkout !== 'success') return
+
+  checkoutProcessing.value = true
+
+  try {
+    const sessionId = typeof route.query.session_id === 'string' ? route.query.session_id : null
+    await pollCheckoutResult(sessionId)
+    message.success(t('pages.billing.checkoutSuccess'))
+    activeTab.value = 'topup'
+  } catch {
+    message.warning(t('pages.billing.checkoutPending'))
+  } finally {
+    checkoutProcessing.value = false
+    await replace({ name: 'billing' })
   }
 }
 
@@ -227,7 +354,18 @@ function handleAddCard() {
   message.info(t('pages.billing.addCardSoon'))
 }
 
-onMounted(loadBilling)
+function handleViewTransaction(item: Transaction) {
+  viewingTransaction.value = item
+}
+
+function closeTransactionDetail() {
+  viewingTransaction.value = null
+}
+
+onMounted(async () => {
+  await loadBilling()
+  await handleCheckoutReturn()
+})
 </script>
 
 <template>
@@ -244,17 +382,22 @@ onMounted(loadBilling)
 
       <div v-else-if="error" class="billing-page__state">
         <p class="billing-page__error">{{ error }}</p>
-        <button type="button" class="billing-page__retry" @click="loadBilling">
+        <button type="button" class="billing-page__retry" @click="() => loadBilling()">
           {{ t('pages.billing.retry') }}
         </button>
       </div>
 
       <template v-else-if="summary">
+        <div v-if="checkoutProcessing" class="billing-checkout-banner" role="status">
+          <NSpin size="small" />
+          <span>{{ t('pages.billing.checkoutProcessing') }}</span>
+        </div>
+
         <section class="billing-summary" aria-label="Billing summary">
           <article class="billing-summary__card billing-summary__card--balance">
             <p class="billing-summary__label">{{ t('pages.billing.cashBalance') }}</p>
             <div class="billing-summary__balance-row">
-              <p class="billing-summary__value">{{ formatUsd(summary.balanceUsd) }}</p>
+              <p class="billing-summary__value">{{ formatCredits(summary.balance) }}</p>
               <button type="button" class="billing-summary__topup-btn" @click="scrollToRecharge">
                 {{ t('pages.billing.topUp') }}
               </button>
@@ -264,7 +407,7 @@ onMounted(loadBilling)
           <article class="billing-summary__card">
             <p class="billing-summary__label">{{ t('pages.billing.spentThisMonth') }}</p>
             <div class="billing-summary__spent-row">
-              <p class="billing-summary__value">{{ formatUsd(summary.spentThisMonthUsd) }}</p>
+              <p class="billing-summary__value">{{ formatCredits(summary.spentThisMonthCredits) }}</p>
               <p
                 class="billing-summary__trend"
                 :class="{
@@ -299,27 +442,27 @@ onMounted(loadBilling)
 
           <div class="billing-recharge__grid">
             <div class="billing-panel">
-              <p class="billing-panel__subtitle">{{ t('pages.billing.chooseAmount') }}</p>
+              <p class="billing-panel__subtitle">{{ t('pages.billing.choosePackage') }}</p>
 
-              <div class="billing-amount-list" role="radiogroup" :aria-label="t('pages.billing.chooseAmount')">
+              <div class="billing-amount-list" role="radiogroup" :aria-label="t('pages.billing.choosePackage')">
                 <label
-                  v-for="preset in presets"
-                  :key="preset.amountUsd"
-                  class="billing-amount-option"
-                  :class="{ 'billing-amount-option--selected': selectedAmount === preset.amountUsd }"
+                  v-for="pkg in packages"
+                  :key="pkg.id"
+                  class="billing-amount-option billing-amount-option--package"
+                  :class="{ 'billing-amount-option--selected': selectedPackageId === pkg.id }"
                 >
                   <input
-                    v-model="selectedAmount"
+                    v-model="selectedPackageId"
                     class="billing-amount-option__input"
                     type="radio"
-                    name="top-up-amount"
-                    :value="preset.amountUsd"
+                    name="top-up-package"
+                    :value="pkg.id"
                   />
                   <img
                     class="billing-amount-option__radio"
                     :src="
                       assetUrl(
-                        selectedAmount === preset.amountUsd
+                        selectedPackageId === pkg.id
                           ? '/assets/icons/radio-checked.svg'
                           : '/assets/icons/radio-unchecked.svg',
                       )
@@ -328,48 +471,11 @@ onMounted(loadBilling)
                     width="16"
                     height="16"
                   />
-                  <span class="billing-amount-option__amount">{{ formatUsd(preset.amountUsd) }}</span>
-                  <span v-if="preset.bonusPercent" class="billing-amount-option__bonus">
-                    {{ t('pages.billing.bonus', { percent: preset.bonusPercent }) }}
+                  <span class="billing-amount-option__amount">{{ packageLabel(pkg.id) }}</span>
+                  <span class="billing-amount-option__price">{{ formatUsd(pkg.priceUsd) }}</span>
+                  <span class="billing-amount-option__hint">
+                    {{ t('pages.billing.creditsLabel', { count: pkg.credits }) }}
                   </span>
-                  <span class="billing-amount-option__hint">{{ preset.usageHint }}</span>
-                </label>
-
-                <label
-                  class="billing-amount-option"
-                  :class="{ 'billing-amount-option--selected': selectedAmount === 'custom' }"
-                >
-                  <input
-                    v-model="selectedAmount"
-                    class="billing-amount-option__input"
-                    type="radio"
-                    name="top-up-amount"
-                    value="custom"
-                  />
-                  <img
-                    class="billing-amount-option__radio"
-                    :src="
-                      assetUrl(
-                        selectedAmount === 'custom'
-                          ? '/assets/icons/radio-checked.svg'
-                          : '/assets/icons/radio-unchecked.svg',
-                      )
-                    "
-                    alt=""
-                    width="16"
-                    height="16"
-                  />
-                  <span class="billing-amount-option__amount">{{ t('pages.billing.custom') }}</span>
-                  <input
-                    v-if="selectedAmount === 'custom'"
-                    v-model="customAmount"
-                    class="billing-amount-option__custom-input"
-                    type="number"
-                    min="1"
-                    step="1"
-                    :placeholder="t('pages.billing.customPlaceholder')"
-                    @click.stop
-                  />
                 </label>
               </div>
 
@@ -377,28 +483,14 @@ onMounted(loadBilling)
                 {{ t('pages.billing.paymentMethod') }}
               </p>
 
-              <div class="billing-payment-methods" role="radiogroup" :aria-label="t('pages.billing.paymentMethod')">
-                <label
-                  v-for="method in PAYMENT_METHODS"
-                  :key="method.id"
-                  class="billing-payment-method"
-                  :class="{ 'billing-payment-method--selected': selectedPayment === method.id }"
-                >
-                  <input
-                    v-model="selectedPayment"
-                    class="billing-amount-option__input"
-                    type="radio"
-                    name="payment-method"
-                    :value="method.id"
-                  />
-                  <img :src="method.logo" :alt="method.alt" />
-                </label>
+              <div class="billing-payment-stripe" aria-label="Stripe">
+                <img :src="STRIPE_LOGO" alt="Stripe" />
               </div>
 
               <button
                 type="button"
                 class="billing-buy-btn"
-                :disabled="purchasing || purchaseAmount <= 0"
+                :disabled="purchasing || !selectedPackageId"
                 @click="handleBuy"
               >
                 {{ buyButtonLabel }}
@@ -532,6 +624,7 @@ onMounted(loadBilling)
                 v-for="item in topUpTransactions"
                 :key="item.id"
                 :item="item"
+                @view="handleViewTransaction"
               />
             </div>
 
@@ -546,6 +639,20 @@ onMounted(loadBilling)
         </section>
       </template>
     </div>
+
+    <BillingTopUpDetailDialog
+      :transaction="viewingTransaction"
+      @close="closeTransactionDetail"
+    />
+
+    <StripeCheckoutMockPanel
+      v-if="showStripeMock"
+      :session-id="mockCheckoutSessionId!"
+      :pkg="mockCheckoutPackage"
+      :paying="mockPaying"
+      @pay="handleMockPay"
+      @cancel="handleMockCancel"
+    />
   </div>
 </template>
 
@@ -603,6 +710,18 @@ onMounted(loadBilling)
   color: var(--text-primary);
   font-size: 14px;
   cursor: pointer;
+}
+
+.billing-checkout-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: rgba(6, 182, 212, 0.1);
+  color: var(--text-primary);
+  font-size: 14px;
 }
 
 .billing-summary {
@@ -766,6 +885,23 @@ onMounted(loadBilling)
   color: var(--text-primary);
 }
 
+.billing-amount-option--package {
+  grid-template-columns: 16px minmax(72px, auto) minmax(72px, auto) 1fr;
+}
+
+.billing-amount-option__price {
+  grid-column: 3;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 16px;
+  color: var(--text-primary);
+}
+
+.billing-amount-option--package .billing-amount-option__amount {
+  font-size: 14px;
+  font-weight: 500;
+}
+
 .billing-amount-option__bonus {
   grid-column: 3;
   font-size: 12px;
@@ -796,33 +932,20 @@ onMounted(loadBilling)
   font-size: 14px;
 }
 
-.billing-payment-methods {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 24px;
-}
-
-.billing-payment-method {
-  display: flex;
+.billing-payment-stripe {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 150px;
   height: 44px;
+  margin-bottom: 24px;
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.5);
-  opacity: 0.5;
-  cursor: pointer;
-  transition: opacity 0.15s ease;
 }
 
-.billing-payment-method img {
+.billing-payment-stripe img {
   max-width: 84px;
   max-height: 24px;
-}
-
-.billing-payment-method--selected {
-  opacity: 1;
 }
 
 .billing-buy-btn,

@@ -1,14 +1,59 @@
-import axios from 'axios'
-import type { ApiResponse } from '@/types'
+import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios'
+import type { ApiResponse, TokenPair } from '@/types'
 import { getCurrentLocale } from '@/i18n'
 import { apiBaseUrl } from '@/utils/apiBaseUrl'
 
 const TOKEN_KEY = 'auth_token'
+const REFRESH_TOKEN_KEY = 'refresh_token'
 
 export const http = axios.create({
   baseURL: apiBaseUrl(),
   timeout: 15000,
 })
+
+interface RetryableRequestConfig extends InternalAxiosRequestConfig {
+  _retry?: boolean
+}
+
+let refreshPromise: Promise<string | null> | null = null
+
+async function tryRefreshAccessToken(): Promise<string | null> {
+  const refreshToken = getRefreshToken()
+  if (!refreshToken) return null
+
+  if (!refreshPromise) {
+    refreshPromise = (async () => {
+      try {
+        const locale = getCurrentLocale()
+        const { data } = await axios.post<ApiResponse<TokenPair>>(
+          `${apiBaseUrl()}/auth/refresh`,
+          { refresh_token: refreshToken },
+          {
+            headers: {
+              'Accept-Language': locale,
+              'X-Locale': locale,
+            },
+          },
+        )
+
+        if (data.code !== 0 || !data.data) {
+          throw new Error(data.message || 'Refresh failed')
+        }
+
+        setToken(data.data.access_token)
+        setRefreshToken(data.data.refresh_token)
+        return data.data.access_token
+      } catch {
+        clearAuthTokens()
+        return null
+      } finally {
+        refreshPromise = null
+      }
+    })()
+  }
+
+  return refreshPromise
+}
 
 http.interceptors.request.use((config) => {
   const locale = getCurrentLocale()
@@ -30,7 +75,31 @@ http.interceptors.response.use(
     }
     return response
   },
-  (error) => Promise.reject(error),
+  async (error: AxiosError<ApiResponse<unknown>>) => {
+    const config = error.config as RetryableRequestConfig | undefined
+    const payload = error.response?.data
+    const isUnauthorized =
+      error.response?.status === 401 || payload?.code === 401
+
+    if (
+      config &&
+      !config._retry &&
+      isUnauthorized &&
+      !config.url?.includes('/auth/refresh') &&
+      !config.url?.includes('/auth/verify-otp') &&
+      !config.url?.includes('/auth/request-otp')
+    ) {
+      config._retry = true
+      const newToken = await tryRefreshAccessToken()
+      if (newToken) {
+        config.headers.Authorization = `Bearer ${newToken}`
+        return http(config)
+      }
+    }
+
+    const message = payload?.message || error.message || 'Request failed'
+    return Promise.reject(new Error(message))
+  },
 )
 
 export function getToken(): string | null {
@@ -43,6 +112,23 @@ export function setToken(token: string): void {
 
 export function clearToken(): void {
   localStorage.removeItem(TOKEN_KEY)
+}
+
+export function getRefreshToken(): string | null {
+  return localStorage.getItem(REFRESH_TOKEN_KEY)
+}
+
+export function setRefreshToken(token: string): void {
+  localStorage.setItem(REFRESH_TOKEN_KEY, token)
+}
+
+export function clearRefreshToken(): void {
+  localStorage.removeItem(REFRESH_TOKEN_KEY)
+}
+
+export function clearAuthTokens(): void {
+  clearToken()
+  clearRefreshToken()
 }
 
 export async function unwrap<T>(promise: Promise<{ data: ApiResponse<T> }>): Promise<T> {

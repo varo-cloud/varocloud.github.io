@@ -1,48 +1,48 @@
 import type { MockMethod } from 'vite-plugin-mock'
 import { success } from './_util'
 
-const MAY_12_2026 = Date.parse('2026-05-12T10:00:00Z')
-const TWO_MINUTES_AGO = Date.now() - 2 * 60 * 1000
+const MAY_12_2026 = '2026-05-12T10:00:00Z'
+const TWO_MINUTES_AGO = new Date(Date.now() - 2 * 60 * 1000).toISOString()
 
 let apiKeys: Array<{
   id: string
   name: string
-  keyMasked: string
-  createdAt: number
-  status: 'active' | 'revoked'
-  totalCalls: number
-  totalSpendUsd: number
-  lastUsedAt: number | null
+  prefix: string
+  created_at: string
+  is_active: boolean
+  total_calls: number
+  total_spend_usd: number
+  last_used_at: string | null
 }> = [
   {
     id: 'key-1',
     name: 'production',
-    keyMasked: '******BneyZM',
-    createdAt: MAY_12_2026,
-    status: 'active',
-    totalCalls: 14208,
-    totalSpendUsd: 84.21,
-    lastUsedAt: TWO_MINUTES_AGO,
+    prefix: 'sk_live_1f78',
+    created_at: MAY_12_2026,
+    is_active: true,
+    total_calls: 14208,
+    total_spend_usd: 84.21,
+    last_used_at: TWO_MINUTES_AGO,
   },
   {
     id: 'key-2',
     name: 'staging',
-    keyMasked: '******xK9pQ2',
-    createdAt: MAY_12_2026,
-    status: 'active',
-    totalCalls: 14208,
-    totalSpendUsd: 84.21,
-    lastUsedAt: TWO_MINUTES_AGO,
+    prefix: 'sk_live_2a9b',
+    created_at: MAY_12_2026,
+    is_active: true,
+    total_calls: 14208,
+    total_spend_usd: 84.21,
+    last_used_at: TWO_MINUTES_AGO,
   },
   {
     id: 'key-3',
     name: 'development',
-    keyMasked: '******mN4vR8',
-    createdAt: MAY_12_2026,
-    status: 'revoked',
-    totalCalls: 14208,
-    totalSpendUsd: 84.21,
-    lastUsedAt: TWO_MINUTES_AGO,
+    prefix: 'sk_live_3c4d',
+    created_at: MAY_12_2026,
+    is_active: false,
+    total_calls: 14208,
+    total_spend_usd: 84.21,
+    last_used_at: TWO_MINUTES_AGO,
   },
 ]
 
@@ -55,28 +55,32 @@ export default [
   {
     url: '/api/api-keys',
     method: 'post',
-    response: ({ body }: { body: { name: string } }) => {
-      const createdAt = Date.now()
-      const newKey = {
-        id: `key-${createdAt}`,
-        name: body.name || 'Untitled',
-        key: `wsk_live_${Math.random().toString(36).slice(2, 18)}`,
-        createdAt,
-      }
+    response: ({ body }: { body: { name?: string } }) => {
+      const createdAt = new Date().toISOString()
+      const key = `sk_live_${Math.random().toString(36).slice(2, 18)}`
+      const prefix = key.slice(0, 12)
+      const name = body.name?.trim() || 'Untitled'
+
       apiKeys = [
         {
-          id: newKey.id,
-          name: newKey.name,
-          keyMasked: `******${newKey.key.slice(-6)}`,
-          createdAt: newKey.createdAt,
-          status: 'active' as const,
-          totalCalls: 0,
-          totalSpendUsd: 0,
-          lastUsedAt: null,
+          id: `key-${Date.now()}`,
+          name,
+          prefix,
+          created_at: createdAt,
+          is_active: true,
+          total_calls: 0,
+          total_spend_usd: 0,
+          last_used_at: null,
         },
         ...apiKeys,
       ]
-      return success(newKey)
+
+      return success({
+        id: apiKeys[0].id,
+        key,
+        prefix,
+        created_at: createdAt,
+      })
     },
   },
   {
@@ -84,7 +88,7 @@ export default [
     method: 'delete',
     response: ({ query }: { query: Record<string, string> }) => {
       apiKeys = apiKeys.filter((item) => item.id !== query.id)
-      return success(null)
+      return success({ revoked: true })
     },
   },
 ] as MockMethod[]

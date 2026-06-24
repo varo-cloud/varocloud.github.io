@@ -2,7 +2,7 @@
 import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useLocaleRouter } from '@/composables/useLocaleRouter'
-import { NSpin, useDialog, useMessage } from 'naive-ui'
+import { NSpin, useMessage } from 'naive-ui'
 import AppIcon from '@/components/common/AppIcon.vue'
 import ApiKeyTableRow from '@/components/api-keys/ApiKeyTableRow.vue'
 import { assetUrl } from '@/utils/assetUrl'
@@ -12,7 +12,6 @@ import type { ApiKey } from '@/types'
 const { push } = useLocaleRouter()
 const { t } = useI18n()
 const message = useMessage()
-const dialog = useDialog()
 
 const keys = ref<ApiKey[]>([])
 const loading = ref(true)
@@ -20,6 +19,8 @@ const error = ref<string | null>(null)
 const creating = ref(false)
 const deletingId = ref<string | null>(null)
 const showCreateDialog = ref(false)
+const showDeleteDialog = ref(false)
+const deleteTarget = ref<ApiKey | null>(null)
 const keyName = ref('')
 const revealedKey = ref('')
 
@@ -86,26 +87,33 @@ function handleDeleteKey(id: string) {
   const key = keys.value.find((item) => item.id === id)
   if (!key) return
 
-  dialog.warning({
-    title: t('pages.apiKeys.deleteConfirmTitle'),
-    content: t('pages.apiKeys.deleteConfirmContent', { name: key.name }),
-    positiveText: t('pages.apiKeys.deleteConfirmSubmit'),
-    negativeText: t('pages.apiKeys.deleteConfirmCancel'),
-    onPositiveClick: async () => {
-      deletingId.value = id
+  deleteTarget.value = key
+  showDeleteDialog.value = true
+}
 
-      try {
-        await deleteApiKey(id)
-        message.success(t('pages.apiKeys.deleteSuccess'))
-        await loadKeys()
-      } catch {
-        message.error(t('pages.apiKeys.deleteError'))
-        return false
-      } finally {
-        deletingId.value = null
-      }
-    },
-  })
+function closeDeleteDialog() {
+  if (deletingId.value) return
+  showDeleteDialog.value = false
+  deleteTarget.value = null
+}
+
+async function confirmDeleteKey() {
+  const target = deleteTarget.value
+  if (!target || deletingId.value) return
+
+  deletingId.value = target.id
+
+  try {
+    await deleteApiKey(target.id)
+    showDeleteDialog.value = false
+    deleteTarget.value = null
+    message.success(t('pages.apiKeys.deleteSuccess'))
+    await loadKeys()
+  } catch {
+    message.error(t('pages.apiKeys.deleteError'))
+  } finally {
+    deletingId.value = null
+  }
 }
 
 function goToDocs() {
@@ -220,6 +228,55 @@ onMounted(loadKeys)
     </div>
 
     <Teleport to="body">
+      <div
+        v-if="showDeleteDialog && deleteTarget"
+        class="api-keys-dialog-backdrop"
+        @click.self="closeDeleteDialog"
+      >
+        <div
+          class="api-keys-delete-dialog"
+          role="dialog"
+          aria-modal="true"
+          :aria-label="t('pages.apiKeys.deleteConfirmTitle')"
+        >
+          <div class="api-keys-delete-dialog__header">
+            <h3 class="api-keys-delete-dialog__title">
+              {{ t('pages.apiKeys.deleteConfirmTitle') }}
+            </h3>
+            <button
+              type="button"
+              class="api-keys-delete-dialog__close"
+              :aria-label="t('common.close')"
+              :disabled="!!deletingId"
+              @click="closeDeleteDialog"
+            >
+              <AppIcon name="close" :size="20" />
+            </button>
+          </div>
+          <p class="api-keys-delete-dialog__content">
+            {{ t('pages.apiKeys.deleteConfirmContent', { name: deleteTarget.name }) }}
+          </p>
+          <div class="api-keys-delete-dialog__actions">
+            <button
+              type="button"
+              class="api-keys-delete-dialog__cancel"
+              :disabled="!!deletingId"
+              @click="closeDeleteDialog"
+            >
+              {{ t('pages.apiKeys.deleteConfirmCancel') }}
+            </button>
+            <button
+              type="button"
+              class="api-keys-delete-dialog__submit"
+              :disabled="!!deletingId"
+              @click="confirmDeleteKey"
+            >
+              {{ t('pages.apiKeys.deleteConfirmSubmit') }}
+            </button>
+          </div>
+        </div>
+      </div>
+
       <div
         v-if="showCreateDialog"
         class="api-keys-dialog-backdrop"
@@ -573,6 +630,93 @@ onMounted(loadKeys)
   background: rgba(0, 0, 0, 0.6);
 }
 
+.api-keys-delete-dialog {
+  width: min(100%, 510px);
+  padding: 36px;
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  background: var(--bg-card);
+}
+
+.api-keys-delete-dialog__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 29px;
+}
+
+.api-keys-delete-dialog__title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.408px;
+  color: var(--text-primary);
+}
+
+.api-keys-delete-dialog__close {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.api-keys-delete-dialog__close:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.api-keys-delete-dialog__content {
+  margin: 0 0 24px;
+  max-width: 392px;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 24px;
+  letter-spacing: -0.408px;
+  color: var(--text-primary);
+}
+
+.api-keys-delete-dialog__actions {
+  display: flex;
+  gap: 16px;
+}
+
+.api-keys-delete-dialog__cancel,
+.api-keys-delete-dialog__submit {
+  flex: 1;
+  height: 48px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.api-keys-delete-dialog__cancel {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.api-keys-delete-dialog__submit {
+  background: var(--text-accent);
+}
+
+.api-keys-delete-dialog__cancel:disabled,
+.api-keys-delete-dialog__submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .api-keys-dialog {
   width: min(100%, 440px);
   padding: 24px;
@@ -681,6 +825,18 @@ onMounted(loadKeys)
 
   .api-keys-reveal__actions {
     justify-content: flex-end;
+  }
+
+  .api-keys-delete-dialog {
+    padding: 24px 20px;
+  }
+
+  .api-keys-delete-dialog__title {
+    font-size: 20px;
+  }
+
+  .api-keys-delete-dialog__actions {
+    flex-direction: column;
   }
 }
 </style>

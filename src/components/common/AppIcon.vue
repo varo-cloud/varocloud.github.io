@@ -12,6 +12,10 @@ const ICONS = {
   key: '/assets/icons/key.svg',
   add: '/assets/icons/add.svg',
   delete: '/assets/icons/delete.svg',
+  edit: '/assets/icons/edit.svg',
+  'code-box': '/assets/icons/code-box.svg',
+  'file-paper': '/assets/icons/file-paper.svg',
+  logout: '/assets/icons/logout.svg',
 } as const
 
 export type AppIconName = keyof typeof ICONS

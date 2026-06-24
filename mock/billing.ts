@@ -1,69 +1,73 @@
 import type { MockMethod } from 'vite-plugin-mock'
-import { success } from './_util'
+import type { CreditPackageId, Transaction } from '../src/types'
+import { addAccountBalanceUsd, getAccountBalanceUsd } from './account-balance'
+import { fail, success } from './_util'
 
-const usageHint =
-  '250 Nano Banana Pro Images or 50 Seedance 2.0 Videos'
+const creditPackages = [
+  { id: 'starter' as const, price_usd: 10, credits: 1000 },
+  { id: 'pro' as const, price_usd: 25, credits: 3000 },
+  { id: 'business' as const, price_usd: 50, credits: 7000 },
+]
+
+interface PendingCheckout {
+  sessionId: string
+  packageId: CreditPackageId
+  transactionId: string
+  amountUsd: number
+  credits: number
+}
+
+const pendingCheckouts = new Map<string, PendingCheckout>()
 
 let summary = {
-  balanceUsd: 12.4,
-  spentThisMonthUsd: 96.28,
-  spentChangePercent: -12,
-  autoTopUp: {
+  balance: Math.round(getAccountBalanceUsd() * 100),
+  spent_this_month_credits: 9628,
+  spent_change_percent: -12,
+  auto_top_up: {
     enabled: false,
-    thresholdUsd: 5,
-    topUpAmountUsd: 20,
+    threshold_usd: 5,
+    top_up_amount_usd: 20,
   },
 }
 
-const transactions = [
+const transactions: Transaction[] = [
   {
     id: 'tx-topup-1',
-    type: 'topup' as const,
+    type: 'topup',
     amountUsd: 10,
     description: 'Top Up',
     createdAt: Date.parse('2026-05-12T10:00:00Z'),
+    status: 'completed',
+    creditsGranted: 1000,
+    paymentMethod: 'stripe',
+    paymentDetail: 'Visa ••4242',
+    packageId: 'starter',
+    completedAt: Date.parse('2026-05-12T10:01:00Z'),
+    receiptUrl: 'https://pay.stripe.com/receipts/example',
   },
   {
     id: 'tx-topup-2',
-    type: 'topup' as const,
-    amountUsd: 10,
+    type: 'topup',
+    amountUsd: 25,
     description: 'Top Up',
     createdAt: Date.parse('2026-05-12T09:30:00Z'),
+    status: 'pending',
+    creditsGranted: 3000,
+    paymentMethod: 'stripe',
+    packageId: 'pro',
   },
   {
     id: 'tx-topup-3',
-    type: 'topup' as const,
+    type: 'topup',
     amountUsd: 10,
     description: 'Top Up',
     createdAt: Date.parse('2026-05-12T09:00:00Z'),
-  },
-  {
-    id: 'tx-topup-4',
-    type: 'topup' as const,
-    amountUsd: 10,
-    description: 'Top Up',
-    createdAt: Date.parse('2026-05-12T08:30:00Z'),
-  },
-  {
-    id: 'tx-topup-5',
-    type: 'topup' as const,
-    amountUsd: 10,
-    description: 'Top Up',
-    createdAt: Date.parse('2026-05-12T08:00:00Z'),
-  },
-  {
-    id: 'tx-usage-1',
-    type: 'usage' as const,
-    amountUsd: -1.02,
-    description: 'Seedance 2.0 T2V — 720p 5s',
-    createdAt: Date.parse('2026-06-02T14:30:00Z'),
-  },
-  {
-    id: 'tx-usage-2',
-    type: 'usage' as const,
-    amountUsd: -0.85,
-    description: 'Kling T2V — 480p 4s',
-    createdAt: Date.parse('2026-06-05T11:15:00Z'),
+    status: 'completed',
+    creditsGranted: 1000,
+    paymentMethod: 'stripe',
+    paymentDetail: 'Mastercard ••5555',
+    packageId: 'starter',
+    completedAt: Date.parse('2026-05-12T09:00:30Z'),
   },
 ]
 
@@ -90,58 +94,93 @@ const billingRecords = [
     amountUsd: -0.48,
     createdAt: Date.parse('2026-06-14T13:18:00Z'),
   },
-  {
-    id: 'br-4',
-    style: 'api' as const,
-    key: 'seedance-2.0 · 720p · 8s',
-    apiKey: '******xK9pQ2',
-    amountUsd: -1.02,
-    createdAt: Date.parse('2026-06-14T12:05:00Z'),
-  },
-  {
-    id: 'br-5',
-    style: 'web' as const,
-    key: 'Kling T2V · 480p · 4s',
-    amountUsd: -0.85,
-    createdAt: Date.parse('2026-06-14T11:42:00Z'),
-  },
-  {
-    id: 'br-6',
-    style: 'bonus' as const,
-    key: 'Top-up bonus · 10%',
-    amountUsd: 2,
-    createdAt: Date.parse('2026-06-14T10:20:00Z'),
-  },
 ]
 
-const topUpPresets = [
-  { amountUsd: 5, bonusPercent: 10, usageHint },
-  { amountUsd: 10, bonusPercent: 10, usageHint },
-  { amountUsd: 50, bonusPercent: 10, usageHint },
-  { amountUsd: 100, bonusPercent: 10, usageHint },
-  { amountUsd: 200, usageHint },
-]
+function getPackage(packageId: string) {
+  return creditPackages.find((item) => item.id === packageId)
+}
+
+function toApiTransaction(tx: Transaction) {
+  return {
+    id: tx.id,
+    amount_usd: tx.amountUsd,
+    credits_granted: tx.creditsGranted ?? Math.round(tx.amountUsd * 100),
+    status: tx.status ?? 'completed',
+    created_at: new Date(tx.createdAt).toISOString(),
+    payment_detail: tx.paymentDetail ?? null,
+    package_id: tx.packageId ?? null,
+    completed_at: tx.completedAt ? new Date(tx.completedAt).toISOString() : null,
+    receipt_url: tx.receiptUrl ?? null,
+  }
+}
+
+function syncSummaryBalance() {
+  summary = {
+    ...summary,
+    balance: Math.round(getAccountBalanceUsd() * 100),
+  }
+}
+
+function completeCheckout(sessionId: string) {
+  const pending = pendingCheckouts.get(sessionId)
+  if (!pending) return false
+
+  const index = transactions.findIndex((item) => item.id === pending.transactionId)
+  if (index === -1) return false
+
+  const now = Date.now()
+  const completed: Transaction = {
+    ...transactions[index],
+    status: 'completed',
+    paymentDetail: 'Visa ••4242',
+    completedAt: now,
+    receiptUrl: 'https://pay.stripe.com/receipts/example',
+  }
+  transactions[index] = completed
+
+  addAccountBalanceUsd(pending.amountUsd)
+  syncSummaryBalance()
+
+  billingRecords.unshift({
+    id: `br-topup-${now}`,
+    style: 'topup',
+    key: 'Stripe · Visa ••4242',
+    amountUsd: pending.amountUsd,
+    createdAt: now,
+  })
+
+  pendingCheckouts.delete(sessionId)
+  return true
+}
 
 export default [
   {
+    url: '/api/billing/packages',
+    method: 'get',
+    response: () => success(creditPackages),
+  },
+  {
     url: '/api/billing/balance',
     method: 'get',
-    response: () => success({ balanceUsd: summary.balanceUsd }),
+    response: () => success({ balance: Math.round(getAccountBalanceUsd() * 100) }),
   },
   {
     url: '/api/billing/summary',
     method: 'get',
-    response: () => success(summary),
-  },
-  {
-    url: '/api/billing/top-up-presets',
-    method: 'get',
-    response: () => success(topUpPresets),
+    response: () => {
+      syncSummaryBalance()
+      return success(summary)
+    },
   },
   {
     url: '/api/billing/transactions',
     method: 'get',
-    response: () => success(transactions),
+    response: () =>
+      success(
+        transactions
+          .filter((item) => item.type === 'topup')
+          .map(toApiTransaction),
+      ),
   },
   {
     url: '/api/billing/records',
@@ -149,37 +188,61 @@ export default [
     response: () => success(billingRecords),
   },
   {
-    url: '/api/billing/top-up',
+    url: '/api/billing/checkout',
     method: 'post',
-    response: ({ body }: { body: { amountUsd?: number; paymentMethod?: string } }) => {
-      const amountUsd = Number(body?.amountUsd ?? 0)
-      if (!Number.isFinite(amountUsd) || amountUsd <= 0) {
-        return { code: 400, message: 'Invalid amount', data: null }
+    response: ({
+      body,
+    }: {
+      body: {
+        package?: string
+        success_url?: string
+        cancel_url?: string
+      }
+    }) => {
+      const pkg = getPackage(body.package ?? '')
+      if (!pkg) {
+        return fail('Invalid package', 400)
       }
 
-      summary = {
-        ...summary,
-        balanceUsd: Number((summary.balanceUsd + amountUsd).toFixed(2)),
-      }
+      const sessionId = `cs_mock_${Date.now()}`
+      const transactionId = `tx-topup-${Date.now()}`
+      const createdAt = Date.now()
 
-      const tx = {
-        id: `tx-topup-${Date.now()}`,
-        type: 'topup' as const,
-        amountUsd,
+      transactions.unshift({
+        id: transactionId,
+        type: 'topup',
+        amountUsd: pkg.price_usd,
         description: 'Top Up',
-        createdAt: Date.now(),
-      }
-      transactions.unshift(tx)
-
-      billingRecords.unshift({
-        id: `br-topup-${Date.now()}`,
-        style: 'topup' as const,
-        key: `Stripe · ${body?.paymentMethod === 'stripe' ? 'Visa ••4242' : 'Payment'}`,
-        amountUsd,
-        createdAt: Date.now(),
+        createdAt,
+        status: 'pending',
+        creditsGranted: pkg.credits,
+        paymentMethod: 'stripe',
+        packageId: pkg.id,
       })
 
-      return success(tx)
+      pendingCheckouts.set(sessionId, {
+        sessionId,
+        packageId: pkg.id,
+        transactionId,
+        amountUsd: pkg.price_usd,
+        credits: pkg.credits,
+      })
+
+      const successBase = body.success_url?.split('?')[0] ?? 'http://localhost:5173/en/billing'
+      const checkoutUrl = `${successBase}?stripe_checkout=1&session_id=${encodeURIComponent(sessionId)}&package=${pkg.id}`
+
+      return success({ checkout_url: checkoutUrl })
+    },
+  },
+  {
+    url: '/api/billing/checkout/mock-complete',
+    method: 'post',
+    response: ({ body }: { body: { session_id?: string } }) => {
+      const sessionId = body.session_id ?? ''
+      if (!sessionId || !completeCheckout(sessionId)) {
+        return fail('Checkout session not found', 404)
+      }
+      return success({ completed: true })
     },
   },
   {
@@ -190,20 +253,24 @@ export default [
     }: {
       body: {
         enabled?: boolean
+        threshold_usd?: number
+        top_up_amount_usd?: number
         thresholdUsd?: number
         topUpAmountUsd?: number
       }
     }) => {
       summary = {
         ...summary,
-        autoTopUp: {
+        auto_top_up: {
           enabled: Boolean(body?.enabled),
-          thresholdUsd: Number(body?.thresholdUsd ?? summary.autoTopUp.thresholdUsd),
-          topUpAmountUsd: Number(body?.topUpAmountUsd ?? summary.autoTopUp.topUpAmountUsd),
+          threshold_usd: Number(body?.threshold_usd ?? body?.thresholdUsd ?? summary.auto_top_up.threshold_usd),
+          top_up_amount_usd: Number(
+            body?.top_up_amount_usd ?? body?.topUpAmountUsd ?? summary.auto_top_up.top_up_amount_usd,
+          ),
         },
       }
 
-      return success(summary.autoTopUp)
+      return success(summary.auto_top_up)
     },
   },
 ] as MockMethod[]

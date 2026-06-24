@@ -1,25 +1,98 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useLocaleRouter } from '@/composables/useLocaleRouter'
 import { useMessage } from 'naive-ui'
-import { login } from '@/api/auth'
+import { requestOtp, verifyOtp } from '@/api/auth'
 import { useUserStore } from '@/stores/user'
 import AppHeader from '@/components/layout/AppHeader.vue'
 import AppFooter from '@/components/layout/AppFooter.vue'
 import AppIcon from '@/components/common/AppIcon.vue'
+import TurnstileWidget from '@/components/auth/TurnstileWidget.vue'
 import { assetUrl } from '@/utils/assetUrl'
+import {
+  getLastAuthMethod,
+  setLastAuthMethod,
+  type AuthLoginMethod,
+} from '@/utils/lastAuthMethod'
 
 const route = useRoute()
 const { push, replace, localePath } = useLocaleRouter()
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const message = useMessage()
 const userStore = useUserStore()
 
 const email = ref('')
+const otpCode = ref('')
 const loading = ref(false)
 const error = ref<string | null>(null)
+const resendCooldown = ref(0)
+const turnstileToken = ref<string | null>(null)
+const turnstileReady = ref(false)
+const turnstileFailed = ref(false)
+const turnstileWidgetRef = ref<InstanceType<typeof TurnstileWidget> | null>(null)
+const lastAuthMethod = ref<AuthLoginMethod | null>(getLastAuthMethod())
+
+let resendTimer: ReturnType<typeof setInterval> | null = null
+
+function rememberAuthMethod(method: AuthLoginMethod) {
+  setLastAuthMethod(method)
+  lastAuthMethod.value = method
+}
+
+const turnstileLanguage = computed(() => (locale.value === 'zh-CN' ? 'zh-CN' : 'en'))
+
+const turnstileStatus = computed(() => {
+  if (turnstileFailed.value) return t('pages.auth.turnstileError')
+  if (turnstileToken.value) return ''
+  if (!turnstileReady.value) return t('pages.auth.turnstilePreparing')
+  return t('pages.auth.turnstilePreparing')
+})
+
+const isHumanVerified = computed(() => Boolean(turnstileToken.value))
+
+function handleTurnstileVerified(token: string) {
+  turnstileToken.value = token
+  turnstileFailed.value = false
+  if (error.value === t('pages.auth.turnstileRequired') || error.value === t('pages.auth.turnstileExpired')) {
+    error.value = null
+  }
+}
+
+function handleTurnstileReady() {
+  turnstileReady.value = true
+}
+
+function handleTurnstileExpired() {
+  turnstileToken.value = null
+  error.value = t('pages.auth.turnstileExpired')
+  turnstileWidgetRef.value?.reset()
+}
+
+function handleTurnstileError() {
+  turnstileFailed.value = true
+  turnstileToken.value = null
+  error.value = t('pages.auth.turnstileError')
+}
+
+function ensureHumanVerified(): boolean {
+  if (turnstileToken.value) return true
+  error.value = t('pages.auth.turnstileRequired')
+  return false
+}
+
+function startResendCooldown(seconds = 60) {
+  resendCooldown.value = seconds
+  if (resendTimer) clearInterval(resendTimer)
+  resendTimer = setInterval(() => {
+    resendCooldown.value -= 1
+    if (resendCooldown.value <= 0 && resendTimer) {
+      clearInterval(resendTimer)
+      resendTimer = null
+    }
+  }, 1000)
+}
 
 function closeAuth() {
   if (window.history.length > 1) {
@@ -29,7 +102,16 @@ function closeAuth() {
   push({ name: 'models' })
 }
 
-async function handleLogin() {
+function resolveErrorMessage(err: unknown, fallback: string): string {
+  if (err instanceof Error && err.message) {
+    return err.message
+  }
+  return fallback
+}
+
+async function handleRequestOtp() {
+  if (!ensureHumanVerified()) return
+
   const value = email.value.trim()
   if (!value) {
     error.value = t('pages.auth.emailRequired')
@@ -40,26 +122,78 @@ async function handleLogin() {
   error.value = null
 
   try {
-    const result = await login({ email: value, password: '' })
-    userStore.establishSession(result.token, result.user)
+    await requestOtp({ email: value })
+    otpCode.value = ''
+    startResendCooldown()
+    message.success(t('pages.auth.otpSent'))
+  } catch (err) {
+    error.value = resolveErrorMessage(err, t('pages.auth.otpRequestError'))
+  } finally {
+    loading.value = false
+  }
+}
+
+async function handleLogin() {
+  if (!ensureHumanVerified()) return
+
+  const value = email.value.trim()
+  const code = otpCode.value.trim()
+
+  if (!value) {
+    error.value = t('pages.auth.emailRequired')
+    return
+  }
+
+  if (!code) {
+    error.value = t('pages.auth.codeRequired')
+    return
+  }
+
+  if (code.length !== 6) {
+    error.value = t('pages.auth.codeInvalid')
+    return
+  }
+
+  loading.value = true
+  error.value = null
+
+  try {
+    const tokens = await verifyOtp({ email: value, code })
+    rememberAuthMethod('email')
+    userStore.establishSession(tokens)
+    await userStore.loadProfile()
     const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : null
     push(redirect || { name: 'models' })
-  } catch {
-    error.value = t('pages.auth.loginError')
+  } catch (err) {
+    error.value = resolveErrorMessage(err, t('pages.auth.verifyError'))
   } finally {
     loading.value = false
   }
 }
 
 function handleGoogleLogin() {
+  if (!ensureHumanVerified()) return
+  // rememberAuthMethod('google') — call after OAuth succeeds
   message.info(t('pages.auth.googleComingSoon'))
 }
 
+function handleGithubLogin() {
+  if (!ensureHumanVerified()) return
+  // rememberAuthMethod('github') — call after OAuth succeeds
+  message.info(t('pages.auth.githubComingSoon'))
+}
+
 onMounted(() => {
+  lastAuthMethod.value = getLastAuthMethod()
+
   if (userStore.isLoggedIn) {
     const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : null
     replace(redirect || { name: 'models' })
   }
+})
+
+onUnmounted(() => {
+  if (resendTimer) clearInterval(resendTimer)
 })
 </script>
 
@@ -81,22 +215,66 @@ onMounted(() => {
           </button>
         </div>
 
-        <form class="auth-card__form" @submit.prevent="handleLogin">
+        <div class="auth-card__turnstile">
+          <TurnstileWidget
+            ref="turnstileWidgetRef"
+            theme="dark"
+            :language="turnstileLanguage"
+            @verified="handleTurnstileVerified"
+            @ready="handleTurnstileReady"
+            @expired="handleTurnstileExpired"
+            @error="handleTurnstileError"
+          />
+          <p v-if="turnstileStatus" class="auth-card__turnstile-status">{{ turnstileStatus }}</p>
+        </div>
+
+        <form class="auth-card__form" :class="{ 'auth-card__form--locked': !isHumanVerified }" @submit.prevent="handleLogin">
           <label class="auth-field" :class="{ 'auth-field--error': error }">
             <span class="auth-field__label">{{ t('pages.auth.emailLabel') }}</span>
             <input
               v-model="email"
               type="email"
-              class="auth-field__input"
+              class="auth-field__input auth-field__input--email"
               :placeholder="t('pages.auth.emailPlaceholder')"
               autocomplete="email"
-              :disabled="loading"
+              :disabled="loading || !isHumanVerified"
               @input="error = null"
             />
-            <p v-if="error" class="auth-field__error">{{ error }}</p>
           </label>
 
-          <button type="submit" class="auth-card__submit" :disabled="loading">
+          <label class="auth-field" :class="{ 'auth-field--error': error }">
+            <span class="auth-field__label">{{ t('pages.auth.codeLabel') }}</span>
+            <div class="auth-field__input-wrap">
+              <input
+                v-model="otpCode"
+                type="text"
+                inputmode="numeric"
+                pattern="[0-9]*"
+                maxlength="6"
+                class="auth-field__input auth-field__input--code"
+                :placeholder="t('pages.auth.codePlaceholder')"
+                autocomplete="one-time-code"
+                :disabled="loading || !isHumanVerified"
+                @input="error = null"
+              />
+              <button
+                type="button"
+                class="auth-field__get-code"
+                :disabled="loading || resendCooldown > 0 || !isHumanVerified"
+                @click="handleRequestOtp"
+              >
+                {{
+                  resendCooldown > 0
+                    ? t('pages.auth.resendIn', { seconds: resendCooldown })
+                    : t('pages.auth.getCodeButton')
+                }}
+              </button>
+            </div>
+          </label>
+
+          <p v-if="error" class="auth-field__error auth-field__error--standalone">{{ error }}</p>
+
+          <button type="submit" class="auth-card__submit" :disabled="loading || !isHumanVerified">
             {{ t('pages.auth.loginButton') }}
           </button>
 
@@ -106,20 +284,45 @@ onMounted(() => {
             <span class="auth-card__divider-line" />
           </div>
 
-          <button
-            type="button"
-            class="auth-card__google"
-            :disabled="loading"
-            @click="handleGoogleLogin"
-          >
-            <img
-              :src="assetUrl('/assets/icons/google.svg')"
-              alt=""
-              aria-hidden="true"
-              class="auth-card__google-icon"
-            />
-            <span>{{ t('pages.auth.googleLogin') }}</span>
-          </button>
+          <div class="auth-card__social-wrap">
+            <span v-if="lastAuthMethod === 'google'" class="auth-card__last-used">
+              {{ t('pages.auth.lastUsed') }}
+            </span>
+            <button
+              type="button"
+              class="auth-card__social auth-card__social--google"
+              :disabled="loading || !isHumanVerified"
+              @click="handleGoogleLogin"
+            >
+              <img
+                :src="assetUrl('/assets/icons/google.svg')"
+                alt=""
+                aria-hidden="true"
+                class="auth-card__social-icon"
+              />
+              <span>{{ t('pages.auth.googleLogin') }}</span>
+            </button>
+          </div>
+
+          <div class="auth-card__social-wrap">
+            <span v-if="lastAuthMethod === 'github'" class="auth-card__last-used">
+              {{ t('pages.auth.lastUsed') }}
+            </span>
+            <button
+              type="button"
+              class="auth-card__social auth-card__social--github"
+              :disabled="loading || !isHumanVerified"
+              @click="handleGithubLogin"
+            >
+              <img
+                :src="assetUrl('/assets/icons/github.svg')"
+                alt=""
+                aria-hidden="true"
+                class="auth-card__social-icon"
+              />
+              <span>{{ t('pages.auth.githubLogin') }}</span>
+            </button>
+          </div>
 
           <p class="auth-card__terms">
             {{ t('pages.auth.termsPrefix') }}
@@ -166,7 +369,27 @@ onMounted(() => {
   align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
+  margin-bottom: 16px;
+}
+
+.auth-card__turnstile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
   margin-bottom: 24px;
+}
+
+.auth-card__turnstile-status {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.4;
+  text-align: center;
+  color: #808080;
+}
+
+.auth-card__form--locked {
+  opacity: 0.72;
 }
 
 .auth-card__title {
@@ -220,6 +443,10 @@ onMounted(() => {
   color: #ebf4fb;
 }
 
+.auth-field__input-wrap {
+  position: relative;
+}
+
 .auth-field__input {
   width: 100%;
   height: 48px;
@@ -235,17 +462,54 @@ onMounted(() => {
   transition: border-color 0.15s ease, background 0.15s ease;
 }
 
+.auth-field__input--email {
+  border-color: #06b6d4;
+}
+
+.auth-field__input--code {
+  padding-right: 108px;
+}
+
 .auth-field__input::placeholder {
   color: #808080;
 }
 
 .auth-field__input:focus {
   border-color: #06b6d4;
-  background: rgba(255, 255, 255, 0.06);
+}
+
+.auth-field__input:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 
 .auth-field--error .auth-field__input {
   border-color: #f87171;
+}
+
+.auth-field__get-code {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: #06b6d4;
+  font-size: 14px;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.auth-field__get-code:hover:not(:disabled) {
+  opacity: 0.85;
+}
+
+.auth-field__get-code:disabled {
+  color: #808080;
+  cursor: not-allowed;
 }
 
 .auth-field__error {
@@ -253,6 +517,10 @@ onMounted(() => {
   font-size: 12px;
   line-height: 1.2;
   color: #f87171;
+}
+
+.auth-field__error--standalone {
+  margin-top: -12px;
 }
 
 .auth-card__submit {
@@ -297,17 +565,35 @@ onMounted(() => {
   color: #808080;
 }
 
-.auth-card__google {
+.auth-card__social-wrap {
+  position: relative;
+}
+
+.auth-card__last-used {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 8px 0 8px 0;
+  background: #06b6d4;
+  color: #ebf4fb;
+  font-size: 10px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.auth-card__social {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   width: 100%;
   height: 48px;
-  border: 1px solid #06b6d4;
   border-radius: 8px;
-  background: rgba(22, 218, 235, 0.1);
-  color: #e0e0e0;
   font-size: 14px;
   font-weight: 500;
   line-height: 1;
@@ -315,16 +601,32 @@ onMounted(() => {
   transition: opacity 0.15s ease, background 0.15s ease;
 }
 
-.auth-card__google:hover:not(:disabled) {
+.auth-card__social--google {
+  border: 1px solid #06b6d4;
+  background: rgba(22, 218, 235, 0.1);
+  color: #e0e0e0;
+}
+
+.auth-card__social--google:hover:not(:disabled) {
   background: rgba(22, 218, 235, 0.16);
 }
 
-.auth-card__google:disabled {
+.auth-card__social--github {
+  border: 1px solid #9b9dab;
+  background: transparent;
+  color: #e0e0e0;
+}
+
+.auth-card__social--github:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.auth-card__social:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
-.auth-card__google-icon {
+.auth-card__social-icon {
   width: 16px;
   height: 16px;
   flex-shrink: 0;
@@ -360,6 +662,14 @@ onMounted(() => {
 
   .auth-card__title {
     font-size: 20px;
+  }
+
+  .auth-field__input--code {
+    padding-right: 96px;
+  }
+
+  .auth-field__get-code {
+    font-size: 13px;
   }
 }
 </style>

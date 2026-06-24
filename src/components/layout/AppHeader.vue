@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { NDropdown } from 'naive-ui'
@@ -15,6 +15,17 @@ const { t } = useI18n()
 const userStore = useUserStore()
 
 const headerSearch = ref('')
+const isScrolled = ref(false)
+const userMenuOpen = ref(false)
+
+let userMenuCloseTimer: ReturnType<typeof setTimeout> | null = null
+
+const usesTransparentHeader = computed(() => route.meta.transparentHeader === true)
+const isHeaderSolid = computed(() => !usesTransparentHeader.value || isScrolled.value)
+
+function updateScrollState() {
+  isScrolled.value = window.scrollY > 0
+}
 
 const navItems = computed(() => [
   { label: t('nav.models'), name: 'models' },
@@ -29,10 +40,10 @@ const navItems = computed(() => [
 ])
 
 const userMenuOptions = computed(() => [
-  {
-    label: t('common.logout'),
-    key: 'logout',
-  },
+  { label: t('common.deposit'), key: 'deposit', icon: 'deposit' as const },
+  { label: t('nav.apiKeys'), key: 'api-keys', icon: 'code-box' as const },
+  { label: t('header.myBilling'), key: 'billing', icon: 'file-paper' as const },
+  { label: t('header.signOut'), key: 'logout', icon: 'logout' as const },
 ])
 
 const languageMenuOptions = computed(() => [
@@ -42,15 +53,50 @@ const languageMenuOptions = computed(() => [
 
 const balanceLabel = computed(() => {
   if (!userStore.isLoggedIn) return null
-  const value = userStore.balanceUsd
+  const value = userStore.balance
   if (value === null) return '—'
-  return `$${value.toFixed(2)}`
+  return value.toLocaleString()
 })
 
 const userInitial = computed(() => {
   const name = userStore.profile?.name ?? userStore.profile?.email ?? ''
   return name.charAt(0).toUpperCase() || '?'
 })
+
+const displayEmail = computed(() => {
+  const email = userStore.profile?.email ?? ''
+  const at = email.indexOf('@')
+  if (at <= 0) return email
+  const local = email.slice(0, at)
+  const domain = email.slice(at)
+  if (local.length <= 5) return email
+  return `${local.slice(0, 3)}...${local.slice(-2)}${domain}`
+})
+
+const displayUserId = computed(() => userStore.profile?.id ?? '—')
+
+function openUserMenu() {
+  if (userMenuCloseTimer) {
+    clearTimeout(userMenuCloseTimer)
+    userMenuCloseTimer = null
+  }
+  userMenuOpen.value = true
+}
+
+function scheduleCloseUserMenu() {
+  if (userMenuCloseTimer) clearTimeout(userMenuCloseTimer)
+  userMenuCloseTimer = setTimeout(() => {
+    userMenuOpen.value = false
+    userMenuCloseTimer = null
+  }, 120)
+}
+
+function cancelCloseUserMenu() {
+  if (userMenuCloseTimer) {
+    clearTimeout(userMenuCloseTimer)
+    userMenuCloseTimer = null
+  }
+}
 
 function isActive(name: string) {
   if (name === 'models') {
@@ -64,9 +110,17 @@ function goTo(name: string) {
 }
 
 function handleUserMenuSelect(key: string) {
+  userMenuOpen.value = false
+
   if (key === 'logout') {
-    userStore.logout()
-    push({ name: 'models' })
+    void userStore.logout().then(() => {
+      push({ name: 'models' })
+    })
+    return
+  }
+
+  if (key === 'deposit' || key === 'billing' || key === 'api-keys') {
+    goTo(key === 'deposit' ? 'billing' : key)
   }
 }
 
@@ -90,13 +144,30 @@ watch(
   { immediate: true },
 )
 
+watch(
+  () => route.fullPath,
+  () => {
+    updateScrollState()
+  },
+)
+
 onMounted(() => {
   userStore.loadProfile()
+  updateScrollState()
+  window.addEventListener('scroll', updateScrollState, { passive: true })
+})
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', updateScrollState)
+  if (userMenuCloseTimer) clearTimeout(userMenuCloseTimer)
 })
 </script>
 
 <template>
-  <header class="app-header">
+  <header
+    class="app-header"
+    :class="{ 'app-header--solid': isHeaderSolid, 'app-header--transparent': !isHeaderSolid }"
+  >
     <div class="app-header__inner">
       <div class="app-header__left">
         <RouterLink :to="localePath('/')" class="app-header__logo" :aria-label="t('common.appName')">
@@ -163,22 +234,57 @@ onMounted(() => {
             </button>
           </div>
 
-          <NDropdown
-            trigger="click"
-            :options="userMenuOptions"
-            @select="handleUserMenuSelect"
+          <div
+            class="app-header__user-menu"
+            @mouseenter="openUserMenu"
+            @mouseleave="scheduleCloseUserMenu"
           >
-            <button type="button" class="app-header__user-trigger">
+            <button
+              type="button"
+              class="app-header__user-trigger"
+              :aria-expanded="userMenuOpen"
+              aria-haspopup="menu"
+            >
               <span class="app-header__avatar">{{ userInitial }}</span>
               <AppIcon name="chevron-down" />
             </button>
-          </NDropdown>
+
+            <div
+              v-show="userMenuOpen"
+              class="app-header__user-dropdown"
+              @mouseenter="cancelCloseUserMenu"
+              @mouseleave="scheduleCloseUserMenu"
+            >
+              <div class="app-header__user-dropdown-header">
+                <div class="app-header__user-email">
+                  <span :title="userStore.profile?.email">{{ displayEmail }}</span>
+                </div>
+                <p class="app-header__user-id">
+                  {{ t('header.userId', { id: displayUserId }) }}
+                </p>
+              </div>
+
+              <div class="app-header__user-dropdown-items" role="menu">
+                <button
+                  v-for="item in userMenuOptions"
+                  :key="item.key"
+                  type="button"
+                  class="app-header__user-dropdown-item"
+                  role="menuitem"
+                  @click="handleUserMenuSelect(item.key)"
+                >
+                  <AppIcon :name="item.icon" />
+                  <span>{{ item.label }}</span>
+                </button>
+              </div>
+            </div>
+          </div>
         </template>
 
         <button
           v-else
           type="button"
-          class="app-header__login-link"
+          class="app-header__login-btn"
           @click="push({ name: 'auth' })"
         >
           {{ t('common.login') }}
@@ -193,11 +299,22 @@ onMounted(() => {
   position: sticky;
   top: 0;
   z-index: 100;
+  width: 100%;
   height: 80px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(10, 10, 14, 0.3);
-  backdrop-filter: blur(8px);
   color: #ebf4fb;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.app-header--solid {
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-page);
+}
+
+.app-header--transparent {
+  border-bottom: 1px solid transparent;
+  background: transparent;
 }
 
 .app-header__inner {
@@ -325,6 +442,72 @@ onMounted(() => {
   opacity: 0.85;
 }
 
+.app-header__user-menu {
+  position: relative;
+}
+
+.app-header__user-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 200;
+  width: 280px;
+  padding: 20px;
+  border-radius: 8px;
+  background: #1c1c20;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+}
+
+.app-header__user-dropdown-header {
+  margin-bottom: 18px;
+}
+
+.app-header__user-email {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #ebf4fb;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 16px;
+}
+
+.app-header__user-id {
+  margin: 8px 0 0;
+  color: #9b9dab;
+  font-size: 14px;
+  line-height: 14px;
+}
+
+.app-header__user-dropdown-items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.app-header__user-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 20px;
+  margin: 0 -20px;
+  width: calc(100% + 40px);
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  color: #e0e0e0;
+  font-size: 14px;
+  line-height: 1;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.app-header__user-dropdown-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
 .app-header__wallet-group {
   display: flex;
   gap: 1px;
@@ -370,18 +553,30 @@ onMounted(() => {
   line-height: 1;
 }
 
-.app-header__login-link {
-  padding: 0;
+.app-header__login-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 116px;
+  height: 36px;
+  padding: 0 16px;
   border: none;
-  background: transparent;
-  color: #ebf4fb;
+  border-radius: 8px;
+  background: #fff;
+  color: #222;
   font-size: 14px;
   font-weight: 500;
+  line-height: 1;
   cursor: pointer;
+  transition: background 0.15s ease;
 }
 
-.app-header__login-link:hover {
-  opacity: 0.85;
+.app-header__login-btn:hover {
+  background: #e8e8ec;
+}
+
+.app-header__login-btn:active {
+  background: #d8d8dc;
 }
 
 @media (max-width: 767px) {
