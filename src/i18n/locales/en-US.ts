@@ -130,7 +130,7 @@ export default {
       keysSectionTitle: 'Keys',
       neverUsed: 'Never',
       deleteKey: 'Delete API key',
-      deleteConfirmTitle: 'Delete API key?',
+      deleteConfirmTitle: 'Delete API key',
       deleteConfirmContent: 'Are you sure you want to delete "{name}"? This action cannot be undone.',
       deleteConfirmSubmit: 'Delete',
       deleteConfirmCancel: 'Cancel',

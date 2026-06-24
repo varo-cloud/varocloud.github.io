@@ -130,7 +130,7 @@ export default {
       keysSectionTitle: '密钥列表',
       neverUsed: '从未使用',
       deleteKey: '删除 API 密钥',
-      deleteConfirmTitle: '删除 API 密钥？',
+      deleteConfirmTitle: '删除 API 密钥',
       deleteConfirmContent: '确定要删除「{name}」吗？此操作无法撤销。',
       deleteConfirmSubmit: '删除',
       deleteConfirmCancel: '取消',
