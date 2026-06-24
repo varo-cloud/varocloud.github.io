@@ -93,6 +93,11 @@ export default {
       code: 'Code',
       codeNoResult: '运行模型后可查看 API 返回的 JSON。',
       noGenerations: '运行模型后，生成结果将显示在这里。',
+      viewFullscreen: '放大查看',
+      download: '下载',
+      downloadFailed: '下载失败，请重试。',
+      previousResult: '上一个结果',
+      nextResult: '下一个结果',
       perRun: 'per run',
       apiPlaceholder: 'API 文档与代码示例将在此提供。',
       apiTab: {

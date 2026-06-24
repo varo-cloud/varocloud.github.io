@@ -93,6 +93,11 @@ export default {
       code: 'Code',
       codeNoResult: 'Run the model to view the API response JSON.',
       noGenerations: 'Run the model to see your generation here.',
+      viewFullscreen: 'View fullscreen',
+      download: 'Download',
+      downloadFailed: 'Download failed. Please try again.',
+      previousResult: 'Previous result',
+      nextResult: 'Next result',
       perRun: 'per run',
       apiPlaceholder: 'API documentation and code examples will be available here.',
       apiTab: {
