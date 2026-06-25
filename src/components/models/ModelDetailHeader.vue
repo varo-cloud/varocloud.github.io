@@ -25,9 +25,6 @@ const thumbnailSrc = computed(() =>
       <h1 class="model-header__title">{{ title }}</h1>
       <div class="model-header__path">
         <code class="model-header__path-text">{{ modelPath }}</code>
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-          <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
-        </svg>
       </div>
       <p class="model-header__desc">{{ description }}</p>
     </div>
