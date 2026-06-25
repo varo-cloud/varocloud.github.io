@@ -8,7 +8,6 @@ import { requestOtp, verifyOtp } from '@/api/auth'
 import { useUserStore } from '@/stores/user'
 import AppHeader from '@/components/layout/AppHeader.vue'
 import AppFooter from '@/components/layout/AppFooter.vue'
-import AppIcon from '@/components/common/AppIcon.vue'
 import TurnstileWidget from '@/components/auth/TurnstileWidget.vue'
 import { assetUrl } from '@/utils/assetUrl'
 import {
@@ -97,14 +96,6 @@ function startResendCooldown(seconds = 60) {
       resendTimer = null
     }
   }, 1000)
-}
-
-function closeAuth() {
-  if (window.history.length > 1) {
-    window.history.back()
-    return
-  }
-  push({ name: 'models' })
 }
 
 function resolveErrorMessage(err: unknown, fallback: string): string {
@@ -224,14 +215,6 @@ onUnmounted(() => {
       <div class="auth-card">
         <div class="auth-card__header">
           <h1 class="auth-card__title">{{ t('pages.auth.welcome') }}</h1>
-          <button
-            type="button"
-            class="auth-card__close"
-            :aria-label="t('common.close')"
-            @click="closeAuth"
-          >
-            <AppIcon name="close" :size="20" />
-          </button>
         </div>
 
         <div class="auth-card__turnstile">
@@ -384,10 +367,6 @@ onUnmounted(() => {
 }
 
 .auth-card__header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
   margin-bottom: 16px;
 }
 
@@ -418,28 +397,6 @@ onUnmounted(() => {
   line-height: 1.2;
   letter-spacing: -0.408px;
   color: #ebf4fb;
-}
-
-.auth-card__close {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  width: 32px;
-  height: 32px;
-  margin: -4px -4px 0 0;
-  padding: 0;
-  border: none;
-  border-radius: 8px;
-  background: transparent;
-  color: #9b9dab;
-  cursor: pointer;
-  transition: color 0.15s ease, background 0.15s ease;
-}
-
-.auth-card__close:hover {
-  color: #ebf4fb;
-  background: rgba(255, 255, 255, 0.06);
 }
 
 .auth-card__form {

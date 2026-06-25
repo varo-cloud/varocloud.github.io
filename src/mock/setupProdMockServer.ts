@@ -3,6 +3,7 @@ import type { MockMethod } from 'vite-plugin-mock'
 import { match as matchPath } from 'path-to-regexp'
 import { http } from '@/api/http'
 import { toProdMockUrl } from '@/utils/apiBaseUrl'
+import { useRealAuthApi } from '@/utils/authApiBaseUrl'
 import apiKeysMock from '../../mock/api-keys'
 import authMock from '../../mock/auth'
 import billingMock from '../../mock/billing'
@@ -14,7 +15,7 @@ import pricingMock from '../../mock/pricing'
 import uploadMock from '../../mock/upload'
 
 const mockModules: MockMethod[] = [
-  ...authMock,
+  ...(useRealAuthApi() ? [] : authMock),
   ...apiKeysMock,
   ...modelsMock,
   ...modelSchemaMock,
