@@ -18,6 +18,7 @@ export default {
   },
   nav: {
     models: '模型',
+    aiGenerator: 'AI Generator',
     pricing: '价格',
     apiKeys: 'API 密钥',
     billing: '账单',
@@ -63,6 +64,13 @@ export default {
         'text-to-video': '文生视频',
         'image-to-video': '图生视频',
       },
+    },
+    aiGenerator: {
+      model: '模型',
+      hot: 'HOT',
+      loadError: '加载模型列表失败，请重试。',
+      modelLoadError: '加载模型失败，请重试。',
+      emptyModels: '暂无可用模型。',
     },
     modelDetail: {
       title: '模型详情',

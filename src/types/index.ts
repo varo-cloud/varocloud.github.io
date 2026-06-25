@@ -34,6 +34,8 @@ export interface Model {
   thumbnailUrl?: string
   /** Maps from API field `icon_url` — brand icon beside card title */
   iconUrl?: string
+  /** Maps from API field `is_hot` */
+  isHot?: boolean
 }
 
 export interface ModelDetail extends Model {

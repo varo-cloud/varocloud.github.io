@@ -15,6 +15,12 @@ const appLayoutChildren: RouteRecordRaw[] = [
     component: () => import('@/views/models/ModelDetailView.vue'),
   },
   {
+    path: 'ai-generator',
+    name: 'ai-generator',
+    meta: { fullBleed: true, transparentHeader: true },
+    component: () => import('@/views/ai-generator/AiGeneratorView.vue'),
+  },
+  {
     path: 'pricing',
     name: 'pricing',
     meta: { fullBleed: true, transparentHeader: true },

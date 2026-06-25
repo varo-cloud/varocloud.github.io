@@ -22,6 +22,7 @@ interface ApiModel {
   description: string
   thumbnail_url?: string | null
   icon_url?: string | null
+  is_hot?: boolean | null
 }
 
 interface ApiModelDetail extends ApiModel {
@@ -56,6 +57,7 @@ function mapModel(raw: ApiModel): Model {
     description: raw.description,
     thumbnailUrl: raw.thumbnail_url ?? undefined,
     iconUrl: raw.icon_url ?? undefined,
+    isHot: raw.is_hot ?? undefined,
   }
 }
 

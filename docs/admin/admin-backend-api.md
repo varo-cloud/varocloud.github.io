@@ -772,7 +772,7 @@ Webhook 丢失时人工补入账。需二次确认 Stripe 侧已支付。
 |---|---|---|
 | `users` | 用户 | `email`、`role`、`status`、`balance`（credits）、`created_at` |
 | `api_keys` | API Key | `user_id`、`name`、`prefix`、`is_active`、用量聚合 |
-| `models` | 模型目录 | 展示字段（`name` 等为 jsonb `LocalizedString`）、`api_model_id`、`active`、`sort_order` |
+| `models` | 模型目录 | 展示字段（`name` 等为 jsonb `LocalizedString`）、`api_model_id`、`active`、`is_hot`、`sort_order` |
 | `model_input_schemas` | Playground Schema | `model_id`、`schema`（jsonb） |
 | `model_docs` | 文档 | `readme_md`、`faq`（jsonb，均为多语言） |
 | `pricing_items` | 定价页条目 | `name`（多语言）、价格字段、`model_id`、`sort_order` |

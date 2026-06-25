@@ -18,6 +18,7 @@ export default {
   },
   nav: {
     models: 'Models',
+    aiGenerator: 'AI Generator',
     pricing: 'Pricing',
     apiKeys: 'API Keys',
     billing: 'Billing',
@@ -63,6 +64,13 @@ export default {
         'text-to-video': 'Text to Video',
         'image-to-video': 'Image to Video',
       },
+    },
+    aiGenerator: {
+      model: 'Model',
+      hot: 'HOT',
+      loadError: 'Failed to load models. Please try again.',
+      modelLoadError: 'Failed to load model. Please try again.',
+      emptyModels: 'No models available.',
     },
     modelDetail: {
       title: 'Model Detail',

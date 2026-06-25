@@ -182,7 +182,6 @@ function buildModelCatalog(): ModelCatalogEntry[] {
 function toListItem(model: ModelCatalogEntry) {
   const {
     model_path: _modelPath,
-    is_hot: _isHot,
     per_run_price_usd: _perRun,
     runs_per_ten_usd: _runs,
     ...item
