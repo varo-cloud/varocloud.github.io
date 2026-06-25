@@ -1,6 +1,6 @@
 # 管理后台 — 前端页面专章
 
-> **版本：** v1.0  
+> **版本：** v1.1  
 > **日期：** 2026-06-25  
 > **受众：** 管理后台前端团队  
 > **姊妹文档：** [后端 API 专章](./admin-backend-api.md) · [总览索引](./admin-platform-requirements.md)
@@ -50,7 +50,23 @@
 | 类型定义 | `src/types/index.ts` | Model、Transaction 等，按需 copy 或抽 shared 包 |
 | 时间格式化 | 用户端 `formatTimestamp` 逻辑 | 13 位毫秒 → 展示字符串 |
 | 金额格式化 | 用户端 `formatUsd` / `currency.ts` | `$17.50` |
-| HTTP 拦截器 | `src/api/http.ts` | Token 注入、401 刷新；Admin 无需 `X-Locale` 也可保留 |
+| HTTP 拦截器 | `src/api/http.ts` | Token 注入、401 刷新；**Admin 不发送 `X-Locale`**（界面不做 i18n） |
+
+### 2.5 多语言策略
+
+**Admin Console 界面本身不做 i18n**，固定单一界面语言（建议中文），不引入 `vue-i18n`。
+
+通过 Admin 编辑、在用户端展示的**运营文案**须支持 `en-US` 与 `zh-CN`，与 [后端专章 §3.3](./admin-backend-api.md#33-用户端内容多语言) 对齐：
+
+| 范围 | Admin 前端行为 |
+|---|---|
+| 菜单、按钮、表格列、错误 Toast | 硬编码单一语言，无需 i18n |
+| 模型 / 定价 / 文档等可编辑文案 | 编辑页内 **语言子 Tab**（`English` · `简体中文`），分别录入 |
+| 列表页展示名称 | 默认显示 `en-US` 值；无则 fallback 至 `zh-CN` |
+
+**不引入 `vue-i18n` 的原因：** Admin 为内部工具，界面文案量小且受众固定；仅内容编辑区需要 locale 切换，用 Tab + 表单字段映射即可，无需整站国际化框架。
+
+**HTTP：** Admin API 请求不附加 `X-Locale`；后端 Admin 接口也不依赖 locale 解析。
 
 ---
 
@@ -279,7 +295,7 @@ user@example.com                    [调整余额] [禁用账号 P1]
 | 列 | 说明 |
 |---|---|
 | ID | `seedance-t2v`，可复制 |
-| 名称 | `display_name` 或 `name` |
+| 名称 | `display_name["en-US"]` 或 `name["en-US"]`（列表固定展示英文，§2.5） |
 | 提供商 | `provider` |
 | 能力 | capabilities Tags |
 | 状态 | `active` → 绿色「已上架」/ 灰色「草稿」 |
@@ -313,14 +329,16 @@ user@example.com                    [调整余额] [禁用账号 P1]
 
 #### Tab：基本信息
 
+可翻译字段（完整名称、展示名称、描述）在 Tab 内嵌 **语言子 Tab**：`English (en-US)` · `简体中文 (zh-CN)`。`en-US` 必填；`zh-CN` 可选。
+
 | 字段 | 控件 | 必填 |
 |---|---|---|
 | ID | Input（创建时可编辑，编辑时 disabled） | ✅ |
-| 完整名称 | Input | ✅ |
-| 展示名称 | Input | |
+| 完整名称 | Input（按当前语言子 Tab） | ✅（en-US） |
+| 展示名称 | Input（按当前语言子 Tab） | |
 | 提供商 | Select 或 Input | ✅ |
 | 能力 | 多选 Tags：`text-to-video`、`image-to-video` | ✅ |
-| 描述 | Textarea | ✅ |
+| 描述 | Textarea（按当前语言子 Tab） | ✅（en-US） |
 | 缩略图 URL | Input + 预览 | |
 | model_path | Input | ✅ |
 | api_model_id | Input | ✅ |
@@ -351,10 +369,14 @@ user@example.com                    [调整余额] [禁用账号 P1]
 
 #### Tab：文档 FAQ
 
+顶部 **语言子 Tab**（同基本信息）；`readme_md` 与 FAQ 的 question / answer 按当前语言分别编辑。
+
 | 元素 | 说明 |
 |---|---|
 | readme_md | Markdown textarea + 预览分栏（P1）；P2 换富文本 |
-| FAQ 列表 | 动态表单：question + answer，增删行，拖拽排序（P2） |
+| FAQ 列表 | 动态表单：question + answer（当前语言），增删行，拖拽排序（P2） |
+
+保存时将两种 locale 合并为 `LocalizedString` 提交后端（见 [API §3.3](./admin-backend-api.md#33-用户端内容多语言)）。
 
 #### 保存行为
 
@@ -471,10 +493,11 @@ Task: cgt-20260611195952-9l74f          [退还费用]
 
 - 标准 CRUD 表格 + 编辑 Drawer
 - V1 若与模型合并，此路由可隐藏，仅在模型编辑页勾选「同步到定价页」
+- 编辑 Drawer 内 **名称** 字段使用语言子 Tab（`en-US` / `zh-CN`），规则同模型基本信息
 
 | 列 | 字段 |
 |---|---|
-| 名称 | `name` |
+| 名称 | `name["en-US"]`（列表固定展示英文） |
 | 关联模型 | `model_id` |
 | 标准价 / 起价 | USD + unit |
 | 折扣 | `discount_percent` |
@@ -623,15 +646,16 @@ admin-web/src/
 ### Phase 1 — P0（约 1～1.5 周）
 
 - [ ] 工程初始化 + AdminLayout + 登录 + 路由守卫
-- [ ] Dashboard / Users（列表+详情+调账）/ Models（列表+编辑）/ Generations（列表+详情+退款）/ Billing transactions
+- [ ] Dashboard / Users（列表+详情+调账）/ Models（列表+编辑含语言子 Tab）/ Generations（列表+详情+退款）/ Billing transactions
 - [ ] 通用 ConfirmReasonModal、JsonEditor、表格分页
 
 **验收：** 运营可通过 UI 完成「调账 → 编辑并上架模型 → 失败任务退款」，无需 SQL。
 
 ### Phase 2 — P1（约 1 周）
 
-- [ ] Settings / API Keys / Pricing（或合并到模型页）
+- [ ] Settings / API Keys / Pricing（或合并到模型页，含定价名称多语言）
 - [ ] 用户禁用、充值异常处理、审计日志页
+- [ ] 模型文档 FAQ 多语言编辑（readme + FAQ 语言子 Tab）
 
 ### Phase 3 — P2
 
@@ -657,5 +681,5 @@ admin-web/src/
 | 1 | 独立域名 vs 子路径 | `admin.varo.cloud`，与用户端 cookie 隔离 |
 | 2 | 定价页独立路由 | 模型 ≤4 时隐藏 `/pricing`，模型页勾选同步 |
 | 3 | Schema 可视化构建器 | V1 JSON Editor；P2 再评估 |
-| 4 | 界面语言 | V1 中文或英文固定一种；内部工具可不做 i18n |
+| 4 | Admin 界面语言 | **固定中文**（或英文二选一），不做 i18n；用户端内容用编辑页语言子 Tab |
 | 5 | credits 调试信息 | 仅 user 详情折叠展示，默认隐藏 |

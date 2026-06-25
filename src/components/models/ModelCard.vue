@@ -237,15 +237,20 @@ async function toggleFavourite(event: Event) {
 .model-card__title-row {
   display: flex;
   align-items: center;
-  gap: 6px;
+  justify-content: space-between;
+  width: 100%;
 }
 
 .model-card__title {
   margin: 0;
+  min-width: 0;
   font-size: 16px;
   font-weight: 600;
   line-height: 16px;
   color: #222;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .model-card__icon {

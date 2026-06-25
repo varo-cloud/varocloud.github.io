@@ -1,6 +1,6 @@
 # 管理后台功能需求 — 总览索引
 
-> **版本：** v1.1  
+> **版本：** v1.2  
 > **日期：** 2026-06-25  
 > **受众：** 管理后台前端团队、后端团队
 
@@ -93,10 +93,10 @@
 
 | 用户端能力 | Admin 支撑 |
 |---|---|
-| Models 首页 | 模型管理：展示字段、上下架、排序 |
+| Models 首页 | 模型管理：展示字段（多语言）、上下架、排序 |
 | Playground | Input Schema 编辑；任务监控 |
-| 模型 API Tab | `api_model_id`、`readme_md`、`faq` |
-| 定价页 | 定价字段或定价目录 |
+| 模型 API Tab | `api_model_id`、多语言 `readme_md` / `faq` |
+| 定价页 | 多语言 `name` + 定价字段或定价目录 |
 | API Keys | 用户详情 Tab + 全站 Key 管理 |
 | Billing / Stripe | 充值订单；套餐配置 |
 | 注册体验金 | `signup_bonus_usd` + bonus 调账 |
@@ -104,25 +104,42 @@
 
 ---
 
+## 4.1 多语言策略
+
+用户端 [frontend-web](../../README.md) 支持 `en-US` / `zh-CN`；Admin 与之对齐的方式如下：
+
+| 范围 | 是否多语言 | 说明 |
+|---|---|---|
+| **Admin Console 界面** | **否** | 菜单、按钮、表格列等固定单一语言（建议中文），不引入 `vue-i18n` |
+| **Admin 配置的用户端内容** | **是** | 模型名、描述、README、FAQ、定价名称等须存 `en-US` + `zh-CN` |
+| Admin API 错误 message | 否 | 固定英文 |
+| 用户端公开 API | 是 | 按 `X-Locale` 返回单语言 string；缺 locale 时 fallback `en-US` |
+
+**数据形态：** Admin 读写 `LocalizedString`（`{ "en-US": "...", "zh-CN": "..." }`）；公开 `GET /api/models`、`GET /api/pricing` 等按 locale 解析后返回 string。
+
+> 详见 [后端 API §3.3](./admin-backend-api.md#33-用户端内容多语言) · [前端页面 §2.5](./admin-frontend-pages.md#25-多语言策略)
+
+---
+
 ## 5. 实施里程碑
 
 ### Phase 1 — 可运营（P0，约 1～1.5 周）
 
-**后端：** 鉴权中间件 · users / models / generations / billing · balance-adjustment · refund
+**后端：** 鉴权中间件 · users / models / generations / billing · balance-adjustment · refund · 模型展示字段多语言
 
-**前端：** 独立工程 · 登录 · Dashboard · Users · Models · Generations · Billing
+**前端：** 独立工程 · 登录 · Dashboard · Users · Models（含语言子 Tab）· Generations · Billing
 
 **验收：** 运营可完成「上新模型 → 充值异常排查 → 失败任务退款」，无需 SQL。
 
 ### Phase 2 — 效率提升（P1，约 1 周）
 
-**后端：** config · pricing · api-keys · user suspend · audit logs · billing 异常处理
+**后端：** config · pricing · api-keys · user suspend · audit logs · billing 异常处理 · readme/faq/定价名称多语言
 
-**前端：** Settings · API Keys · Pricing（或合并模型页）· 审计日志
+**前端：** Settings · API Keys · Pricing（或合并模型页）· 审计日志 · 文档 FAQ 多语言编辑
 
 ### Phase 3 — 运营增强（P2）
 
-Promo Code · 批量赠送 · FAQ 富文本 · 多语言内容
+Promo Code · 批量赠送 · FAQ 富文本 · 公告等多语言运营内容
 
 ---
 
@@ -148,6 +165,7 @@ Promo Code · 批量赠送 · FAQ 富文本 · 多语言内容
 | 4 | 注册体验金自动 vs 人工？ | 自动发放 + Admin 补发 |
 | 5 | super-admin 细分权限？ | V1 单 `admin` 角色 |
 | 6 | Schema 可视化构建器？ | V1 JSON Editor |
+| 7 | Admin 界面是否 i18n？ | **已确认：否**；仅用户端内容多语言（§4.1） |
 
 ---
 
