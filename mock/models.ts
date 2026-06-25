@@ -35,7 +35,7 @@ const baseModels: ModelCatalogEntry[] = [
     price_unit: 'per_second',
     per_run_price_usd: 0.42,
     runs_per_ten_usd: 23,
-    price_detail: '5s · 720p',
+    price_detail: '720p',
     discount_percent: 16,
     is_hot: true,
     description:
@@ -54,7 +54,7 @@ const baseModels: ModelCatalogEntry[] = [
     price_unit: 'per_second',
     per_run_price_usd: 0.36,
     runs_per_ten_usd: 27,
-    price_detail: '5s · 480p',
+    price_detail: '480p',
     discount_percent: 20,
     description:
       'Hollywood-grade cinematic text-to-video generation with native audio sync. Supports reference images, videos, and audios for style and motion guidance.',
@@ -72,7 +72,7 @@ const baseModels: ModelCatalogEntry[] = [
     price_unit: 'per_second',
     per_run_price_usd: 0.33,
     runs_per_ten_usd: 30,
-    price_detail: '5s · 720p',
+    price_detail: '720p',
     discount_percent: 18,
     description:
       'High-quality text-to-video generation powered by Kling with cinematic motion control.',
@@ -90,7 +90,7 @@ const baseModels: ModelCatalogEntry[] = [
     price_unit: 'per_second',
     per_run_price_usd: 0.33,
     runs_per_ten_usd: 30,
-    price_detail: '5s · 720p',
+    price_detail: '720p',
     discount_percent: 18,
     description:
       'Transform reference images into smooth video clips with Kling image-to-video.',
@@ -160,7 +160,7 @@ function buildModelCatalog(): ModelCatalogEntry[] {
       price_unit: 'per_second',
       per_run_price_usd: perRun,
       runs_per_ten_usd: Math.max(1, Math.floor(10 / perRun)),
-      price_detail: `${duration}s · ${['480p', '720p', '1080p'][index % 3]}`,
+      price_detail: ['480p', '720p', '1080p'][index % 3],
       ...(index % 4 !== 0 ? { discount_percent: [20, 25, 30][index % 3] } : {}),
       is_hot: index % 7 === 0,
       description: `${family} ${template.capability.replace(/-/g, ' ')} generation powered by ${provider}.`,

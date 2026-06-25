@@ -1,7 +1,7 @@
 export default {
   common: {
     appName: 'Varo.cloud',
-    slogan: 'The AI Model Cloud, Built for Video.',
+    slogan: 'The AI Model Cloud for Creator',
     designPending: 'Design pending — content will be added after design delivery.',
     balance: 'Balance',
     login: 'Log in',

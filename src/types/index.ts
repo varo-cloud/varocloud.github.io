@@ -25,7 +25,7 @@ export interface Model {
   originalPriceUsd?: number
   /** Maps from API field `price_unit` */
   priceUnit: PricingPriceUnit
-  /** Maps from API field `price_detail` — optional run context, e.g. "5s · 720p" */
+  /** Maps from API field `price_detail` — optional run context; for per_second, resolution only e.g. "720p" */
   priceDetail?: string
   /** Maps from API field `discount_percent` */
   discountPercent?: number

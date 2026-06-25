@@ -68,7 +68,7 @@
         "starting_price_usd": 0.084,
         "standard_price_usd": 0.1,
         "price_unit": "per_second",
-        "price_detail": "5s · 720p",
+        "price_detail": "720p",
         "discount_percent": 16,
         "description": "...",
         "thumbnail_url": "/..."
@@ -111,7 +111,7 @@
 | `per_million_tokens` | `$5` + `/M` |
 | `per_hour` | `$2.49` + `/小时` |
 
-`price_detail` 为可选补充说明（如 `5s · 720p`），**不是**计费单位。
+`price_detail` 为可选补充说明；`per_second` 时仅填分辨率（如 `720p`），**不是**计费单位，不含时长。
 
 ---
 

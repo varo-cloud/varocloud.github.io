@@ -126,22 +126,24 @@ async function toggleFavourite(event: Event) {
 
     <div class="model-card__footer">
       <div class="model-card__pricing">
-        <p v-if="originalPriceLabel" class="model-card__from">
-          {{ t('pages.models.from') }}
-          <span class="model-card__strike">{{ originalPriceLabel }}<span class="model-card__unit">{{ unitLabel }}</span></span>
+        <p class="model-card__from">
+          <template v-if="originalPriceLabel">
+            {{ t('pages.models.from') }}
+            <span class="model-card__strike">{{ originalPriceLabel }}<span class="model-card__unit">{{ unitLabel }}</span></span>
+          </template>
         </p>
         <p class="model-card__price">
           <strong>{{ startingPriceLabel }}</strong><span class="model-card__unit">{{ unitLabel }}</span>
           <template v-if="model.priceDetail">
             <span class="model-card__detail"> · {{ model.priceDetail }}</span>
           </template>
+          <span
+            v-if="model.discountPercent"
+            class="model-card__discount"
+          >
+            -{{ model.discountPercent }}%
+          </span>
         </p>
-        <span
-          v-if="model.discountPercent"
-          class="model-card__discount"
-        >
-          -{{ model.discountPercent }}%
-        </span>
       </div>
 
       <button type="button" class="model-card__cta" @click.stop="goToDetail">
@@ -155,6 +157,7 @@ async function toggleFavourite(event: Event) {
 .model-card {
   display: flex;
   flex-direction: column;
+  height: 100%;
   overflow: hidden;
   border: 1px solid #e8e8e8;
   border-radius: 8px;
@@ -223,6 +226,7 @@ async function toggleFavourite(event: Event) {
 }
 
 .model-card__body {
+  flex: 1;
   padding: 12px 16px 0;
 }
 
@@ -252,6 +256,7 @@ async function toggleFavourite(event: Event) {
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
   overflow: hidden;
+  min-height: 48px;
   font-size: 12px;
   line-height: 16px;
   color: #9b9dab;
@@ -260,7 +265,7 @@ async function toggleFavourite(event: Event) {
 .model-card__footer {
   position: relative;
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: space-between;
   gap: 8px;
   margin-top: auto;
@@ -286,6 +291,7 @@ async function toggleFavourite(event: Event) {
 
 .model-card__from {
   margin: 0;
+  min-height: 16px;
   font-size: 12px;
   line-height: 16px;
   color: #9b9dab;
@@ -298,7 +304,7 @@ async function toggleFavourite(event: Event) {
 .model-card__price {
   margin: 0;
   font-size: 12px;
-  line-height: 16px;
+  line-height: 20px;
   color: #9b9dab;
 }
 
@@ -321,8 +327,8 @@ async function toggleFavourite(event: Event) {
 .model-card__discount {
   display: inline-flex;
   align-items: center;
-  align-self: flex-start;
-  margin-top: 2px;
+  vertical-align: middle;
+  margin-left: 6px;
   padding: 2px 8px;
   border-radius: 30px;
   background: #00bb83;

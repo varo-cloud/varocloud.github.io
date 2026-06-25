@@ -1,3 +1,4 @@
+import { authHttp } from './authHttp'
 import {
   http,
   clearAuthTokens,
@@ -16,19 +17,19 @@ import type {
 } from '@/types'
 
 export function requestOtp(payload: OtpRequestPayload) {
-  return unwrap<OtpRequestResult>(http.post('/auth/request-otp', payload))
+  return unwrap<OtpRequestResult>(authHttp.post('/auth/request-otp', payload))
 }
 
 export function verifyOtp(payload: OtpVerifyPayload) {
-  return unwrap<TokenPair>(http.post('/auth/verify-otp', payload))
+  return unwrap<TokenPair>(authHttp.post('/auth/verify-otp', payload))
 }
 
 export function refreshAuthToken(refreshToken: string) {
-  return unwrap<TokenPair>(http.post('/auth/refresh', { refresh_token: refreshToken }))
+  return unwrap<TokenPair>(authHttp.post('/auth/refresh', { refresh_token: refreshToken }))
 }
 
 export function revokeRefreshToken(refreshToken: string) {
-  return unwrap<LogoutResult>(http.post('/auth/logout', { refresh_token: refreshToken }))
+  return unwrap<LogoutResult>(authHttp.post('/auth/logout', { refresh_token: refreshToken }))
 }
 
 interface ApiUserProfile {

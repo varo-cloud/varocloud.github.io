@@ -1,6 +1,7 @@
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios'
 import type { ApiResponse, TokenPair } from '@/types'
 import { getCurrentLocale } from '@/i18n'
+import { authHttp } from '@/api/authHttp'
 import { apiBaseUrl } from '@/utils/apiBaseUrl'
 
 const TOKEN_KEY = 'auth_token'
@@ -24,17 +25,9 @@ async function tryRefreshAccessToken(): Promise<string | null> {
   if (!refreshPromise) {
     refreshPromise = (async () => {
       try {
-        const locale = getCurrentLocale()
-        const { data } = await axios.post<ApiResponse<TokenPair>>(
-          `${apiBaseUrl()}/auth/refresh`,
-          { refresh_token: refreshToken },
-          {
-            headers: {
-              'Accept-Language': locale,
-              'X-Locale': locale,
-            },
-          },
-        )
+        const { data } = await authHttp.post<ApiResponse<TokenPair>>('/auth/refresh', {
+          refresh_token: refreshToken,
+        })
 
         if (data.code !== 0 || !data.data) {
           throw new Error(data.message || 'Refresh failed')

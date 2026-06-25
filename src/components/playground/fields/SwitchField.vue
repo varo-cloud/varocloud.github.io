@@ -41,7 +41,7 @@ defineProps<{
   justify-content: space-between;
   gap: 16px;
   min-height: 36px;
-  padding: 8px 12px;
+  padding: 8px 0;
   border: 0.5px solid transparent;
   border-radius: 8px;
   transition: border-color 0.15s ease;

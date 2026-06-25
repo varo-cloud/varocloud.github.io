@@ -74,7 +74,7 @@
         "starting_price_usd": 0.084,
         "standard_price_usd": 0.1,
         "price_unit": "per_second",
-        "price_detail": "5s · 720p",
+        "price_detail": "720p",
         "discount_percent": 16,
         "description": "Hollywood-grade cinematic image-to-video...",
         "thumbnail_url": "https://cdn.example.com/thumbs/seedance-i2v.jpg"
@@ -99,7 +99,7 @@
 | `starting_price_usd` | number | ✅ | **单价**（USD），配合 `price_unit` |
 | `standard_price_usd` | number | 可选 | 标准单价，用于划线价 |
 | `price_unit` | string | ✅ | 枚举：`per_second` \| `per_image` \| `per_million_tokens` \| `per_hour` |
-| `price_detail` | string | 可选 | 运行配置说明，如 `5s · 720p`（非计费单位） |
+| `price_detail` | string | 可选 | 运行配置说明；`per_second` 时仅填分辨率，如 `720p`（非计费单位，不含时长） |
 | `discount_percent` | number | 可选 | 折扣整数，如 `16` → `-16%` |
 | `description` | string | ✅ | 卡片描述 |
 | `thumbnail_url` | string | 可选 | 缩略图 URL |
@@ -110,7 +110,7 @@
 
 | `price_unit` | 适用 | 卡片示例 |
 |---|---|---|
-| `per_second` | 视频 | `$0.084` `/秒` · `5s · 720p` |
+| `per_second` | 视频 | `$0.084` `/秒` · `720p` |
 | `per_image` | 图像 | `$0.07` `/图像` |
 | `per_million_tokens` | 语言模型 | `$5` `/M` |
 | `per_hour` | Serverless GPU | `$2.49` `/小时` |
@@ -435,7 +435,7 @@ CREATE INDEX idx_recent_user_visited ON user_model_recent (user_id, visited_at D
 - [ ] 响应分页包装 `{ items, total, offset, limit }`
 - [ ] 列表项含 `starting_price_usd`、`price_unit`（必填枚举）
 - [ ] `standard_price_usd` 可选，用于划线价
-- [ ] `price_detail` 为运行配置说明，非自由文本单位
+- [ ] `price_detail` 为运行配置说明；`per_second` 仅分辨率，非自由文本单位
 - [ ] 实现 `GET /api/models/batch?ids=`
 - [ ] 实现 `GET /api/user/model-preferences`（JWT，空列表不返回 null）
 - [ ] 实现 `POST /api/models/{id}/favourite`（幂等添加，404 当模型不存在）
