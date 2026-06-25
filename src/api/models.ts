@@ -23,12 +23,14 @@ interface ApiModel {
   thumbnail_url?: string | null
   icon_url?: string | null
   is_hot?: boolean | null
+  is_new?: boolean | null
 }
 
 interface ApiModelDetail extends ApiModel {
   model_path: string
   api_model_id?: string | null
   is_hot?: boolean
+  is_new?: boolean
   per_run_price_usd?: number | null
   runs_per_ten_usd?: number | null
   readme_md?: string | null
@@ -58,6 +60,7 @@ function mapModel(raw: ApiModel): Model {
     thumbnailUrl: raw.thumbnail_url ?? undefined,
     iconUrl: raw.icon_url ?? undefined,
     isHot: raw.is_hot ?? undefined,
+    isNew: raw.is_new ?? undefined,
   }
 }
 
@@ -67,6 +70,7 @@ function mapModelDetail(raw: ApiModelDetail): ModelDetail {
     modelPath: raw.model_path,
     apiModelId: raw.api_model_id ?? undefined,
     isHot: raw.is_hot,
+    isNew: raw.is_new,
     perRunPriceUsd: raw.per_run_price_usd ?? undefined,
     runsPerTenUsd: raw.runs_per_ten_usd ?? undefined,
     readmeMd: raw.readme_md ?? undefined,

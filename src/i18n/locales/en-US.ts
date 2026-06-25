@@ -68,6 +68,8 @@ export default {
     aiGenerator: {
       model: 'Model',
       hot: 'HOT',
+      new: 'NEW',
+      newHint: '{model} is now available',
       loadError: 'Failed to load models. Please try again.',
       modelLoadError: 'Failed to load model. Please try again.',
       emptyModels: 'No models available.',

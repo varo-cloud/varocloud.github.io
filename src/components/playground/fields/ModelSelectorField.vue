@@ -8,6 +8,7 @@ export type ModelSelectorOption = {
   id: string
   label: string
   isHot?: boolean
+  isNew?: boolean
 }
 
 const model = defineModel<string>({ required: true })
@@ -28,6 +29,10 @@ const panelId = useId()
 const selectedOption = computed(() => props.options.find((item) => item.id === model.value))
 
 const selectedLabel = computed(() => selectedOption.value?.label ?? '')
+
+const featuredNewOption = computed(() =>
+  props.options.find((item) => item.isNew && item.id !== model.value),
+)
 
 function updatePanelPosition() {
   const el = triggerRef.value
@@ -96,6 +101,9 @@ onBeforeUnmount(() => {
           <span v-if="selectedOption?.isHot" class="model-selector__hot">
             {{ t('pages.aiGenerator.hot') }}
           </span>
+          <span v-else-if="selectedOption?.isNew" class="model-selector__new">
+            {{ t('pages.aiGenerator.new') }}
+          </span>
         </span>
         <AppIcon
           name="chevron-down"
@@ -126,6 +134,7 @@ onBeforeUnmount(() => {
             <span class="model-selector__option-label">
               <span class="model-selector__option-name">{{ opt.label }}</span>
               <span v-if="opt.isHot" class="model-selector__hot">{{ t('pages.aiGenerator.hot') }}</span>
+              <span v-else-if="opt.isNew" class="model-selector__new">{{ t('pages.aiGenerator.new') }}</span>
             </span>
             <svg
               v-if="opt.id === model"
@@ -148,6 +157,19 @@ onBeforeUnmount(() => {
         </div>
       </Teleport>
     </div>
+
+    <button
+      v-if="featuredNewOption"
+      type="button"
+      class="model-selector__new-hint"
+      :disabled="disabled"
+      @click="selectOption(featuredNewOption.id)"
+    >
+      <span class="model-selector__new">{{ t('pages.aiGenerator.new') }}</span>
+      <span class="model-selector__new-hint-text">
+        {{ t('pages.aiGenerator.newHint', { model: featuredNewOption.label }) }}
+      </span>
+    </button>
   </div>
 </template>
 
@@ -210,6 +232,50 @@ onBeforeUnmount(() => {
   font-weight: 400;
   line-height: 12px;
   color: #fff;
+}
+
+.model-selector__new {
+  flex-shrink: 0;
+  padding: 1px 4px;
+  border-radius: 4px;
+  background: #06b6d4;
+  font-size: 10px;
+  font-weight: 400;
+  line-height: 12px;
+  color: #fff;
+}
+
+.model-selector__new-hint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: 8px;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 8px;
+  background: rgba(6, 182, 212, 0.08);
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.model-selector__new-hint:hover:not(:disabled) {
+  background: rgba(6, 182, 212, 0.14);
+}
+
+.model-selector__new-hint:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.model-selector__new-hint-text {
+  min-width: 0;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  color: #9b9dab;
 }
 
 .model-selector__chevron {

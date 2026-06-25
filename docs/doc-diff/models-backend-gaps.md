@@ -107,8 +107,9 @@
 | `thumbnail_url` | string | 可选 | 卡片顶部预览图 URL |
 | `icon_url` | string | 可选 | 模型品牌图标 URL，显示在卡片标题旁（16×16）；缺省时前端使用默认占位 |
 | `is_hot` | boolean | 可选 | 热门标记；`true` 时在 AI Generator 模型选择器等场景展示 HOT 标签；默认 `false` |
+| `is_new` | boolean | 可选 | 新品标记；`true` 时在 AI Generator 模型选择器展示 NEW 标签，并在选择器下方展示「现已上线」提示条（当前未选中该模型时）；默认 `false` |
 
-> **`is_hot` 配置来源：** 由 Admin 在模型编辑页维护（Switch），存于 `models.is_hot`；公开 `GET /api/models`、`GET /api/models/batch`、`GET /api/models/{id}` 均返回该字段。详见 [admin-backend-api.md §5.3](../admin/admin-backend-api.md#53-模型管理)。
+> **`is_hot` / `is_new` 配置来源：** 由 Admin 在模型编辑页维护（Switch），存于 `models.is_hot` / `models.is_new`；公开 `GET /api/models`、`GET /api/models/batch`、`GET /api/models/{id}` 均返回该字段。详见 [admin-backend-api.md §5.3](../admin/admin-backend-api.md#53-模型管理)。
 
 #### `price_unit` 枚举
 

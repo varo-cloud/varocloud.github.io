@@ -44,6 +44,7 @@ const modelOptions = computed<ModelSelectorOption[]>(() =>
     id: item.id,
     label: item.displayName ?? item.name,
     isHot: item.isHot,
+    isNew: item.isNew,
   })),
 )
 

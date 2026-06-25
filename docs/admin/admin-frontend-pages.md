@@ -343,6 +343,7 @@ user@example.com                    [调整余额] [禁用账号 P1]
 | model_path | Input | ✅ |
 | api_model_id | Input | ✅ |
 | 热门 | Switch | |
+| 新品 | Switch | |
 | 排序 | InputNumber | |
 | 上架 | Switch（或仅在列表操作） | |
 

@@ -36,6 +36,8 @@ export interface Model {
   iconUrl?: string
   /** Maps from API field `is_hot` */
   isHot?: boolean
+  /** Maps from API field `is_new` */
+  isNew?: boolean
 }
 
 export interface ModelDetail extends Model {
@@ -45,6 +47,8 @@ export interface ModelDetail extends Model {
   apiModelId?: string
   /** Maps from API field `is_hot` */
   isHot?: boolean
+  /** Maps from API field `is_new` */
+  isNew?: boolean
   /** Maps from API field `per_run_price_usd` — total USD for default run config */
   perRunPriceUsd?: number
   /** Maps from API field `runs_per_ten_usd` */

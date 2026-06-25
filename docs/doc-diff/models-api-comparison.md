@@ -132,6 +132,7 @@
 | `modelPath` | `model_path` | 模型路径，用于 API 文档展示 |
 | `inputSchema` | `input_schema` | JSON Schema，驱动 Playground 表单 |
 | `isHot` | `is_hot` | 可选，热门标记 |
+| `isNew` | `is_new` | 可选，新品标记 |
 | `perRunPriceUsd` | `per_run_price_usd` | 默认配置下单次运行总价（USD） |
 | `runsPerTenUsd` | `runs_per_ten_usd` | 可选，`$10` 可运行次数 |
 

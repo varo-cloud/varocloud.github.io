@@ -68,6 +68,8 @@ export default {
     aiGenerator: {
       model: '模型',
       hot: 'HOT',
+      new: 'NEW',
+      newHint: '{model} 现已上线',
       loadError: '加载模型列表失败，请重试。',
       modelLoadError: '加载模型失败，请重试。',
       emptyModels: '暂无可用模型。',
