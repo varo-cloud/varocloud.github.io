@@ -25,6 +25,10 @@ const thumbnailSrc = computed(() =>
   assetUrl(props.model.thumbnailUrl ?? '/assets/models/card-thumb.jpg'),
 )
 
+const iconSrc = computed(() =>
+  assetUrl(props.model.iconUrl ?? '/assets/models/seedance.svg'),
+)
+
 const capabilityBadge = computed(() => {
   const cap = props.model.capabilities[0]
   if (!cap) return ''
@@ -114,8 +118,8 @@ async function toggleFavourite(event: Event) {
       <div class="model-card__title-row">
         <h3 class="model-card__title">{{ displayName }}</h3>
         <img
-          class="model-card__chart"
-          :src="assetUrl('/assets/models/chart-dot.svg')"
+          class="model-card__icon"
+          :src="iconSrc"
           alt=""
           aria-hidden="true"
         />
@@ -227,7 +231,7 @@ async function toggleFavourite(event: Event) {
 
 .model-card__body {
   flex: 1;
-  padding: 12px 16px 0;
+  padding: 12px 16px 16px;
 }
 
 .model-card__title-row {
@@ -244,7 +248,7 @@ async function toggleFavourite(event: Event) {
   color: #222;
 }
 
-.model-card__chart {
+.model-card__icon {
   width: 16px;
   height: 16px;
   flex-shrink: 0;

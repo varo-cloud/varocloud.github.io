@@ -32,6 +32,8 @@ export interface Model {
   description: string
   /** Maps from API field `thumbnail_url` */
   thumbnailUrl?: string
+  /** Maps from API field `icon_url` — brand icon beside card title */
+  iconUrl?: string
 }
 
 export interface ModelDetail extends Model {

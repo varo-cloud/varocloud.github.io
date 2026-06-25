@@ -20,6 +20,7 @@ interface ModelCatalogEntry {
   is_hot?: boolean
   description: string
   thumbnail_url?: string
+  icon_url?: string
 }
 
 const baseModels: ModelCatalogEntry[] = [
@@ -41,6 +42,7 @@ const baseModels: ModelCatalogEntry[] = [
     description:
       'Hollywood-grade cinematic image-to-video generation with native audio sync at 480p or 720p. Animates a starting frame with natural-language motion prompts.',
     thumbnail_url: '/assets/model-detail/model-thumb.jpg',
+    icon_url: '/assets/models/seedance.svg',
   },
   {
     id: 'seedance-t2v',
@@ -59,6 +61,7 @@ const baseModels: ModelCatalogEntry[] = [
     description:
       'Hollywood-grade cinematic text-to-video generation with native audio sync. Supports reference images, videos, and audios for style and motion guidance.',
     thumbnail_url: '/assets/models/card-thumb.jpg',
+    icon_url: '/assets/models/seedance.svg',
   },
   {
     id: 'kling-t2v',
@@ -77,6 +80,7 @@ const baseModels: ModelCatalogEntry[] = [
     description:
       'High-quality text-to-video generation powered by Kling with cinematic motion control.',
     thumbnail_url: '/assets/models/card-thumb.jpg',
+    icon_url: '/assets/models/seedance.svg',
   },
   {
     id: 'kling-i2v',
@@ -95,6 +99,7 @@ const baseModels: ModelCatalogEntry[] = [
     description:
       'Transform reference images into smooth video clips with Kling image-to-video.',
     thumbnail_url: '/assets/models/card-thumb.jpg',
+    icon_url: '/assets/models/seedance.svg',
   },
 ]
 
@@ -166,6 +171,7 @@ function buildModelCatalog(): ModelCatalogEntry[] {
       description: `${family} ${template.capability.replace(/-/g, ' ')} generation powered by ${provider}.`,
       thumbnail_url:
         index % 3 === 0 ? '/assets/model-detail/model-thumb.jpg' : '/assets/models/card-thumb.jpg',
+      icon_url: '/assets/models/seedance.svg',
     })
     index += 1
   }

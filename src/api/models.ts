@@ -21,6 +21,7 @@ interface ApiModel {
   discount_percent?: number | null
   description: string
   thumbnail_url?: string | null
+  icon_url?: string | null
 }
 
 interface ApiModelDetail extends ApiModel {
@@ -54,6 +55,7 @@ function mapModel(raw: ApiModel): Model {
     discountPercent: raw.discount_percent ?? undefined,
     description: raw.description,
     thumbnailUrl: raw.thumbnail_url ?? undefined,
+    iconUrl: raw.icon_url ?? undefined,
   }
 }
 

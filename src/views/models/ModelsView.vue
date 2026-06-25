@@ -183,22 +183,23 @@ onMounted(() => {
         alt=""
         aria-hidden="true"
       />
-      <div class="models-hero__overlay" aria-hidden="true" />
 
-      <div class="models-hero__content">
-        <h1 id="models-hero-title" class="models-hero__title">
-          {{ t('common.slogan') }}
-        </h1>
-        <p class="models-hero__subtitle">
-          {{ t('pages.models.heroSubtitle') }}
-        </p>
-        <div class="models-hero__actions">
-          <button type="button" class="models-hero__btn models-hero__btn--primary" @click="goToAuth">
-            {{ t('pages.models.heroCtaPrimary') }}
-          </button>
-          <button type="button" class="models-hero__btn models-hero__btn--secondary" @click="goToDocs">
-            {{ t('pages.models.heroCtaSecondary') }}
-          </button>
+      <div class="models-hero__inner">
+        <div class="models-hero__content">
+          <h1 id="models-hero-title" class="models-hero__title">
+            {{ t('common.slogan') }}
+          </h1>
+          <p class="models-hero__subtitle">
+            {{ t('pages.models.heroSubtitle') }}
+          </p>
+          <div class="models-hero__actions">
+            <button type="button" class="models-hero__btn models-hero__btn--primary" @click="goToAuth">
+              {{ t('pages.models.heroCtaPrimary') }}
+            </button>
+            <button type="button" class="models-hero__btn models-hero__btn--secondary" @click="goToDocs">
+              {{ t('pages.models.heroCtaSecondary') }}
+            </button>
+          </div>
         </div>
       </div>
     </section>
@@ -281,9 +282,10 @@ onMounted(() => {
 .models-hero {
   position: relative;
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: center;
   min-height: 724px;
+  padding: 0 16px 49px;
   overflow: hidden;
 }
 
@@ -296,36 +298,34 @@ onMounted(() => {
   pointer-events: none;
 }
 
-.models-hero__overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.15);
-  pointer-events: none;
+.models-hero__inner {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 1360px;
+  margin: 0 auto;
 }
 
 .models-hero__content {
-  position: relative;
-  z-index: 1;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 36px;
+  align-items: flex-start;
+  gap: 24px;
   max-width: 738px;
-  padding: 120px 24px 80px;
-  text-align: center;
+  text-align: left;
 }
 
 .models-hero__title {
   margin: 0;
   font-size: clamp(36px, 5vw, 56px);
-  font-weight: 800;
+  font-weight: 900;
   line-height: 1.14;
   color: #fff;
 }
 
 .models-hero__subtitle {
   margin: 0;
-  max-width: 640px;
+  max-width: 738px;
   font-size: clamp(16px, 2.5vw, 20px);
   font-weight: 600;
   line-height: 1.2;
@@ -336,8 +336,7 @@ onMounted(() => {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: center;
-  gap: 12px;
+  gap: 16px;
 }
 
 .models-hero__btn {
@@ -520,6 +519,18 @@ onMounted(() => {
   .models-list__inner {
     padding-inline: 24px;
   }
+
+  .models-hero {
+    padding-inline: 24px;
+  }
+
+  .models-hero__title {
+    line-height: 64px;
+  }
+
+  .models-hero__subtitle {
+    line-height: 24px;
+  }
 }
 
 @media (min-width: 1280px) {
@@ -530,13 +541,9 @@ onMounted(() => {
 
 @media (max-width: 767px) {
   .models-hero {
+    align-items: flex-end;
     min-height: 520px;
-  }
-
-  .models-hero__content {
-    gap: 24px;
-    padding-top: 96px;
-    padding-bottom: 48px;
+    padding: 0 16px 40px;
   }
 
   .models-toolbar {

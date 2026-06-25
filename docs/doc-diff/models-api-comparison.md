@@ -71,7 +71,8 @@
         "price_detail": "720p",
         "discount_percent": 16,
         "description": "...",
-        "thumbnail_url": "/..."
+        "thumbnail_url": "/...",
+        "icon_url": "/assets/models/seedance.svg"
       }
     ],
     "total": 48,
@@ -97,6 +98,7 @@
 | `discountPercent` | `discount_percent` | — | ❌ 缺失 |
 | `description` | `description` | — | ❌ 缺失 |
 | `thumbnailUrl` | `thumbnail_url` | — | ❌ 缺失 |
+| `iconUrl` | `icon_url` | — | ❌ 缺失 |
 | — | `credits_per_second` | ✅ | 前端不使用，后端应换算为 USD |
 | — | `active` | ✅ | 前端列表不展示，后端可过滤 `active=false` |
 

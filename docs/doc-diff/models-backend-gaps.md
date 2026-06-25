@@ -77,7 +77,8 @@
         "price_detail": "720p",
         "discount_percent": 16,
         "description": "Hollywood-grade cinematic image-to-video...",
-        "thumbnail_url": "https://cdn.example.com/thumbs/seedance-i2v.jpg"
+        "thumbnail_url": "https://cdn.example.com/thumbs/seedance-i2v.jpg",
+        "icon_url": "https://cdn.example.com/icons/seedance.svg"
       }
     ],
     "total": 48,
@@ -102,7 +103,8 @@
 | `price_detail` | string | 可选 | 运行配置说明；`per_second` 时仅填分辨率，如 `720p`（非计费单位，不含时长） |
 | `discount_percent` | number | 可选 | 折扣整数，如 `16` → `-16%` |
 | `description` | string | ✅ | 卡片描述 |
-| `thumbnail_url` | string | 可选 | 缩略图 URL |
+| `thumbnail_url` | string | 可选 | 卡片顶部预览图 URL |
+| `icon_url` | string | 可选 | 模型品牌图标 URL，显示在卡片标题旁（16×16）；缺省时前端使用默认占位 |
 
 #### `price_unit` 枚举
 

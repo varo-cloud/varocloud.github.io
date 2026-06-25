@@ -347,6 +347,7 @@ JWT claims 含 `sub`（用户 ID）与 `role`，详见 [auth-zh.md](../api-doc/a
   "capabilities": ["text-to-video"],
   "description": "...",
   "thumbnail_url": "https://cdn.example.com/thumb.jpg",
+  "icon_url": "https://cdn.example.com/icons/seedance.svg",
   "model_path": "bytedance/seedance-2.0/text-to-video",
   "api_model_id": "dreamina-seedance-2-0-260128",
   "active": false,
