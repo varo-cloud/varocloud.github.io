@@ -311,16 +311,17 @@ onMounted(() => {
   flex-direction: column;
   align-items: flex-start;
   gap: 24px;
-  max-width: 738px;
   text-align: left;
 }
 
 .models-hero__title {
   margin: 0;
+  max-width: 964px;
   font-size: clamp(36px, 5vw, 56px);
   font-weight: 900;
   line-height: 1.14;
   color: #fff;
+  word-break: break-word;
 }
 
 .models-hero__subtitle {
@@ -330,6 +331,7 @@ onMounted(() => {
   font-weight: 600;
   line-height: 1.2;
   color: rgba(255, 255, 255, 0.5);
+  word-break: break-word;
 }
 
 .models-hero__actions {
@@ -525,10 +527,12 @@ onMounted(() => {
   }
 
   .models-hero__title {
+    font-size: 56px;
     line-height: 64px;
   }
 
   .models-hero__subtitle {
+    font-size: 20px;
     line-height: 24px;
   }
 }
