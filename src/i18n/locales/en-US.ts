@@ -26,9 +26,13 @@ export default {
   },
   footer: {
     navLabel: 'Footer',
+    contactLabel: 'Contact',
     terms: 'Terms of Service',
     privacy: 'Privacy Policy',
     supportEmail: 'Contact support',
+    discord: 'Discord',
+    x: 'X',
+    youtube: 'YouTube',
     twitter: 'X (Twitter)',
     telegram: 'Telegram',
   },

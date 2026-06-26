@@ -7,13 +7,25 @@ import AppFooter from './AppFooter.vue'
 const route = useRoute()
 
 const isFullBleed = computed(() => route.meta.fullBleed === true)
+const isLightPage = computed(() => route.meta.lightPage === true)
 </script>
 
 <template>
-  <div class="app-layout" :class="{ 'app-layout--full-bleed': isFullBleed }">
+  <div
+    class="app-layout"
+    :class="{
+      'app-layout--full-bleed': isFullBleed,
+      'app-layout--light': isLightPage,
+    }"
+  >
     <AppHeader />
     <main class="app-layout__main">
-      <div :class="isFullBleed ? 'app-layout__full' : 'app-layout__content'">
+      <div
+        :class="[
+          isFullBleed ? 'app-layout__full' : 'app-layout__content',
+          { 'app-layout__content--light': isLightPage && !isFullBleed },
+        ]"
+      >
         <RouterView />
       </div>
     </main>
@@ -47,6 +59,16 @@ const isFullBleed = computed(() => route.meta.fullBleed === true)
 
 .app-layout--full-bleed .app-layout__main {
   margin-top: -80px;
+}
+
+.app-layout--light {
+  background: #fff;
+  color: #333;
+}
+
+.app-layout__content--light {
+  max-width: none;
+  padding: 0;
 }
 
 @media (max-width: 767px) {

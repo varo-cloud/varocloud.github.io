@@ -26,9 +26,13 @@ export default {
   },
   footer: {
     navLabel: '页脚',
+    contactLabel: '联系方式',
     terms: '服务条款',
     privacy: '隐私政策',
     supportEmail: '联系客服',
+    discord: 'Discord',
+    x: 'X',
+    youtube: 'YouTube',
     twitter: 'X (Twitter)',
     telegram: 'Telegram',
   },

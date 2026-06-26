@@ -1,0 +1,600 @@
+<!doctype html>
+<html>
+<head>
+<meta charset='UTF-8'><meta name='viewport' content='width=device-width initial-scale=1'>
+
+<link href='https://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,700,400&subset=latin,latin-ext' rel='stylesheet' type='text/css' /><style type='text/css'>html {overflow-x: initial !important;}:root { --bg-color: #ffffff; --text-color: #333333; --select-text-bg-color: #B5D6FC; --select-text-font-color: auto; --monospace: "Lucida Console",Consolas,"Courier",monospace; --title-bar-height: 20px; }
+.mac-os-11 { --title-bar-height: 28px; }
+html { font-size: 14px; background-color: var(--bg-color); color: var(--text-color); font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+h1, h2, h3, h4, h5 { white-space: pre-wrap; }
+body { margin: 0px; padding: 0px; height: auto; inset: 0px; font-size: 1rem; line-height: 1.428571; overflow-x: hidden; background: inherit; tab-size: 4; }
+iframe { margin: auto; }
+a.url { word-break: break-all; }
+a:active, a:hover { outline: 0px; }
+.in-text-selection, ::selection { text-shadow: none; background: var(--select-text-bg-color); color: var(--select-text-font-color); }
+#write { margin: 0px auto; height: auto; width: inherit; word-break: normal; overflow-wrap: break-word; position: relative; white-space: normal; overflow-x: visible; padding-top: 36px; }
+#write.first-line-indent p { text-indent: 2em; }
+#write.first-line-indent li p, #write.first-line-indent p * { text-indent: 0px; }
+#write.first-line-indent li { margin-left: 2em; }
+.for-image #write { padding-left: 8px; padding-right: 8px; }
+body.typora-export { padding-left: 30px; padding-right: 30px; }
+.typora-export .footnote-line, .typora-export li, .typora-export p { white-space: pre-wrap; }
+.typora-export .task-list-item input { pointer-events: none; }
+@media screen and (max-width: 500px) {
+  body.typora-export { padding-left: 0px; padding-right: 0px; }
+  #write { padding-left: 20px; padding-right: 20px; }
+}
+#write li > figure:last-child { margin-bottom: 0.5rem; }
+#write ol, #write ul { position: relative; }
+img { max-width: 100%; vertical-align: middle; image-orientation: from-image; }
+button, input, select, textarea { color: inherit; font-style: inherit; font-variant-caps: inherit; font-weight: inherit; font-width: inherit; font-size: inherit; line-height: inherit; font-family: inherit; font-size-adjust: inherit; font-kerning: inherit; font-variant-alternates: inherit; font-variant-ligatures: inherit; font-variant-numeric: inherit; font-variant-east-asian: inherit; font-variant-position: inherit; font-variant-emoji: inherit; font-feature-settings: inherit; font-optical-sizing: inherit; font-variation-settings: inherit; }
+input[type="checkbox"], input[type="radio"] { line-height: normal; padding: 0px; }
+*, ::after, ::before { box-sizing: border-box; }
+#write h1, #write h2, #write h3, #write h4, #write h5, #write h6, #write p, #write pre { width: inherit; }
+#write h1, #write h2, #write h3, #write h4, #write h5, #write h6, #write p { position: relative; }
+p { line-height: inherit; }
+h1, h2, h3, h4, h5, h6 { break-after: avoid-page; break-inside: avoid; orphans: 4; }
+p { orphans: 4; }
+h1 { font-size: 2rem; }
+h2 { font-size: 1.8rem; }
+h3 { font-size: 1.6rem; }
+h4 { font-size: 1.4rem; }
+h5 { font-size: 1.2rem; }
+h6 { font-size: 1rem; }
+.md-math-block, .md-rawblock, h1, h2, h3, h4, h5, h6, p { margin-top: 1rem; margin-bottom: 1rem; }
+.hidden { display: none; }
+.md-blockmeta { color: rgb(204, 204, 204); font-weight: 700; font-style: italic; }
+a { cursor: pointer; }
+sup.md-footnote { padding: 2px 4px; background-color: rgba(238, 238, 238, 0.7); color: rgb(85, 85, 85); border-radius: 4px; cursor: pointer; }
+sup.md-footnote a, sup.md-footnote a:hover { color: inherit; text-transform: inherit; text-decoration: inherit; }
+#write input[type="checkbox"] { cursor: pointer; width: inherit; height: inherit; }
+figure { overflow-x: auto; margin: 1.2em 0px; max-width: calc(100% + 16px); padding: 0px; }
+figure > table { margin: 0px; }
+thead, tr { break-inside: avoid; break-after: auto; }
+thead { display: table-header-group; }
+table { border-collapse: collapse; border-spacing: 0px; width: 100%; overflow: auto; break-inside: auto; text-align: left; }
+table.md-table td { min-width: 32px; }
+.CodeMirror-gutters { border-right-width: 0px; border-right-style: none; border-right-color: currentcolor; background-color: inherit; }
+.CodeMirror-linenumber { -webkit-user-select: none; }
+.CodeMirror { text-align: left; }
+.CodeMirror-placeholder { opacity: 0.3; }
+.CodeMirror pre { padding: 0px 4px; }
+.CodeMirror-lines { padding: 0px; }
+div.hr:focus { cursor: none; }
+#write pre { white-space: pre-wrap; }
+#write.fences-no-line-wrapping pre { white-space: pre; }
+#write pre.ty-contain-cm { white-space: normal; }
+.CodeMirror-gutters { margin-right: 4px; }
+.md-fences { font-size: 0.9rem; display: block; break-inside: avoid; text-align: left; overflow: visible; white-space: pre; background: inherit; position: relative !important; }
+.md-fences-adv-panel { width: 100%; margin-top: 10px; text-align: center; padding-top: 0px; padding-bottom: 8px; overflow-x: auto; }
+#write .md-fences.mock-cm { white-space: pre-wrap; }
+.md-fences.md-fences-with-lineno { padding-left: 0px; }
+#write.fences-no-line-wrapping .md-fences.mock-cm { white-space: pre; overflow-x: auto; }
+.md-fences.mock-cm.md-fences-with-lineno { padding-left: 8px; }
+.CodeMirror-line, twitterwidget { break-inside: avoid; }
+svg { break-inside: avoid; }
+.footnotes { opacity: 0.8; font-size: 0.9rem; margin-top: 1em; margin-bottom: 1em; }
+.footnotes + .footnotes { margin-top: 0px; }
+.md-reset { margin: 0px; padding: 0px; border: 0px; outline: 0px; vertical-align: top; background: 0px 0px; text-decoration: none; text-shadow: none; float: none; position: static; width: auto; height: auto; white-space: nowrap; cursor: inherit; line-height: normal; font-weight: 400; text-align: left; box-sizing: content-box; direction: ltr; }
+li div { padding-top: 0px; }
+blockquote { margin: 1rem 0px; }
+li .mathjax-block, li p { margin: 0.5rem 0px; }
+li blockquote { margin: 1rem 0px; }
+li { margin: 0px; position: relative; }
+blockquote > :last-child { margin-bottom: 0px; }
+blockquote > :first-child, li > :first-child { margin-top: 0px; }
+.footnotes-area { color: rgb(136, 136, 136); margin-top: 0.714rem; padding-bottom: 0.143rem; white-space: normal; }
+#write .footnote-line { white-space: pre-wrap; }
+@media print {
+  body, html { border: 1px solid transparent; height: 99%; break-after: avoid; break-before: avoid; font-variant-ligatures: no-common-ligatures; }
+  #write { margin-top: 0px; border-color: transparent !important; padding-top: 0px !important; padding-bottom: 0px !important; }
+  .typora-export * { print-color-adjust: exact; }
+  .typora-export #write { break-after: avoid; }
+  .typora-export #write::after { height: 0px; }
+  .is-mac table { break-inside: avoid; }
+  #write > p:nth-child(1) { margin-top: 0px; }
+  .typora-export-show-outline .typora-export-sidebar { display: none; }
+  figure { overflow-x: visible; }
+}
+.footnote-line { margin-top: 0.714em; font-size: 0.7em; }
+a img, img a { cursor: pointer; }
+pre.md-meta-block { font-size: 0.8rem; min-height: 0.8rem; white-space: pre-wrap; background: rgb(204, 204, 204); display: block; overflow-x: hidden; }
+p > .md-image:only-child:not(.md-img-error) img, p > img:only-child { display: block; margin: auto; }
+#write.first-line-indent p > .md-image:only-child:not(.md-img-error) img { left: -2em; position: relative; }
+p > .md-image:only-child { display: inline-block; width: 100%; }
+#write .MathJax_Display { margin: 0.8em 0px 0px; }
+.md-math-block { width: 100%; }
+.md-math-block:not(:empty)::after { display: none; }
+.MathJax_ref { fill: currentcolor; }
+[contenteditable="true"]:active, [contenteditable="true"]:focus, [contenteditable="false"]:active, [contenteditable="false"]:focus { outline: 0px; box-shadow: none; }
+.md-task-list-item { position: relative; list-style-type: none; }
+.task-list-item.md-task-list-item { padding-left: 0px; }
+.md-task-list-item > input { position: absolute; top: 0px; left: 0px; margin-left: -1.2em; margin-top: calc(1em - 10px); border: medium; }
+.math { font-size: 1rem; }
+.md-toc { min-height: 3.58rem; position: relative; font-size: 0.9rem; border-radius: 10px; }
+.md-toc-content { position: relative; margin-left: 0px; }
+.md-toc-content::after, .md-toc::after { display: none; }
+.md-toc-item { display: block; color: rgb(65, 131, 196); }
+.md-toc-item a { text-decoration: none; }
+.md-toc-inner:hover { text-decoration: underline; }
+.md-toc-inner { display: inline-block; cursor: pointer; }
+.md-toc-h1 .md-toc-inner { margin-left: 0px; font-weight: 700; }
+.md-toc-h2 .md-toc-inner { margin-left: 2em; }
+.md-toc-h3 .md-toc-inner { margin-left: 4em; }
+.md-toc-h4 .md-toc-inner { margin-left: 6em; }
+.md-toc-h5 .md-toc-inner { margin-left: 8em; }
+.md-toc-h6 .md-toc-inner { margin-left: 10em; }
+@media screen and (max-width: 48em) {
+  .md-toc-h3 .md-toc-inner { margin-left: 3.5em; }
+  .md-toc-h4 .md-toc-inner { margin-left: 5em; }
+  .md-toc-h5 .md-toc-inner { margin-left: 6.5em; }
+  .md-toc-h6 .md-toc-inner { margin-left: 8em; }
+}
+a.md-toc-inner { font-size: inherit; font-style: inherit; font-weight: inherit; line-height: inherit; }
+.footnote-line a:not(.reversefootnote) { color: inherit; }
+.reversefootnote { font-family: ui-monospace, sans-serif; }
+.md-attr { display: none; }
+.md-fn-count::after { content: "."; }
+code, pre, samp, tt { font-family: var(--monospace); }
+kbd { margin: 0px 0.1em; padding: 0.1em 0.6em; font-size: 0.8em; color: rgb(36, 39, 41); background: rgb(255, 255, 255); border: 1px solid rgb(173, 179, 185); border-radius: 3px; box-shadow: rgba(12, 13, 14, 0.2) 0px 1px 0px, rgb(255, 255, 255) 0px 0px 0px 2px inset; white-space: nowrap; vertical-align: middle; }
+.md-comment { color: rgb(162, 127, 3); opacity: 0.6; font-family: var(--monospace); }
+code { text-align: left; vertical-align: initial; }
+a.md-print-anchor { white-space: pre !important; border-width: medium !important; border-style: none !important; border-color: currentcolor !important; display: inline-block !important; position: absolute !important; width: 1px !important; right: 0px !important; outline: 0px !important; background: 0px 0px !important; text-decoration: initial !important; text-shadow: initial !important; }
+.os-windows.monocolor-emoji .md-emoji { font-family: "Segoe UI Symbol", sans-serif; }
+.md-diagram-panel > svg { max-width: 100%; }
+[lang="flow"] svg, [lang="mermaid"] svg { max-width: 100%; height: auto; }
+[lang="mermaid"] .node text { font-size: 1rem; }
+table tr th { border-bottom-width: 0px; border-bottom-style: none; border-bottom-color: currentcolor; }
+video { max-width: 100%; display: block; margin: 0px auto; }
+iframe { max-width: 100%; width: 100%; border: medium; }
+.highlight td, .highlight tr { border: 0px; }
+mark { background: rgb(255, 255, 0); color: rgb(0, 0, 0); }
+.md-html-inline .md-plain, .md-html-inline strong, mark .md-inline-math, mark strong { color: inherit; }
+.md-expand mark .md-meta { opacity: 0.3 !important; }
+mark .md-meta { color: rgb(0, 0, 0); }
+@media print {
+  .typora-export h1, .typora-export h2, .typora-export h3, .typora-export h4, .typora-export h5, .typora-export h6 { break-inside: avoid; }
+}
+.md-diagram-panel .messageText { stroke: none !important; }
+.md-diagram-panel .start-state { fill: var(--node-fill); }
+.md-diagram-panel .edgeLabel rect { opacity: 1 !important; }
+.md-fences.md-fences-math { font-size: 1em; }
+.md-fences-advanced:not(.md-focus) { padding: 0px; white-space: nowrap; border: 0px; }
+.md-fences-advanced:not(.md-focus) { background: inherit; }
+.typora-export-show-outline .typora-export-content { max-width: 1440px; margin: auto; display: flex; flex-direction: row; }
+.typora-export-sidebar { width: 300px; font-size: 0.8rem; margin-top: 80px; margin-right: 18px; }
+.typora-export-show-outline #write { --webkit-flex: 2; flex: 2 1 0%; }
+.typora-export-sidebar .outline-content { position: fixed; top: 0px; max-height: 100%; overflow: hidden auto; padding-bottom: 30px; padding-top: 60px; width: 300px; }
+@media screen and (max-width: 1024px) {
+  .typora-export-sidebar, .typora-export-sidebar .outline-content { width: 240px; }
+}
+@media screen and (max-width: 800px) {
+  .typora-export-sidebar { display: none; }
+}
+.outline-content li, .outline-content ul { margin-left: 0px; margin-right: 0px; padding-left: 0px; padding-right: 0px; list-style: none; overflow-wrap: anywhere; }
+.outline-content ul { margin-top: 0px; margin-bottom: 0px; }
+.outline-content strong { font-weight: 400; }
+.outline-expander { width: 1rem; height: 1.428571rem; position: relative; display: table-cell; vertical-align: middle; cursor: pointer; padding-left: 4px; }
+.outline-expander::before { content: ""; position: relative; font-family: Ionicons; display: inline-block; font-size: 8px; vertical-align: middle; }
+.outline-item { padding-top: 3px; padding-bottom: 3px; cursor: pointer; }
+.outline-expander:hover::before { content: ""; }
+.outline-h1 > .outline-item { padding-left: 0px; }
+.outline-h2 > .outline-item { padding-left: 1em; }
+.outline-h3 > .outline-item { padding-left: 2em; }
+.outline-h4 > .outline-item { padding-left: 3em; }
+.outline-h5 > .outline-item { padding-left: 4em; }
+.outline-h6 > .outline-item { padding-left: 5em; }
+.outline-label { cursor: pointer; display: table-cell; vertical-align: middle; text-decoration: none; color: inherit; }
+.outline-label:hover { text-decoration: underline; }
+.outline-item:hover { border-color: rgb(245, 245, 245); background-color: var(--item-hover-bg-color); }
+.outline-item:hover { margin-left: -28px; margin-right: -28px; border-left-width: 28px; border-left-style: solid; border-left-color: transparent; border-right-width: 28px; border-right-style: solid; border-right-color: transparent; }
+.outline-item-single .outline-expander::before, .outline-item-single .outline-expander:hover::before { display: none; }
+.outline-item-open > .outline-item > .outline-expander::before { content: ""; }
+.outline-children { display: none; }
+.info-panel-tab-wrapper { display: none; }
+.outline-item-open > .outline-children { display: block; }
+.typora-export .outline-item { padding-top: 1px; padding-bottom: 1px; }
+.typora-export .outline-item:hover { margin-right: -8px; border-right-width: 8px; border-right-style: solid; border-right-color: transparent; }
+.typora-export .outline-expander::before { content: "+"; font-family: inherit; top: -1px; }
+.typora-export .outline-expander:hover::before, .typora-export .outline-item-open > .outline-item > .outline-expander::before { content: "−"; }
+.typora-export-collapse-outline .outline-children { display: none; }
+.typora-export-collapse-outline .outline-item-open > .outline-children, .typora-export-no-collapse-outline .outline-children { display: block; }
+.typora-export-no-collapse-outline .outline-expander::before { content: "" !important; }
+.typora-export-show-outline .outline-item-active > .outline-item .outline-label { font-weight: 700; }
+.md-inline-math-container mjx-container { zoom: 0.95; }
+mjx-container { break-inside: avoid; }
+
+
+:root {
+    --side-bar-bg-color: #fafafa;
+    --control-text-color: #777;
+}
+
+@include-when-export url(https://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,700,400&subset=latin,latin-ext);
+
+/* open-sans-regular - latin-ext_latin */
+  /* open-sans-italic - latin-ext_latin */
+    /* open-sans-700 - latin-ext_latin */
+    /* open-sans-700italic - latin-ext_latin */
+  html {
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+}
+
+body {
+    font-family: "Open Sans","Clear Sans", "Helvetica Neue", Helvetica, Arial, 'Segoe UI Emoji', sans-serif;
+    color: rgb(51, 51, 51);
+    line-height: 1.6;
+}
+
+#write {
+    max-width: 860px;
+  	margin: 0 auto;
+  	padding: 30px;
+    padding-bottom: 100px;
+}
+
+@media only screen and (min-width: 1400px) {
+	#write {
+		max-width: 1024px;
+	}
+}
+
+@media only screen and (min-width: 1800px) {
+	#write {
+		max-width: 1200px;
+	}
+}
+
+#write > ul:first-child,
+#write > ol:first-child{
+    margin-top: 30px;
+}
+
+a {
+    color: #4183C4;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    position: relative;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    font-weight: bold;
+    line-height: 1.4;
+    cursor: text;
+}
+h1:hover a.anchor,
+h2:hover a.anchor,
+h3:hover a.anchor,
+h4:hover a.anchor,
+h5:hover a.anchor,
+h6:hover a.anchor {
+    text-decoration: none;
+}
+h1 tt,
+h1 code {
+    font-size: inherit;
+}
+h2 tt,
+h2 code {
+    font-size: inherit;
+}
+h3 tt,
+h3 code {
+    font-size: inherit;
+}
+h4 tt,
+h4 code {
+    font-size: inherit;
+}
+h5 tt,
+h5 code {
+    font-size: inherit;
+}
+h6 tt,
+h6 code {
+    font-size: inherit;
+}
+h1 {
+    font-size: 2.25em;
+    line-height: 1.2;
+    border-bottom: 1px solid #eee;
+}
+h2 {
+    font-size: 1.75em;
+    line-height: 1.225;
+    border-bottom: 1px solid #eee;
+}
+
+/*@media print {
+    .typora-export h1,
+    .typora-export h2 {
+        border-bottom: none;
+        padding-bottom: initial;
+    }
+
+    .typora-export h1::after,
+    .typora-export h2::after {
+        content: "";
+        display: block;
+        height: 100px;
+        margin-top: -96px;
+        border-top: 1px solid #eee;
+    }
+}*/
+
+h3 {
+    font-size: 1.5em;
+    line-height: 1.43;
+}
+h4 {
+    font-size: 1.25em;
+}
+h5 {
+    font-size: 1em;
+}
+h6 {
+   font-size: 1em;
+    color: #777;
+}
+p,
+blockquote,
+ul,
+ol,
+dl,
+table{
+    margin: 0.8em 0;
+}
+li>ol,
+li>ul {
+    margin: 0 0;
+}
+hr {
+    height: 2px;
+    padding: 0;
+    margin: 16px 0;
+    background-color: #e7e7e7;
+    border: 0 none;
+    overflow: hidden;
+    box-sizing: content-box;
+}
+
+li p.first {
+    display: inline-block;
+}
+ul,
+ol {
+    padding-left: 30px;
+}
+ul:first-child,
+ol:first-child {
+    margin-top: 0;
+}
+ul:last-child,
+ol:last-child {
+    margin-bottom: 0;
+}
+blockquote {
+    border-left: 4px solid #dfe2e5;
+    padding: 0 15px;
+    color: #777777;
+}
+blockquote blockquote {
+    padding-right: 0;
+}
+table {
+    padding: 0;
+    word-break: initial;
+}
+table tr {
+    border: 1px solid #dfe2e5;
+    margin: 0;
+    padding: 0;
+}
+table tr:nth-child(2n),
+thead {
+    background-color: #f8f8f8;
+}
+table th {
+    font-weight: bold;
+    border: 1px solid #dfe2e5;
+    border-bottom: 0;
+    margin: 0;
+    padding: 6px 13px;
+}
+table td {
+    border: 1px solid #dfe2e5;
+    margin: 0;
+    padding: 6px 13px;
+}
+table th:first-child,
+table td:first-child {
+    margin-top: 0;
+}
+table th:last-child,
+table td:last-child {
+    margin-bottom: 0;
+}
+
+.CodeMirror-lines {
+    padding-left: 4px;
+}
+
+.code-tooltip {
+    box-shadow: 0 1px 1px 0 rgba(0,28,36,.3);
+    border-top: 1px solid #eef2f2;
+}
+
+.md-fences,
+code,
+tt {
+    border: 1px solid #e7eaed;
+    background-color: #f8f8f8;
+    border-radius: 3px;
+    padding: 0;
+    padding: 2px 4px 0px 4px;
+    font-size: 0.9em;
+}
+
+code {
+    background-color: #f3f4f4;
+    padding: 0 2px 0 2px;
+}
+
+.md-fences {
+    margin-bottom: 15px;
+    margin-top: 15px;
+    padding-top: 8px;
+    padding-bottom: 6px;
+}
+
+
+.md-task-list-item > input {
+  margin-left: -1.3em;
+}
+
+@media print {
+    html {
+        font-size: 13px;
+    }
+    pre {
+        page-break-inside: avoid;
+        word-wrap: break-word;
+    }
+}
+
+.md-fences {
+	background-color: #f8f8f8;
+}
+#write pre.md-meta-block {
+	padding: 1rem;
+    font-size: 85%;
+    line-height: 1.45;
+    background-color: #f7f7f7;
+    border: 0;
+    border-radius: 3px;
+    color: #777777;
+    margin-top: 0 !important;
+}
+
+.mathjax-block>.code-tooltip {
+	bottom: .375rem;
+}
+
+.md-mathjax-midline {
+    background: #fafafa;
+}
+
+#write>h3.md-focus:before{
+	left: -1.5625rem;
+	top: .375rem;
+}
+#write>h4.md-focus:before{
+	left: -1.5625rem;
+	top: .285714286rem;
+}
+#write>h5.md-focus:before{
+	left: -1.5625rem;
+	top: .285714286rem;
+}
+#write>h6.md-focus:before{
+	left: -1.5625rem;
+	top: .285714286rem;
+}
+.md-image>.md-meta {
+    /*border: 1px solid #ddd;*/
+    border-radius: 3px;
+    padding: 2px 0px 0px 4px;
+    font-size: 0.9em;
+    color: inherit;
+}
+
+.md-tag {
+    color: #a7a7a7;
+    opacity: 1;
+}
+
+.md-toc { 
+    margin-top:20px;
+    padding-bottom:20px;
+}
+
+.sidebar-tabs {
+    border-bottom: none;
+}
+
+#typora-quick-open {
+    border: 1px solid #ddd;
+    background-color: #f8f8f8;
+}
+
+#typora-quick-open-item {
+    background-color: #FAFAFA;
+    border-color: #FEFEFE #e5e5e5 #e5e5e5 #eee;
+    border-style: solid;
+    border-width: 1px;
+}
+
+/** focus mode */
+.on-focus-mode blockquote {
+    border-left-color: rgba(85, 85, 85, 0.12);
+}
+
+header, .context-menu, .megamenu-content, footer{
+    font-family: "Segoe UI", "Arial", sans-serif;
+}
+
+.file-node-content:hover .file-node-icon,
+.file-node-content:hover .file-node-open-state{
+    visibility: visible;
+}
+
+.mac-seamless-mode #typora-sidebar {
+    background-color: #fafafa;
+    background-color: var(--side-bar-bg-color);
+}
+
+.md-lang {
+    color: #b4654d;
+}
+
+/*.html-for-mac {
+    --item-hover-bg-color: #E6F0FE;
+}*/
+
+#md-notification .btn {
+    border: 0;
+}
+
+.dropdown-menu .divider {
+    border-color: #e5e5e5;
+    opacity: 0.4;
+}
+
+.ty-preferences .window-content {
+    background-color: #fafafa;
+}
+
+.ty-preferences .nav-group-item.active {
+    color: white;
+    background: #999;
+}
+
+.menu-item-container a.menu-style-btn {
+    background-color: #f5f8fa;
+    background-image: linear-gradient( 180deg , hsla(0, 0%, 100%, 0.8), hsla(0, 0%, 100%, 0)); 
+}
+
+
+ @media print { @page {margin: 0 0 0 0;} body.typora-export {padding-left: 0; padding-right: 0;} #write {padding:0;}}
+</style><title>Varo.cloud-Terms-of-Service</title>
+</head>
+<body class='typora-export'><div class='typora-export-content'>
+<div id='write'  class=''><h1 id='varocloud-terms-of-service'><span>Varo.cloud Terms of Service</span></h1><p><em><span>Effective date: June 25, 2026</span></em></p><p><span>Welcome to Varo.cloud! These Terms of Service (&quot;</span><strong><span>Terms</span></strong><span>&quot;) are a legally binding agreement between you (&quot;</span><strong><span>Customer</span></strong><span>&quot;, &quot;</span><strong><span>you</span></strong><span>&quot;, or &quot;</span><strong><span>your</span></strong><span>&quot;) and </span><strong><span>NEW DATA AI PTE LTD</span></strong><span>, a company incorporated in Singapore (&quot;</span><strong><span>Varo.cloud</span></strong><span>&quot;, &quot;</span><strong><span>we</span></strong><span>&quot;, &quot;</span><strong><span>us</span></strong><span>&quot;, or &quot;</span><strong><span>our</span></strong><span>&quot;).</span></p><p><span>Any mention of &quot;you&quot; or &quot;Customer&quot; in these Terms means either you, the end user using the Services in your personal capacity, or, if you are acting as a duly authorized Representative of an entity, that entity. &quot;</span><strong><span>Party</span></strong><span>&quot; means Varo.cloud or Customer, as applicable, and &quot;</span><strong><span>Parties</span></strong><span>&quot; means Varo.cloud and Customer collectively.</span></p><p><span>By accessing or using the Services, you represent and warrant that you are at least 18 years of age or over the age of majority in the jurisdiction where you reside. If an end user is under 18, such end user may use the Services only with the consent and supervision of a parent or legal guardian, and that parent or legal guardian assumes liability as if they were the end user. Section 8 of our Privacy Policy explains separately that we do not knowingly collect personal information from children under the age of 13, consistent with COPPA and similar laws.</span></p><p><span>PLEASE READ THESE TERMS CAREFULLY AS THEY ARE A LEGALLY BINDING CONTRACT BETWEEN THE PARTIES. THESE TERMS CONTAIN CERTAIN DISCLAIMERS LIMITING VARO.CLOUD&#39;S LIABILITY AND ADDRESS DISPUTE RESOLUTION - PARTIES WILL ONLY RESOLVE DISPUTES THROUGH INDIVIDUAL ARBITRATION PROCEEDINGS AND WAIVE THE ABILITY TO LITIGATE IN COURT, WHETHER INDIVIDUALLY OR AS PART OF A CLASS ACTION.</span></p><p><span>In addition to these Terms, please review our </span><a href='https://varo.cloud/privacy'><span>Privacy Policy</span></a><span>, which is incorporated by reference into these Terms and explains how we access and use your information. These Terms are published at </span><a href='https://varo.cloud/terms'><span>https://varo.cloud/terms</span></a><span>.</span></p><h2 id='1-definitions'><span>1. Definitions</span></h2><p><strong><span>1.1</span></strong><span>. &quot;Action&quot; means any claim, action, cause of action, demand, lawsuit, arbitration, inquiry, audit, notice of violation, proceeding, litigation, citation, summons, subpoena, or investigation of any nature, civil, criminal, administrative, regulatory, or other, whether at law, in equity, or otherwise.</span></p><p><strong><span>1.2</span></strong><span>. &quot;Affiliate&quot; of a Party means any other party that directly or indirectly, through one or more intermediaries, controls, is controlled by, or is under common control with, such Party. The term &quot;control&quot; (including the terms &quot;controlled by&quot; and &quot;under common control with&quot;) means the direct or indirect power to direct or cause the direction of the management and policies of a person, whether through the ownership of voting securities, by contract, or otherwise.</span></p><p><strong><span>1.3</span></strong><span>. &quot;Authorized User&quot; means each person authorized by Customer to use the Services.</span></p><p><strong><span>1.4</span></strong><span>. &quot;Content&quot; means commands, code, Models, text, data, articles, images, photographs, graphics, software, applications, packages, designs, features, and other digital materials.</span></p><p><strong><span>1.5</span></strong><span>. &quot;Customer Data&quot; means Customer Inputs and Outputs. For the avoidance of doubt, Customer Data does not include Resultant Data or any other information reflecting the access or use of the Services by or on behalf of Customer.</span></p><p><strong><span>1.6. &quot;Documentation&quot; means any manuals, instructions, or other documents or materials that Varo.cloud provides or makes available to Customer in any form or medium and which describe the functionality, components, features, or requirements of the Services, including any aspect of the operation, use, or support thereof, or any Third-Party Offering.</span></strong></p><p><strong><span>1.7</span></strong><span>. &quot;Fees&quot; means the amounts Customer is obligated to pay Varo.cloud in connection with use of its Services.</span></p><p><strong><span>1.8</span></strong><span>. &quot;Foundation Model&quot; means a Model that is provided by a third party or that is proprietary to Varo.cloud.</span></p><p><strong><span>1.9</span></strong><span>. &quot;Harmful Code&quot; means any software, hardware, or other technology, device, or means, including any virus, worm, malware, or other malicious computer code, the purpose or effect of which is to (a) permit unauthorized access to, or to destroy, disrupt, disable, distort, or otherwise harm or impede in any manner any (i) computer, software, firmware, hardware, system, or network; or (ii) any application or function of any of the foregoing or the security, integrity, confidentiality, or use of any data processed thereby; or (b) prevent Customer from accessing or using the Services as intended by these Terms.</span></p><p><strong><span>1.10</span></strong><span>. &quot;Inputs&quot; means prompts, text, and media files (such as images, audio, and video) that Customer submits through the Website or API to be processed through the Services for model inference.</span></p><p><strong><span>1.11</span></strong><span>. &quot;Intellectual Property Rights&quot; means patents, patent applications, inventions, and discoveries (whether patentable or unpatentable), copyrights and copyrightable works, moral rights, trademarks, service marks, trade names, domain name rights, know-how and other trade secret rights, rights in software, databases, artificial intelligence and AI algorithms, and all other intellectual property rights and similar forms of protection throughout the world.</span></p><p><strong><span>1.12</span></strong><span>. &quot;Law&quot; means any applicable statute, law, ordinance, regulation, rule, code, order, constitution, treaty, common law, judgment, decree, directive, or other legally binding requirement of Singapore or any other applicable jurisdiction, and any final and binding interpretation or administration thereof by any governmental authority, regulatory authority, arbitrator, court, or tribunal of competent jurisdiction.</span></p><p><strong><span>1.13</span></strong><span>. &quot;Login Credentials&quot; means any email address, one-time verification code, API key, OAuth token, user-name, identification number, password, license or security key, security token, PIN, or other security code, method, technology, or device, used alone or in combination, to verify an Authorized User&#39;s identity and authorization to access and use the Services.</span></p><p><strong><span>1.14</span></strong><span>. &quot;Losses&quot; means any and all losses, damages, deficiencies, claims, actions, judgments, settlements, interest, awards, penalties, fines, costs, or expenses of whatever kind, including reasonable attorneys&#39; fees and the costs of enforcing any right to indemnification hereunder and the cost of pursuing any insurance providers.</span></p><p><strong><span>1.15</span></strong><span>. &quot;Model&quot; means many different things depending on context. It can be the source code, trained weights, architecture, or some combination thereof. At Varo.cloud, &quot;Model&quot; refers to a trained, packaged, and published software program that accepts Inputs and returns Outputs.</span></p><p><strong><span>1.16. &quot;Output&quot; means the Content generated by the Services based on Customer&#39;s Inputs.</span></strong></p><p><strong><span>1.17</span></strong><span>. &quot;Privacy Policy&quot; means </span><a href='https://varo.cloud/privacy'><span>Varo.cloud&#39;s Privacy Policy</span></a><span> which sets out Varo.cloud&#39;s approach to use and protection of data obtained through the Services.</span></p><p><strong><span>1.18</span></strong><span>. &quot;Resultant Data&quot; means data and information related to Customer&#39;s use of the Services that is aggregated and anonymized, including compiling statistical and performance information related to the provision and operation of the Services.</span></p><p><strong><span>1.19</span></strong><span>. &quot;Representatives&quot; means employees, officers, directors, consultants, agents, or independent contractors.</span></p><p><strong><span>1.20</span></strong><span>. &quot;Services&quot; means the hosted software platform provided on a MaaS basis that gives Customers the ability, for the applicable Fee, to run Models in the cloud using Varo.cloud API or Varo.cloud&#39;s Website interface.</span></p><p><strong><span>1.21</span></strong><span>. &quot;Third-Party Offering&quot; means any materials and information, in any form or medium, including any open-source Models or Foundation Models offered by third parties and available through our Website, or other software, documents, data, content, specifications, products, equipment, or components of or relating to the Services that are not proprietary to Varo.cloud.</span></p><p><strong><span>1.22</span></strong><span>. &quot;Third-Party Terms&quot; means terms and conditions applicable to a Customer&#39;s use of the third party&#39;s offering.</span></p><p><strong><span>1.23</span></strong><span>. &quot;Website&quot; means, in respect of Varo.cloud, </span><a href='https://varo.cloud/'><span>https://varo.cloud</span></a><span> and all its subdomains.</span></p><p><strong><span>1.24</span></strong><span>. &quot;Term&quot; means the period during which you access or use the Services, beginning when you first create an account or accept these Terms and ending upon termination as described in Section 14.</span></p><h2 id='2-services'><span>2. Services</span></h2><p><strong><span>2.1</span></strong><span>. Use Rights. Varo.cloud hereby grants Customer a non-exclusive, non-transferable, revocable, non-sublicensable right to access and use the Services and Services Documentation solely in accordance with these Terms and our Website. The Services are only available to Customers who are capable of forming legally binding contracts under applicable Law. You are not eligible to be a Customer, directly or indirectly, if you are prohibited from accessing or using the Services under the laws of Singapore or any other applicable jurisdiction.</span></p><p><strong><span>2.2</span></strong><span>. Features and Benefits. Among other benefits of our Services, you can access and run third-party Foundation Models through our Website and API on a pay-as-you-go basis. For more information on the Models available on Varo.cloud, pricing, and how to use our Services, please refer to our Website. Varo.cloud does not currently offer customer-owned private model hosting or deployment through the Services.</span></p><p><strong><span>2.3</span></strong><span>. Our Website Documentation includes guidance documents that are available on our Website subject to the rights granted under these Terms or as explicitly set out on the Website. We grant you a non-sublicensable (except to your Representatives solely for your internal use), non-transferable, revocable, fully paid-up license to use the foregoing solely for your and your Representatives&#39; internal, non-commercial purposes.</span></p><p><strong><span>2.4</span></strong><span>. API Keys and Authentication. Customer is solely responsible for maintaining the confidentiality and security of its API keys and account credentials. Customer shall be responsible for all activities and requests made using its API keys, whether authorized or unauthorized, except to the extent caused by Varo.cloud&#39;s own security breach. Varo.cloud may treat the possession or use of a valid API key as sufficient authentication of Customer and its authorized users, and may rely on such authentication in providing access to the Services.</span></p><h2 id='3-account-set-up'><span>3. Account Set-Up</span></h2><p><strong><span>3.1</span></strong><span>. You may access our Services by creating an account and signing in to Varo.cloud. Currently, account access is provided through email-based one-time password (OTP) verification. We plan to support sign-in through Google and GitHub OAuth in the future. When those options become available, your use of them will also be subject to the applicable third-party provider&#39;s terms.</span></p><p><strong><span>3.2</span></strong><span>. You are responsible for maintaining the confidentiality of your account and Login Credentials, including but not limited to the restriction of access to your computer and/or account. You are responsible for any and all activities or actions that occur under your account, whether through email OTP, OAuth sign-in, or API keys. You must notify us immediately upon becoming aware of any breach of security or unauthorized use of your account.</span></p><p><strong><span>3.3</span></strong><span>. You may not register for or use an account in a manner that impersonates another person or entity, uses another person&#39;s email address or identity without authorization, or uses contact or account information that is offensive, vulgar, or obscene, subject to our discretion.</span></p><p><strong><span>3.4</span></strong><span>. Varo.cloud reserves the right to suspend or terminate Customer&#39;s or any Authorized User&#39;s access to the Services without incurring any resulting obligation or liability if: (1) required by a legal demand or order; or (2) Varo.cloud, in its discretion, determines that: (i) the Customer has breached any material term of these Terms, used the Services beyond granted rights or for a purpose not authorized under these Terms or in any manner that does not comply with any Documentation; or (ii) the Customer is, has been, or is likely to be engaged in fraudulent or unlawful activities related to the Services. This section does not limit Varo.cloud&#39;s other rights or remedies.</span></p><h2 id='4-prepaid-credits-and-usage-based-billing'><span>4. Prepaid Credits and Usage-Based Billing</span></h2><p><strong><span>4.1</span></strong><span>. The Services are generally billed on a prepaid, pay-as-you-go basis. To use the Services, you must purchase credits in advance. Each time you use the Services, whether through the Website or API, applicable Fees are deducted from your credit balance in accordance with the pricing shown on our Website.</span></p><p><strong><span>4.2</span></strong><span>. You may enable automatic credit purchases as described on our Website. Credits are non-refundable except as otherwise agreed by Varo.cloud in its sole discretion, non-transferable, and cannot be exchanged or withdrawn for cash. Varo.cloud does not currently offer recurring subscription plans; if subscription billing is introduced in the future, the applicable terms will be posted on our Website.</span></p><h2 id='5-no-guarantees-on-benefits-or-fees'><span>5. No Guarantees on Benefits or Fees</span></h2><p><strong><span>5.1</span></strong><span>. Varo.cloud is dedicated to delivering a positive customer experience, but we cannot assure the continuous availability of every Model that you may see on our Website or provide any guarantees regarding processing rates. We may in our sole discretion and at any time modify Fees for any part of our Services.</span></p><h2 id='6-third-party-offerings'><span>6. Third-Party Offerings</span></h2><p><strong><span>6.1</span></strong><span>. We may provide information about or access to Third-Party Offerings, or you may use Third-Party Offerings within the Services. You acknowledge that the Services rely on, interoperate with, or otherwise use Third-Party Offerings, including third-party Foundation Models that process your Inputs on our behalf to generate Outputs. To provide inference, we transmit Inputs to such third-party Foundation Model providers as service providers acting on our behalf. You agree to use Third-Party Offerings at your own risk and subject to the disclaimers in these Terms. These Third-Party Offerings are beyond our control, but their operation may impact, or be impacted by, the use and reliability of the Services. You acknowledge that (i) the use and availability of the Services is dependent on Third-Party Offering service providers and (ii) these Third-Party Offerings may not operate reliably or continuously, which may affect Service operation. You are responsible for complying with all Third-Party Terms and Varo.cloud is not, and will not be deemed to be, a party to any separate Third-Party Terms, all of which are exclusively between you and the applicable Third-Party Offering service provider(s).</span></p><p><span>Varo.cloud shall have no liability if any Third-Party Offering, Foundation Model, API, infrastructure service, or related functionality becomes unavailable, is suspended, restricted, modified, discontinued, or otherwise ceases to be supported by the applicable third party.</span></p><h2 id='7-availability-and-support'><span>7. Availability and Support</span></h2><p><strong><span>7.1</span></strong><span>. During the Term, Varo.cloud will strive to maximize Service availability and provide support, but Customers acknowledge that continuous updates may cause occasional technical issues or downtime. Varo.cloud reserves the right to modify Services as needed to maintain quality, enhance performance, ensure compliance, or improve market competitiveness. Varo.cloud shall not be liable for any delay, interruption, suspension, degradation, failure, or unavailability of the Services caused by: (a) third-party service providers; (b) internet or telecommunications failures; (c) maintenance, upgrades, or emergency repairs; (d) force majeure events; or (e) circumstances beyond Varo.cloud&#39;s reasonable control.</span></p><p><strong><span>7.2</span></strong><span>. Customers can access support via our email support@varo.cloud. Note that using third-party channels will subject you to their respective terms of service.</span></p><h2 id='8-acceptable-and-restricted-use'><span>8. Acceptable and Restricted Use</span></h2><p><strong><span>8.1</span></strong><span>. Customer must use the Services solely for authorized purposes in these Terms and in compliance with all Laws and our policies. Customer is responsible for their use of the Services, including any content generation that violates any Laws. Any breach of these Terms, including by Customer or its Representatives, shall be, for the purposes of these Terms, a breach by Customer.</span></p><p><strong><span>8.2</span></strong><span>. Customer shall not, and shall not permit any other person to, access or use the Services except as expressly permitted by these Terms. For purposes of clarity and without limiting the generality of the foregoing, Customer shall not, except as these Terms expressly permit:</span></p><ul><li><p><span>Violate any of the Third-Party Terms (including license terms) as found on or through the Website;</span></p></li><li><p><span>share or disclose Login Credentials to anyone other than the specific Authorized User for which the Login Credentials were generated;</span></p></li><li><p><span>rent, lease, lend, sell, sublicense, assign, distribute, publish, transfer, or otherwise make available any Services to any person, including on or in connection with the internet or any time-sharing, service bureau, software as a service, cloud, or other technology or service;</span></p></li><li><p><span>reverse engineer, disassemble, decompile, decode, adapt, or otherwise attempt to derive or gain access to the source code of the Services, in whole or in part;</span></p></li><li><p><span>bypass or breach any security device or protection used by the Services or access or use the Services other than by an Authorized User through the use of his or her own then valid Login Credentials;</span></p></li><li><p><span>input, upload, transmit, or otherwise provide to or through the Services any information or materials that are unlawful or injurious, or contain, transmit, or activate any Harmful Code;</span></p></li><li><p><span>damage, destroy, disrupt, disable, impair, interfere with, or otherwise impede or harm in any manner the Services, in whole or in part;</span></p></li><li><p><span>remove, delete, alter, or obscure any trademarks, specifications, documentation, warranties, or disclaimers, or any copyright, trademark, patent, or other intellectual property or proprietary rights notices from any portion of the Services, including any copy thereof;</span></p></li><li><p><span>access or use the Services in any manner or for any purpose that infringes, misappropriates, or otherwise violates any Intellectual Property Right or other right of any third party or that violates any Laws; or</span></p></li><li><p><span>otherwise access or use the Services beyond the scope of the authorization granted under these Terms.</span></p></li></ul><p><strong><span>8.3</span></strong><span>. In respect of Outputs, Customer shall not, and shall not permit any other Authorized User to, access or use the Services:</span></p><ul><li><p><span>to violate Laws or others&#39; rights (including but not limited to, intellectual property and data privacy rights), nor promote, contribute to, encourage, facilitate, plan, incite, or further anyone else&#39;s violation of the law or others&#39; rights;</span></p></li><li><p><span>to commit, promote, contribute to, facilitate, encourage, plan, incite, or further any of the following:</span></p><ul><li><p><span>violence, terrorism or generation of hateful content that discriminates or threatens a protected group of people (whether based on gender, ethnicity, sexual identity or orientation, or religion, among others);</span></p></li><li><p><span>exploitation or harm to children, including the solicitation, creation, acquisition, or dissemination of child exploitative content; or</span></p></li><li><p><span>encouragement or instructions related to self-harm;</span></p></li></ul></li><li><p><span>to promote human trafficking, exploitation, and sexual violence;</span></p></li><li><p><span>to harass, abuse, threaten, stalk, or bully individuals or groups of individuals;</span></p></li><li><p><span>to create non-consensual nudity or illegal pornographic content;</span></p></li><li><p><span>to create and disseminate extreme gore such as images involving bodily destruction, mutilation, torture or animal abuse;</span></p></li><li><p><span>to discriminate in the provision of employment, employment benefits, credit, housing, other economic benefits, or other essential goods and services on the basis of race, color, caste, religion, sex (including pregnancy, sexual orientation, or gender identity), national origin, age, disability, or genetic information (including family medical history) except as may be required by Law;</span></p></li><li><p><span>to create malicious code, malware, computer viruses or any activity that could disable, overburden, interfere with or impair the proper working, integrity, operation or appearance of a website or computer system;</span></p></li><li><p><span>for purposes of or for the performance of:</span></p><ul><li><p><span>fully automated decision-making, including profiling, with respect to an individual or group of individuals which produces legal effects concerning such individual(s) or similarly significantly affects such individual(s);</span></p></li><li><p><span>systematic or automated scraping, mining, extraction, or harvesting of personally identifiable data, or similar activity, from the output of any part of the Services except with respect to data that end users have provided as input to the Services and which end users are legally entitled to process, for so long as end users retain such entitlement;</span></p></li><li><p><span>development, improvement, or manufacture of any weapons of mass destruction (such as nuclear, chemical, or biological weapons), weapons of war (such as missiles or landmines), or any gain of function-related activities with respect to any pathogens;</span></p></li><li><p><span>mission critical applications or systems where best industry practices require fail-safe controls or performance, including operation of nuclear facilities, aircraft navigation, electrical grids, communication systems, water treatment facilities, air traffic control, life support, weapons systems, or emergency locator or other emergency services;</span></p></li></ul></li><li><p><span>to intentionally deceive or mislead others, including the use of the Services related to the following:</span></p><ul><li><p><span>generating, promoting, or furthering fraud or the creation or promotion of disinformation;</span></p></li><li><p><span>generating, promoting, or furthering defamatory content, including the creation of defamatory statements, images, or other content;</span></p></li><li><p><span>generating, promoting, or further distributing spam;</span></p></li><li><p><span>impersonating another individual without consent, authorization, or legal right;</span></p></li><li><p><span>misrepresenting or misleading people into believing that the use of the Services or Outputs is human-generated;</span></p></li><li><p><span>generating or facilitating false online engagement, including fake reviews and other means of fake online engagement;</span></p></li><li><p><span>generating or facilitating large-scale disinformation campaigns;</span></p></li><li><p><span>generating political advertisements, propaganda, or influence campaigns;</span></p></li><li><p><span>in a manner that fails to appropriately disclose to end users any known dangers of an applicable AI system, or that misrepresents or misleads end users with respect to its abilities.</span></p></li></ul></li></ul><h2 id='9-customer-responsibilities'><span>9. Customer Responsibilities</span></h2><p><strong><span>9.1</span></strong><span>. You have exclusive control and responsibility for designating Authorized Users, managing spending on Services, and determining what Customer Data is submitted into the Services as Inputs. You are responsible for the legality of all Inputs and ensuring Authorized Users comply with these Terms and applicable Third-Party Terms.</span></p><p><strong><span>9.2</span></strong><span>. Customer Data Processing. Varo.cloud processes Customer Data solely to provide the Services, including transmitting Inputs to third-party Foundation Model providers for inference and returning Outputs to you. Varo.cloud does not use Customer Data to train, fine-tune, or otherwise improve Varo.cloud&#39;s models or any third-party models. Varo.cloud does not long-term store Customer Data; specific retention periods for temporary processing, logging, and backups are described in our Privacy Policy and may be updated from time to time.</span></p><p><strong><span>9.3</span></strong><span>. Customer shall promptly notify Varo.cloud of any unauthorized use of Login Credentials. If an Authorized User suspects their Login Credential is compromised or may be compromised, they must promptly secure their account (for example, by signing out of active sessions, revoking compromised API keys, or re-verifying account access through email OTP) and inform Varo.cloud at </span><a href='mailto:support@varo.cloud'><span>support@varo.cloud</span></a><span>.</span></p><h2 id='10-fees-and-payment'><span>10. Fees and Payment</span></h2><p><strong><span>10.1</span></strong><span>. You will pay the usage Fees charged by Varo.cloud as described on our Website and in Section 4 above. You can view your current usage and manage your billing settings in your account.</span></p><p><strong><span>10.2</span></strong><span>. To utilize the Services, Customer must purchase credits in advance as described in Section 4. Each time you use the Services (whether through the Website or through an API call), the cost for such use will be deducted from your credit balance. You are solely responsible for maintaining a sufficient credit balance to use the Services. If you do not have enough credits to cover your use of the Services, you will be required to purchase additional credits. Customer can also set up automatic credit purchases by providing a payment method and authorizing us to charge Customer for credit purchases and use of our Services, as clearly explained on our Website.</span></p><p><strong><span>10.3</span></strong><span>. Varo.cloud&#39;s Fees are exclusive of taxes, which Customer must pay in full without deductions. Payments are currently processed through Stripe and may be processed through additional third-party payment processors in the future; each processor has its own terms. If an automatic credit purchase fails, a payment is declined, reversed, or charged back, or Customer otherwise fails to maintain a sufficient credit balance, Varo.cloud may suspend access to paid features of the Services until the issue is resolved and sufficient credits are available. Customer remains responsible for any fees, chargebacks, reversals, or related costs caused by Customer&#39;s payment method or authorized payment settings.</span></p><p><strong><span>10.4</span></strong><span>. All amounts payable to Varo.cloud by Customer shall be paid in full without any setoff, recoupment, counterclaim, deduction, debit, or withholding for any reason.</span></p><h2 id='11-intellectual-property-rights-and-ownership'><span>11. Intellectual Property Rights and Ownership</span></h2><p><strong><span>11.1</span></strong><span>. Customer Data. As between Customer and Varo.cloud, Customer owns and will continue to own all rights, title, and interest, including all Intellectual Property Rights, in and to its applicable Customer Data.</span></p><p><strong><span>11.2</span></strong><span>. Consent to Use Customer Data. Customer hereby grants Varo.cloud during the Term a non-exclusive, non-sublicensable (except as necessary to third-party Foundation Model providers and other service providers acting on Varo.cloud&#39;s behalf to provide the Services), royalty-free license to use, copy, store, transmit, modify, process, and display its Customer Data solely to the extent necessary to provide the Output and associated Services under these Terms. Without limiting the foregoing, Varo.cloud will not use Customer Data to train, fine-tune, or otherwise improve any models.</span></p><p><strong><span>11.3</span></strong><span>. Varo.cloud Services. As between Customer and Varo.cloud, Varo.cloud and its licensors own, and reserve all rights, title, and interest, including all Intellectual Property Rights, in and to (i) the Services, and (ii) any Resultant Data.</span></p><p><strong><span>11.4</span></strong><span>. Feedback. Customers assign to Varo.cloud all title and interest in any feedback, comments, ideas, and suggestions for improvement as provided by Customer and any of their Representatives (collectively, &quot;Feedback&quot;). Varo.cloud may, without obligation, incorporate, use, commercialize and distribute in any manner, including, without limitation, as part of the Services such Feedback without any attribution, payment or other obligation to Customer or its Affiliates.</span></p><p><strong><span>11.5</span></strong><span>. Use of Resultant Data. Notwithstanding anything to the contrary, Varo.cloud and its licensors shall have the right to collect and analyze aggregated and anonymized information relating to the provision, use, and performance of various aspects of the Services (in whole or in part) and related systems and technologies, and Varo.cloud and its licensors will be free (during and after the term hereof) to (i) use such Resultant Data to improve and enhance the Services (in whole or in part) and for other development, diagnostic, and corrective purposes in connection with the Services (in whole or in part), and (ii) utilize any such Resultant Data for any lawful purpose consistent with Varo.cloud&#39;s Privacy Policy. For clarity, Resultant Data does not include Customer Data and Varo.cloud&#39;s use of Resultant Data does not include using Customer Data to train, fine-tune, or otherwise improve any models.</span></p><h2 id='12-representations-and-warranties'><span>12. Representations and Warranties</span></h2><p><strong><span>12.1</span></strong><span>. Representations and Warranties. Each Customer, if an entity, represents and warrants:</span></p><ul><li><p><span>it is duly organized, validly existing, and in good standing as a corporation or other entity under the Law of the jurisdiction of its incorporation or other organization;</span></p></li><li><p><span>it has the full right, power, and authority to enter into and perform its obligations and grant the rights, licenses, consents, and authorizations it grants or is required to grant under these Terms, including in respect of its Affiliates as contemplated hereunder;</span></p></li><li><p><span>any use of cost-incurring Services by its Representative has been duly authorized by all necessary corporate or organizational action of Customer.</span></p></li></ul><p><strong><span>12.2</span></strong><span>. Additional Customer Representations, Warranties, and Covenants. Customer represents, warrants, and covenants to Varo.cloud that:</span></p><ul><li><p><span>it has all rights, licenses, permissions, power, and authority that are necessary to use and share the applicable Inputs in association with its use of the Services;</span></p></li><li><p><span>neither the Customer Data, nor the use, storage, or provision of the Customer Data on or through the Services, will infringe, misappropriate, or violate any third party&#39;s Intellectual Property Rights, Third-Party Terms, or other rights, including rights of publicity, privacy, or confidentiality;</span></p></li><li><p><span>Customer&#39;s use and provision of the Customer Data will not breach any agreement between it and a third party or violate any Laws; and</span></p></li><li><p><span>Customer will not breach these Terms.</span></p></li></ul><h2 id='13-disclaimer'><span>13. Disclaimer</span></h2><p><span>Please review our disclaimers in detail to understand the scope of your responsibility and your need to do appropriate due diligence in respect of the Services.</span></p><p><strong><span>13.1</span></strong><span>. Except as otherwise expressly provided in these Terms, Varo.cloud provides the Services &quot;as is&quot; without warranties of any kind, express or implied, including merchantability, fitness for a particular purpose, non-infringement, or against hidden defects, to the fullest extent permitted by Law.</span></p><p><strong><span>13.2</span></strong><span>. Varo.cloud and its licensors do not guarantee the Services will be reliable, uninterrupted, error-free, or that all errors will be corrected. Varo.cloud may modify, replace, discontinue, update, or otherwise alter any Model, Foundation Model, feature, functionality, or Service component at any time without liability, including by changing the third-party Models made available through the Services. Customer acknowledges that Outputs, performance, latency, availability, accuracy, functionality, and behavior of any Model may vary over time and may differ from previous results.</span></p><p><strong><span>13.3. The Parties acknowledge that the Services use Third-Party Offerings over which Varo.cloud has no control, and Varo.cloud assumes no responsibility for the content, privacy policies, or practices of any third-party websites or services. Third-Party Offerings may not be warranted by their providers, and their development or operation may infringe third-party rights or use copyrighted materials without required consent in certain jurisdictions. Varo.cloud does not represent or warrant that any Third-Party Offering or other third-party material complies with Laws. Customer is responsible for reviewing Outputs as necessary to confirm that they are not subject to third-party rights, because Models may generate content that includes copyrighted materials.</span></strong></p><p><strong><span>13.4</span></strong><span>. The Parties further acknowledge that areas of Law which apply to the Services are evolving rapidly in various jurisdictions. Varo.cloud&#39;s compliance with Laws in one jurisdiction may not necessarily result in compliance in all jurisdictions.</span></p><p><strong><span>13.5</span></strong><span>. Varo.cloud further disclaims any and all warranties arising from course of dealing or usage of trade. No advice or information, whether oral or written, obtained from Varo.cloud or its employees or contractors, including guidance provided in the Documentation, will create any warranty not expressly stated in these Terms. Varo.cloud does not monitor or police documents, Customer Data, other information entered into the Services, or Outputs generated by third-party models, and Varo.cloud is not responsible for such content or Outputs. The Services may generate content that is inappropriate, offensive, illegal in certain jurisdictions, suggestive, pornographic, lascivious, violent, graphic, related to fetishes, or not suitable for children. Varo.cloud does not condone or encourage such content creation and does not monitor content for unacceptability.</span></p><p><strong><span>Customer acknowledges that:</span></strong></p><ul><li><p><span>all Outputs generated by the Services and Third-Party Offerings through Customer&#39;s use are Customer&#39;s responsibility to manage and, as appropriate, delete, quarantine, and prevent from further distribution or dissemination;</span></p></li><li><p><span>Outputs generated by the Services may be inaccurate, incomplete, misleading, offensive, biased, or otherwise unsuitable for Customer&#39;s intended purposes;</span></p></li><li><p><span>Customer is solely responsible for evaluating, validating, and verifying all Outputs before relying on, publishing, distributing, or otherwise using such Outputs.</span></p></li></ul><p><strong><span>Varo.cloud does not represent or warrant that any Output:</span></strong></p><ul><li><p><span>is eligible for copyright, patent, trademark, or any other intellectual property protection;</span></p></li><li><p><span>does not infringe, misappropriate, or otherwise violate any third-party rights; or</span></p></li><li><p><span>is unique or exclusive to Customer.</span></p></li></ul><p><span>Similar or identical Outputs may be generated for other customers or users.</span></p><p><strong><span>13.6. We are not responsible for any fraud, willful misconduct, or other misuse arising from your account or the improper use of your log-in credentials. Customer is responsible for monitoring its account and protecting its Login Credentials.</span></strong></p><p><strong><span>13.7</span></strong><span>. Varo.cloud is not liable, directly or indirectly, for any damages or Loss arising from the use of third-party content or services accessible through any such third-party offerings, websites, or services available through the Services.</span></p><p><strong><span>13.8</span></strong><span>. This disclaimer does not affect any warranties that cannot be excluded or limited under applicable Law.</span></p><h2 id='14-suspension--termination'><span>14. Suspension &amp; Termination</span></h2><p><strong><span>14.1</span></strong><span>. These Terms begin when you first create an account or accept them through any action on our Website and remain effective while you use the Services, unless earlier terminated in accordance with this Section 14.</span></p><p><strong><span>14.2</span></strong><span>. Termination by Varo.cloud. If you have breached any provision of these Terms, if Varo.cloud is required to do so by Law, or if it is commercially impractical for Varo.cloud to provide the Services, Varo.cloud shall at its discretion, immediately and without notice, suspend or terminate any of the Services provided to you.</span></p><p><strong><span>14.3. Termination by You. Subject to the provisions that survive under Section 14.5, these Terms shall not apply to you upon the earlier of termination of these Terms or deletion of Customer&#39;s account and, if Customer is an entity, deletion of each of its Authorized Users&#39; accounts.</span></strong></p><p><strong><span>14.4</span></strong><span>. Effect of Termination. If Services are terminated for any reason, your use rights shall cease, and you may not be able to access your account and all related information or files associated with or inside your account may be deleted. Varo.cloud will not have any liability whatsoever for any suspension or termination.</span></p><p><strong><span>14.5</span></strong><span>. Notwithstanding the termination or expiration of these Terms, any provisions of these Terms that by their nature should survive termination or expiration will continue in full force and effect after such termination or expiration until they are satisfied or by their nature expire. This includes, but is not limited to, this Section 14.5 and Sections 1, 10, 11, 12, 13, 15, 16, and 17 of these Terms and any other obligations that may reasonably be expected to be performed or observed after such termination or expiration.</span></p><h2 id='15-indemnification'><span>15. Indemnification</span></h2><p><strong><span>15.1</span></strong><span>. Customer shall indemnify, defend, and hold harmless Varo.cloud and its officers, directors, employees, agents, successors, and assigns (each, a &quot;Varo.cloud Indemnitee&quot;) from and against any and all Losses incurred by such Varo.cloud Indemnitee resulting from Customer&#39;s use of the Services, including any Action that relates to, arises out of, or results from:</span></p><ul><li><p><span>Customer Data, including any Inputs, Outputs, and processing of Customer Data by a Model;</span></p></li><li><p><span>breach of Third-Party Terms;</span></p></li><li><p><span>any other materials or information (including any documents, data, specifications, software, content, or technology) provided by or on behalf of Customer;</span></p></li><li><p><span>allegation of facts that, if true, would constitute Customer&#39;s breach of any of its representations, warranties, covenants, or obligations under these Terms;</span></p></li><li><p><span>negligence or any more culpable act or omission (including recklessness or willful misconduct) by Customer, any Authorized User, or any third party on behalf of Customer, in connection with these Terms.</span></p></li></ul><p><strong><span>15.2</span></strong><span>. Customer is responsible for handling legal Actions with its own counsel at its own expense, and Varo.cloud may participate in the defense at its own expense if it chooses. Customer shall not settle any Action on any terms or in any manner that adversely affects the rights of a Varo.cloud Indemnitee without such party&#39;s prior written consent, which shall not be unreasonably withheld or delayed. If Customer fails or refuses to assume control of the defense of such Action, Varo.cloud Indemnitees shall have the right, but no obligation, to defend against such Action, including settling such Action after giving notice to Customer, in each case in such manner and on such terms as the Varo.cloud Indemnitees may deem appropriate. The Varo.cloud Indemnitee&#39;s failure to comply with this Section 15.2 will not relieve Customer of its obligations under this Section 15, except to the extent that the Customer can demonstrate that it has been materially prejudiced by such failure.</span></p><p><strong><span>15.3</span></strong><span>. If the Services are, or in Varo.cloud&#39;s opinion are likely to be, claimed to infringe, misappropriate, or otherwise violate any third-party Intellectual Property Right, or if Customer&#39;s use of the Services is enjoined or threatened to be enjoined, Customer&#39;s sole and exclusive remedy is to stop using the Services and close its account.</span></p><h2 id='16-limitation-of-liability'><span>16. Limitation of Liability</span></h2><p><strong><span>16.1</span></strong><span>. To the maximum extent permitted by Law, in no event shall Varo.cloud or any of its licensors be liable under or in connection with these Terms or their subject matter under any legal or equitable theory, including breach of contract, tort (including negligence), strict liability, or otherwise, for any: (a) loss of use, business, revenue, or profit, or diminution in value; (b) impairment, inability to use, loss, interruption, or delay of the Services; (c) loss, damage, corruption, or recovery of data, or breach of data or system security; (d) cost of replacement services; (e) loss of goodwill or reputation; or (f) consequential, incidental, indirect, exemplary, special, enhanced, or punitive damages, regardless of whether Varo.cloud or its licensors were advised of the possibility of such Losses or damages or whether such Losses or damages were otherwise foreseeable, and notwithstanding the failure of any agreed or other remedy to achieve its essential purpose.</span></p><p><strong><span>16.2. Except to the extent liability cannot be excluded under applicable Law, and otherwise to the maximum extent permitted by Law, Varo.cloud shall have no obligation to pay any compensation, indemnification, damages, penalties, costs, expenses, service credits, or other amounts to Customer or any third party arising out of or related to these Terms or the Services, and Customer&#39;s remedies are limited to discontinuing use of the Services and closing its account. The foregoing limitations apply even if any remedy fails of its essential purpose.</span></strong>
+<span>Unless expressly agreed in a separate written agreement signed by Varo.cloud, Customer shall not be entitled to any service credits, refunds, rebates, compensation, or other remedies arising from any Service interruption, degradation, latency, suspension, or unavailability.</span></p><p><strong><span>16.3. If any exclusion or limitation in this Section 16 is held unenforceable under applicable Law, that exclusion or limitation will apply to the maximum extent permitted by Law, and the remaining exclusions and limitations will remain in effect.</span></strong></p><p><strong><span>16.4</span></strong><span>. Notwithstanding any other provision herein, these Terms do not entitle you to any remedy from our licensors. Unless you enter into a direct agreement with them, such licensors shall have no liability to you for any direct or indirect damages.</span></p><h2 id='17-general'><span>17. General</span></h2><p><strong><span>17.1. These Terms, as applicable, constitute the complete and exclusive agreement between Varo.cloud and Customer concerning the use of the Services and supersede all prior or contemporaneous agreements or understandings, written or oral, concerning the subject matter of these Terms.</span></strong></p><p><strong><span>17.2</span></strong><span>. These Terms shall be governed by and construed in accordance with the laws of Singapore, excluding its conflict of laws principles. Any law providing that ambiguities in a contract shall be construed against the drafter shall not apply to these Terms. This Section shall be interpreted as broadly as permitted under applicable law.</span></p><p><strong><span>17.3</span></strong><span>. Except for any dispute, claim, or controversy arising out of or relating to our intellectual property rights, confidential information, or any request for injunctive or equitable relief to prevent imminent harm to Varo.cloud or its users or licensors (collectively &quot;Excluded Claims&quot;), which may be brought in any court of competent jurisdiction, any dispute, controversy, or claim arising out of or in connection with these Terms, including any question regarding its existence, validity, interpretation, breach, or termination, shall be referred to and finally resolved by arbitration administered by the Singapore International Arbitration Centre (&quot;SIAC&quot;) in accordance with the Arbitration Rules of the Singapore International Arbitration Centre (&quot;SIAC Rules&quot;) for the time being in force, which rules are deemed to be incorporated by reference in this clause. The seat of the arbitration shall be Singapore. The tribunal shall consist of one arbitrator. The language of the arbitration shall be English.</span></p><p><strong><span>17.4</span></strong><span>. To the fullest extent permitted by Law, no arbitration or claim under these Terms shall be joined to any other arbitration or claim, including any arbitration or claim involving any other current or former user of our Services, and no class arbitration proceedings shall be permitted. Customer agrees to waive any right to commence or participate in any class action against Varo.cloud related to any claim and, where applicable, Customer also agrees to opt out of any class proceedings against Varo.cloud.</span></p><p><strong><span>17.5</span></strong><span>. The arbitrator shall have exclusive authority to resolve any dispute relating to the interpretation, applicability, or enforceability of this arbitration agreement, including any contention that all or any part of this arbitration agreement is void or voidable.</span></p><p><strong><span>17.6</span></strong><span>. If any provision of this arbitration clause is found to be unenforceable, the unenforceable provision shall be severed, and the remaining arbitration terms shall be enforced.</span></p><p><strong><span>17.7. These arbitration and no-class-action provisions shall be effective upon acceptance by Customer of these Terms and shall survive the termination or expiration of these Terms.</span></strong></p><p><strong><span>17.8</span></strong><span>. Varo.cloud may amend these Terms at any time by posting the amended Terms on this site. It is your responsibility to review these Terms periodically. Your continued use of the Services following the posting of revised Terms means that you accept and agree to the changes. By continuing to access or use our Services after any revisions become effective, you agree to be bound by the revised Terms. If you do not agree to the revised Terms, you are no longer authorized to use the Services.</span></p><p><strong><span>17.9</span></strong><span>. Varo.cloud&#39;s waiver of any default or breach of these Terms will not constitute a waiver of any other or subsequent default or breach. In the event any provision of these Terms is held to be invalid or unenforceable, the remaining provisions of these Terms will remain in full force and effect. The headings in these Terms are for the convenience of reference only and have no legal effect.</span></p><p><strong><span>17.10</span></strong><span>. Customer may send us any material notice via email to </span><a href='mailto:support@varo.cloud'><span>support@varo.cloud</span></a><span>.</span></p></div></div>
+</body>
+</html>

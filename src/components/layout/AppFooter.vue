@@ -5,6 +5,33 @@ import { useLocaleRouter } from '@/composables/useLocaleRouter'
 
 const { t } = useI18n()
 const { localePath } = useLocaleRouter()
+
+const contactLinks = [
+  {
+    key: 'discord',
+    href: 'https://discord.gg/8TnkW8GPZ',
+    labelKey: 'footer.discord',
+    icon: 'discord',
+  },
+  {
+    key: 'email',
+    href: 'mailto:support@varo.cloud',
+    labelKey: 'footer.supportEmail',
+    icon: 'email',
+  },
+  {
+    key: 'x',
+    href: 'https://x.com/varocloud',
+    labelKey: 'footer.x',
+    icon: 'x',
+  },
+  {
+    key: 'youtube',
+    href: 'https://www.youtube.com/@varo_cloud',
+    labelKey: 'footer.youtube',
+    icon: 'youtube',
+  },
+] as const
 </script>
 
 <template>
@@ -13,29 +40,19 @@ const { localePath } = useLocaleRouter()
       <nav class="app-footer__links" :aria-label="t('footer.navLabel')">
         <RouterLink :to="localePath('/terms')">{{ t('footer.terms') }}</RouterLink>
         <RouterLink :to="localePath('/privacy')">{{ t('footer.privacy') }}</RouterLink>
-        <a href="mailto:support@varo.cloud" :aria-label="t('footer.supportEmail')">
-          support@varo.cloud
-        </a>
       </nav>
 
-      <div class="app-footer__social">
+      <div class="app-footer__social" :aria-label="t('footer.contactLabel')">
         <a
+          v-for="item in contactLinks"
+          :key="item.key"
           class="app-footer__social-link"
-          href="https://x.com"
-          target="_blank"
-          rel="noopener noreferrer"
-          :aria-label="t('footer.twitter')"
+          :href="item.href"
+          :target="item.key === 'email' ? undefined : '_blank'"
+          :rel="item.key === 'email' ? undefined : 'noopener noreferrer'"
+          :aria-label="t(item.labelKey)"
         >
-          <AppIcon name="twitter" :size="16" />
-        </a>
-        <a
-          class="app-footer__social-link"
-          href="https://t.me"
-          target="_blank"
-          rel="noopener noreferrer"
-          :aria-label="t('footer.telegram')"
-        >
-          <AppIcon name="telegram" :size="16" />
+          <AppIcon :name="item.icon" :size="16" />
         </a>
       </div>
     </div>
