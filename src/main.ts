@@ -4,6 +4,7 @@ import 'virtual:uno.css'
 import '@/styles/global.css'
 import '@/styles/code-highlight.css'
 import '@/styles/playground-select-panel.css'
+import { initAnalytics, setupAnalytics } from '@/analytics'
 import App from './App.vue'
 import router from './router'
 import i18n from './i18n'
@@ -13,6 +14,9 @@ async function bootstrap() {
     const { setupProdMockServer } = await import('@/mock/setupProdMockServer')
     await setupProdMockServer()
   }
+
+  await initAnalytics()
+  setupAnalytics(router)
 
   const app = createApp(App)
 

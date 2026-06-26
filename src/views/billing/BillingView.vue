@@ -19,6 +19,7 @@ import {
   updateAutoTopUp,
 } from '@/api/billing'
 import { useLocaleRouter } from '@/composables/useLocaleRouter'
+import { AnalyticsEvents, trackEvent } from '@/analytics'
 import { useUserStore } from '@/stores/user'
 import { downloadCsv } from '@/utils/csv'
 import { assetUrl } from '@/utils/assetUrl'
@@ -196,8 +197,10 @@ async function handleBuy() {
 
   try {
     const urls = buildCheckoutUrls()
+    const packageId = selectedPackageId.value
+    trackEvent(AnalyticsEvents.CHECKOUT_START, { package_id: packageId })
     const { checkoutUrl } = await createCheckoutSession({
-      package: selectedPackageId.value,
+      package: packageId,
       successUrl: urls.successUrl,
       cancelUrl: urls.cancelUrl,
     })
@@ -266,6 +269,9 @@ async function handleCheckoutReturn() {
   try {
     const sessionId = typeof route.query.session_id === 'string' ? route.query.session_id : null
     await pollCheckoutResult(sessionId)
+    trackEvent(AnalyticsEvents.CHECKOUT_COMPLETE, {
+      session_id: sessionId ?? undefined,
+    })
     message.success(t('pages.billing.checkoutSuccess'))
     activeTab.value = 'topup'
   } catch {

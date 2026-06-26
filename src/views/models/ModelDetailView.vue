@@ -15,6 +15,7 @@ import { useModelPreferencesStore } from '@/stores/modelPreferences'
 import { assetUrl } from '@/utils/assetUrl'
 import { createDefaultFormValues } from '@/utils/schema-form'
 import { usePlaygroundQuote } from '@/composables/usePlaygroundQuote'
+import { AnalyticsEvents, trackEvent } from '@/analytics'
 import type { GenerationStatus, ModelDetail, PlaygroundGenerationResult } from '@/types'
 import type { InputSchema, SchemaFormValues } from '@/types/schema'
 
@@ -160,6 +161,15 @@ function simulateGeneration(count: number) {
           generationResults.value = urls.map((item, index) =>
             buildGenerationResult(item, index, quoteUnitCostUsd.value),
           )
+
+          if (model.value) {
+            trackEvent(AnalyticsEvents.PLAYGROUND_RUN_SUCCESS, {
+              source: 'model_detail',
+              model_id: model.value.id,
+              capability: model.value.capabilities[0],
+              batch_size: count,
+            })
+          }
         }, durationMs),
       )
     }, 800),
@@ -275,6 +285,8 @@ onUnmounted(() => {
           :quote-loading="quoteLoading"
           :balance-usd="balanceUsd"
           :generating="isGenerating"
+          analytics-source="model_detail"
+          :analytics-capability="model.capabilities[0]"
           @run="handleRun"
         />
         <div v-else class="model-detail-page__schema-empty">

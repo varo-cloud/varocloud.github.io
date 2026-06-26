@@ -28,6 +28,7 @@ export default {
     navLabel: 'Footer',
     terms: 'Terms of Service',
     privacy: 'Privacy Policy',
+    supportEmail: 'Contact support',
     twitter: 'X (Twitter)',
     telegram: 'Telegram',
   },

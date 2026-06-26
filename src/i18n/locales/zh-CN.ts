@@ -28,6 +28,7 @@ export default {
     navLabel: '页脚',
     terms: '服务条款',
     privacy: '隐私政策',
+    supportEmail: '联系客服',
     twitter: 'X (Twitter)',
     telegram: 'Telegram',
   },

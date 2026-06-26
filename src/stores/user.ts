@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import { clearAuthTokens, getToken } from '@/api/http'
 import { fetchUserProfile, logout as logoutApi, persistTokenPair } from '@/api/auth'
+import { setAnalyticsUserId } from '@/analytics'
 import { useRealAuthApi } from '@/utils/authApiBaseUrl'
 import type { TokenPair, UserProfile } from '@/types'
 
@@ -26,6 +27,9 @@ export const useUserStore = defineStore('user', () => {
     loading.value = true
     try {
       profile.value = await fetchUserProfile()
+      if (profile.value?.id) {
+        setAnalyticsUserId(profile.value.id)
+      }
     } catch {
       profile.value = null
       if (!useRealAuthApi()) {
@@ -39,6 +43,9 @@ export const useUserStore = defineStore('user', () => {
 
   function setProfile(user: UserProfile) {
     profile.value = user
+    if (user.id) {
+      setAnalyticsUserId(user.id)
+    }
   }
 
   async function logout() {

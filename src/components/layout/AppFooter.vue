@@ -13,6 +13,9 @@ const { localePath } = useLocaleRouter()
       <nav class="app-footer__links" :aria-label="t('footer.navLabel')">
         <RouterLink :to="localePath('/terms')">{{ t('footer.terms') }}</RouterLink>
         <RouterLink :to="localePath('/privacy')">{{ t('footer.privacy') }}</RouterLink>
+        <a href="mailto:support@varo.cloud" :aria-label="t('footer.supportEmail')">
+          support@varo.cloud
+        </a>
       </nav>
 
       <div class="app-footer__social">

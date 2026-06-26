@@ -11,6 +11,7 @@ import type { ModelSelectorOption } from '@/components/playground/fields/ModelSe
 import { useLocaleRouter } from '@/composables/useLocaleRouter'
 import { usePlaygroundQuote } from '@/composables/usePlaygroundQuote'
 import { useUserStore } from '@/stores/user'
+import { AnalyticsEvents, trackEvent } from '@/analytics'
 import { assetUrl } from '@/utils/assetUrl'
 import { createDefaultFormValues } from '@/utils/schema-form'
 import type { GenerationStatus, Model, ModelDetail, PlaygroundGenerationResult } from '@/types'
@@ -166,6 +167,15 @@ function simulateGeneration(count: number) {
           generationResults.value = urls.map((item, index) =>
             buildGenerationResult(item, index, quoteUnitCostUsd.value),
           )
+
+          if (model.value) {
+            trackEvent(AnalyticsEvents.PLAYGROUND_RUN_SUCCESS, {
+              source: 'ai_generator',
+              model_id: model.value.id,
+              capability: model.value.capabilities[0],
+              batch_size: count,
+            })
+          }
         }, durationMs),
       )
     }, 800),
@@ -240,6 +250,10 @@ function handleRun(_values: SchemaFormValues, count: number) {
 watch(selectedModelId, (id, previousId) => {
   if (!id) return
   if (previousId && id !== previousId) {
+    trackEvent(AnalyticsEvents.MODEL_SELECTOR_CHANGE, {
+      model_id: id,
+      previous_model_id: previousId,
+    })
     replace({ name: 'ai-generator', query: { model: id } })
   }
   void loadSelectedModel(id)
@@ -298,6 +312,8 @@ onUnmounted(() => {
         :quote-loading="quoteLoading"
         :balance-usd="balanceUsd"
         :generating="isGenerating || modelLoading"
+        analytics-source="ai_generator"
+        :analytics-capability="model.capabilities[0]"
         @run="handleRun"
       />
       <div v-else class="ai-generator-page__panel-placeholder">

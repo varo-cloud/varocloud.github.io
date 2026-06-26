@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n'
 import { useLocaleRouter } from '@/composables/useLocaleRouter'
 import { useMessage } from 'naive-ui'
 import { requestOtp, verifyOtp } from '@/api/auth'
+import { AnalyticsEvents, setAnalyticsUserId, trackEvent } from '@/analytics'
 import { useUserStore } from '@/stores/user'
 import AppHeader from '@/components/layout/AppHeader.vue'
 import AppFooter from '@/components/layout/AppFooter.vue'
@@ -171,6 +172,10 @@ async function handleLogin() {
     rememberAuthMethod('email')
     userStore.establishSession(tokens)
     await userStore.loadProfile()
+    if (userStore.profile?.id) {
+      setAnalyticsUserId(userStore.profile.id)
+    }
+    trackEvent(AnalyticsEvents.LOGIN_COMPLETE, { method: 'email' })
     const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : null
     push(redirect || { name: 'models' })
   } catch (err) {

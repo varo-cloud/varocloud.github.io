@@ -2,6 +2,7 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useMessage } from 'naive-ui'
+import { AnalyticsEvents, trackEvent } from '@/analytics'
 import AppIcon from '@/components/common/AppIcon.vue'
 import HighlightedCodeBlock from '@/components/common/HighlightedCodeBlock.vue'
 import type { ModelFaqItem } from '@/types'
@@ -101,12 +102,18 @@ function toggleFaq(index: number) {
   expandedFaq.value = expandedFaq.value === index ? null : index
 }
 
-async function copyText(text: string) {
+async function copyText(text: string, copyTarget: 'submit' | 'poll') {
   if (!text) return
 
   try {
     await navigator.clipboard.writeText(text)
     message.success(t('pages.modelDetail.codeCopied'))
+    trackEvent(AnalyticsEvents.API_CODE_COPY, {
+      source: 'model_api_tab',
+      code_type: codeViewMode.value,
+      copy_target: copyTarget,
+      model_name: props.modelName,
+    })
   } catch {
     message.error(t('pages.modelDetail.copyFailed'))
   }
@@ -220,7 +227,7 @@ onBeforeUnmount(() => {
               type="button"
               class="model-api-tab__code-copy"
               :aria-label="t('pages.modelDetail.copyCode')"
-              @click="copyText(submitCodeSnippet)"
+              @click="copyText(submitCodeSnippet, 'submit')"
             >
               <AppIcon name="copy" :size="16" />
             </button>
@@ -239,7 +246,7 @@ onBeforeUnmount(() => {
               type="button"
               class="model-api-tab__code-copy"
               :aria-label="t('pages.modelDetail.copyCode')"
-              @click="copyText(pollCodeSnippet)"
+              @click="copyText(pollCodeSnippet, 'poll')"
             >
               <AppIcon name="copy" :size="16" />
             </button>

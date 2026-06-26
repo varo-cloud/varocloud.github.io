@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useLocaleRouter } from '@/composables/useLocaleRouter'
+import { AnalyticsEvents, trackEvent } from '@/analytics'
 import { useModelPreferencesStore } from '@/stores/modelPreferences'
 import { useUserStore } from '@/stores/user'
 import { assetUrl } from '@/utils/assetUrl'
@@ -62,7 +63,12 @@ async function toggleFavourite(event: Event) {
     return
   }
   try {
+    const wasFavourite = isFavourite.value
     await modelPrefs.toggleFavourite(props.model.id)
+    trackEvent(AnalyticsEvents.MODEL_FAVOURITE_TOGGLE, {
+      model_id: props.model.id,
+      action: wasFavourite ? 'remove' : 'add',
+    })
   } catch {
     // keep optimistic UI rolled back in store
   }

@@ -16,6 +16,7 @@ import {
   type PlaygroundInputViewMode,
 } from '@/utils/playground-request-snippets'
 import { useUserStore } from '@/stores/user'
+import { AnalyticsEvents, trackEvent } from '@/analytics'
 import PlaygroundInputViewSelect from './PlaygroundInputViewSelect.vue'
 import PlaygroundSchemaForm from './PlaygroundSchemaForm.vue'
 import ModelSelectorField, {
@@ -34,6 +35,8 @@ const props = defineProps<{
   balanceUsd: number
   generating?: boolean
   modelOptions?: ModelSelectorOption[]
+  analyticsSource?: 'model_detail' | 'ai_generator'
+  analyticsCapability?: string
 }>()
 
 const batchSize = defineModel<number>('batchSize', { default: 1 })
@@ -235,6 +238,17 @@ function handleRun() {
     push({ name: 'auth' })
     return
   }
+
+  if (props.analyticsSource) {
+    trackEvent(AnalyticsEvents.PLAYGROUND_RUN, {
+      source: props.analyticsSource,
+      model_id: props.modelId,
+      capability: props.analyticsCapability,
+      input_mode: inputViewMode.value,
+      batch_size: batchSize.value,
+    })
+  }
+
   emit('run', { ...formValues.value }, batchSize.value)
 }
 
@@ -253,6 +267,11 @@ async function copyCodeContent() {
   try {
     await navigator.clipboard.writeText(text)
     message.success(t('pages.modelDetail.codeCopied'))
+    trackEvent(AnalyticsEvents.API_CODE_COPY, {
+      source: 'playground',
+      code_type: inputViewMode.value,
+      model_id: props.modelId,
+    })
   } catch {
     message.error(t('pages.modelDetail.copyFailed'))
   }
