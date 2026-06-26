@@ -46,11 +46,13 @@ const appLayoutChildren: RouteRecordRaw[] = [
   {
     path: 'terms',
     name: 'terms',
+    meta: { lightPage: true },
     component: () => import('@/views/legal/TermsView.vue'),
   },
   {
     path: 'privacy',
     name: 'privacy',
+    meta: { lightPage: true },
     component: () => import('@/views/legal/PrivacyView.vue'),
   },
 ]
