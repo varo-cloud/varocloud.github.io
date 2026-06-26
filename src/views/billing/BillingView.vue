@@ -30,10 +30,18 @@ import type {
   BillingSummary,
   CreditPackage,
   CreditPackageId,
+  TopUpSelectionId,
   Transaction,
 } from '@/types'
 
 type HistoryTab = 'topup' | 'billing'
+
+/** Re-enable when auto top-up ships. */
+const SHOW_AUTO_TOP_UP = false
+
+const CUSTOM_AMOUNT_MIN_USD = 1
+const CUSTOM_AMOUNT_MAX_USD = 10_000
+const DEFAULT_CUSTOM_AMOUNT_USD = 20
 
 const STRIPE_LOGO = assetUrl('/assets/billing/stripe.svg')
 
@@ -50,7 +58,8 @@ const packages = ref<CreditPackage[]>([])
 const transactions = ref<Transaction[]>([])
 const billingRecords = ref<BillingRecord[]>([])
 
-const selectedPackageId = ref<CreditPackageId | null>(null)
+const selectedPackageId = ref<TopUpSelectionId | null>(null)
+const customAmountInput = ref(String(DEFAULT_CUSTOM_AMOUNT_USD))
 const purchasing = ref(false)
 const checkoutProcessing = ref(false)
 const mockPaying = ref(false)
@@ -64,14 +73,33 @@ const savingAutoTopUp = ref(false)
 const activeTab = ref<HistoryTab>('topup')
 const rechargeSectionRef = ref<HTMLElement | null>(null)
 
-const selectedPackage = computed(() =>
-  packages.value.find((item) => item.id === selectedPackageId.value) ?? null,
-)
+const selectedPackage = computed(() => {
+  if (!selectedPackageId.value || selectedPackageId.value === 'custom') return null
+  return packages.value.find((item) => item.id === selectedPackageId.value) ?? null
+})
+
+const parsedCustomAmountUsd = computed(() => parseCustomAmount(customAmountInput.value))
+
+const selectedCheckoutAmountUsd = computed(() => {
+  if (selectedPackageId.value === 'custom') return parsedCustomAmountUsd.value
+  return selectedPackage.value?.priceUsd ?? null
+})
+
+const isCheckoutReady = computed(() => {
+  if (!selectedPackageId.value) return false
+  if (selectedPackageId.value === 'custom') {
+    return isValidCustomAmount(parsedCustomAmountUsd.value)
+  }
+  return Boolean(selectedPackage.value)
+})
 
 const buyButtonLabel = computed(() => {
-  if (!selectedPackage.value) return t('pages.billing.continueToStripe', { amount: '—' })
+  if (!isCheckoutReady.value) {
+    return t('pages.billing.continueToStripe', { amount: '—' })
+  }
+
   return t('pages.billing.continueToStripe', {
-    amount: formatUsd(selectedPackage.value.priceUsd),
+    amount: formatUsd(selectedCheckoutAmountUsd.value ?? 0),
   })
 })
 
@@ -83,6 +111,13 @@ const mockCheckoutPackageId = computed(() =>
   typeof route.query.package === 'string' ? (route.query.package as CreditPackageId) : null,
 )
 
+const mockCheckoutAmountUsd = computed(() => {
+  const raw = route.query.amount
+  if (typeof raw !== 'string') return null
+  const parsed = Number(raw)
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null
+})
+
 const showStripeMock = computed(
   () => route.query.stripe_checkout === '1' && Boolean(mockCheckoutSessionId.value),
 )
@@ -92,6 +127,11 @@ const mockCheckoutPackage = computed(() => {
     return packages.value.find((item) => item.id === mockCheckoutPackageId.value) ?? null
   }
   return selectedPackage.value
+})
+
+const mockCheckoutDisplayAmountUsd = computed(() => {
+  if (mockCheckoutAmountUsd.value != null) return mockCheckoutAmountUsd.value
+  return mockCheckoutPackage.value?.priceUsd ?? selectedCheckoutAmountUsd.value
 })
 
 const spentTrendLabel = computed(() => {
@@ -124,6 +164,32 @@ function packageLabel(id: CreditPackageId) {
   const key = `pages.billing.topUpDetail.packages.${id}`
   const translated = t(key)
   return translated === key ? id : translated
+}
+
+function parseCustomAmount(value: string) {
+  const trimmed = value.trim()
+  if (!trimmed) return null
+
+  const parsed = Number(trimmed)
+  if (!Number.isFinite(parsed)) return null
+
+  return Math.round(parsed * 100) / 100
+}
+
+function isValidCustomAmount(amount: number | null): amount is number {
+  return amount != null && amount >= CUSTOM_AMOUNT_MIN_USD && amount <= CUSTOM_AMOUNT_MAX_USD
+}
+
+function selectCustomAmount() {
+  selectedPackageId.value = 'custom'
+}
+
+function handleCustomAmountInput(event: Event) {
+  const target = event.target
+  if (!(target instanceof HTMLInputElement)) return
+
+  customAmountInput.value = target.value
+  selectedPackageId.value = 'custom'
 }
 
 function sleep(ms: number) {
@@ -191,19 +257,40 @@ function buildCheckoutUrls() {
 }
 
 async function handleBuy() {
-  if (!selectedPackageId.value || purchasing.value) return
+  if (!isCheckoutReady.value || purchasing.value) return
+
+  if (selectedPackageId.value === 'custom' && !isValidCustomAmount(parsedCustomAmountUsd.value)) {
+    message.warning(
+      t('pages.billing.customAmountInvalid', {
+        min: formatUsd(CUSTOM_AMOUNT_MIN_USD),
+        max: formatUsd(CUSTOM_AMOUNT_MAX_USD),
+      }),
+    )
+    return
+  }
 
   purchasing.value = true
 
   try {
     const urls = buildCheckoutUrls()
-    const packageId = selectedPackageId.value
-    trackEvent(AnalyticsEvents.CHECKOUT_START, { package_id: packageId })
-    const { checkoutUrl } = await createCheckoutSession({
-      package: packageId,
-      successUrl: urls.successUrl,
-      cancelUrl: urls.cancelUrl,
+    const checkoutPayload =
+      selectedPackageId.value === 'custom'
+        ? {
+            amountUsd: parsedCustomAmountUsd.value!,
+            successUrl: urls.successUrl,
+            cancelUrl: urls.cancelUrl,
+          }
+        : {
+            package: selectedPackageId.value as CreditPackageId,
+            successUrl: urls.successUrl,
+            cancelUrl: urls.cancelUrl,
+          }
+
+    trackEvent(AnalyticsEvents.CHECKOUT_START, {
+      package_id: selectedPackageId.value === 'custom' ? 'custom' : selectedPackageId.value ?? undefined,
+      amount_usd: selectedCheckoutAmountUsd.value ?? undefined,
     })
+    const { checkoutUrl } = await createCheckoutSession(checkoutPayload)
     window.location.assign(checkoutUrl)
   } catch {
     message.error(t('pages.billing.topUpError'))
@@ -392,7 +479,11 @@ onMounted(async () => {
           <span>{{ t('pages.billing.checkoutProcessing') }}</span>
         </div>
 
-        <section class="billing-summary" aria-label="Billing summary">
+        <section
+          class="billing-summary"
+          :class="{ 'billing-summary--two-cols': !SHOW_AUTO_TOP_UP }"
+          aria-label="Billing summary"
+        >
           <article class="billing-summary__card billing-summary__card--balance">
             <p class="billing-summary__label">{{ t('pages.billing.cashBalance') }}</p>
             <div class="billing-summary__balance-row">
@@ -419,7 +510,7 @@ onMounted(async () => {
             </div>
           </article>
 
-          <article class="billing-summary__card">
+          <article v-if="SHOW_AUTO_TOP_UP" class="billing-summary__card">
             <div class="billing-summary__auto-header">
               <p class="billing-summary__label">{{ t('pages.billing.autoTopUp') }}</p>
               <span
@@ -439,7 +530,10 @@ onMounted(async () => {
         <section ref="rechargeSectionRef" class="billing-recharge" aria-label="Account recharge">
           <h2 class="billing-section-title">{{ t('pages.billing.accountRecharge') }}</h2>
 
-          <div class="billing-recharge__grid">
+          <div
+            class="billing-recharge__grid"
+            :class="{ 'billing-recharge__grid--single': !SHOW_AUTO_TOP_UP }"
+          >
             <div class="billing-panel">
               <p class="billing-panel__subtitle">{{ t('pages.billing.choosePackage') }}</p>
 
@@ -473,6 +567,46 @@ onMounted(async () => {
                   <span class="billing-amount-option__amount">{{ packageLabel(pkg.id) }}</span>
                   <span class="billing-amount-option__price">{{ formatUsd(pkg.priceUsd) }}</span>
                 </label>
+
+                <label
+                  class="billing-amount-option billing-amount-option--custom"
+                  :class="{ 'billing-amount-option--selected': selectedPackageId === 'custom' }"
+                >
+                  <input
+                    v-model="selectedPackageId"
+                    class="billing-amount-option__input"
+                    type="radio"
+                    name="top-up-package"
+                    value="custom"
+                  />
+                  <img
+                    class="billing-amount-option__radio"
+                    :src="
+                      assetUrl(
+                        selectedPackageId === 'custom'
+                          ? '/assets/icons/radio-checked.svg'
+                          : '/assets/icons/radio-unchecked.svg',
+                      )
+                    "
+                    alt=""
+                    width="16"
+                    height="16"
+                  />
+                  <span class="billing-amount-option__amount">{{ t('pages.billing.customAmount') }}</span>
+                  <input
+                    class="billing-amount-option__custom-input"
+                    type="number"
+                    inputmode="decimal"
+                    :min="CUSTOM_AMOUNT_MIN_USD"
+                    :max="CUSTOM_AMOUNT_MAX_USD"
+                    step="0.01"
+                    :value="customAmountInput"
+                    :aria-label="t('pages.billing.customAmountInput')"
+                    @input="handleCustomAmountInput"
+                    @focus="selectCustomAmount"
+                    @click.stop="selectCustomAmount"
+                  />
+                </label>
               </div>
 
               <p class="billing-panel__subtitle billing-panel__subtitle--payment">
@@ -486,14 +620,14 @@ onMounted(async () => {
               <button
                 type="button"
                 class="billing-buy-btn"
-                :disabled="purchasing || !selectedPackageId"
+                :disabled="purchasing || !isCheckoutReady"
                 @click="handleBuy"
               >
                 {{ buyButtonLabel }}
               </button>
             </div>
 
-            <div class="billing-panel billing-panel--auto">
+            <div v-if="SHOW_AUTO_TOP_UP" class="billing-panel billing-panel--auto">
               <div class="billing-panel__auto-header">
                 <p class="billing-panel__subtitle billing-panel__subtitle--inline">
                   {{ t('pages.billing.autoTopUp') }}
@@ -645,6 +779,7 @@ onMounted(async () => {
       v-if="showStripeMock"
       :session-id="mockCheckoutSessionId!"
       :pkg="mockCheckoutPackage"
+      :amount-usd="mockCheckoutDisplayAmountUsd"
       :paying="mockPaying"
       @pay="handleMockPay"
       @cancel="handleMockCancel"
@@ -725,6 +860,10 @@ onMounted(async () => {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 24px;
   margin-bottom: 40px;
+}
+
+.billing-summary--two-cols {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .billing-summary__card {
@@ -812,6 +951,11 @@ onMounted(async () => {
   gap: 24px;
 }
 
+.billing-recharge__grid--single {
+  grid-template-columns: minmax(0, 1fr);
+  max-width: 560px;
+}
+
 .billing-panel {
   padding: 24px;
   border: 0.5px solid #2d2d38;
@@ -885,6 +1029,15 @@ onMounted(async () => {
   grid-template-columns: 16px minmax(72px, auto) minmax(72px, auto) 1fr;
 }
 
+.billing-amount-option--custom {
+  grid-template-columns: 16px minmax(72px, auto) 1fr;
+}
+
+.billing-amount-option--custom .billing-amount-option__amount {
+  font-size: 14px;
+  font-weight: 500;
+}
+
 .billing-amount-option__price {
   grid-column: 3;
   font-size: 16px;
@@ -926,6 +1079,11 @@ onMounted(async () => {
   background: rgba(255, 255, 255, 0.06);
   color: var(--text-primary);
   font-size: 14px;
+}
+
+.billing-amount-option__custom-input:focus {
+  outline: none;
+  border-color: var(--text-accent);
 }
 
 .billing-payment-stripe {

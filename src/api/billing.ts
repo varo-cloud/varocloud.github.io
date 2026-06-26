@@ -177,11 +177,20 @@ export function fetchBillingRecords() {
 }
 
 export function createCheckoutSession(payload: CreateCheckoutPayload) {
-  return unwrap<ApiCheckoutResponse>(http.post('/billing/checkout', {
-    package: payload.package,
+  const body: Record<string, string | number> = {
     success_url: payload.successUrl,
     cancel_url: payload.cancelUrl,
-  })).then(
+  }
+
+  if (payload.package) {
+    body.package = payload.package
+  }
+
+  if (payload.amountUsd != null) {
+    body.amount_usd = payload.amountUsd
+  }
+
+  return unwrap<ApiCheckoutResponse>(http.post('/billing/checkout', body)).then(
     (data): CheckoutSessionResult => ({
       checkoutUrl: data.checkout_url,
     }),

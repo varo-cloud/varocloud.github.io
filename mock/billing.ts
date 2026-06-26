@@ -11,7 +11,7 @@ const creditPackages = [
 
 interface PendingCheckout {
   sessionId: string
-  packageId: CreditPackageId
+  packageId: CreditPackageId | 'custom' | null
   transactionId: string
   amountUsd: number
 }
@@ -191,13 +191,28 @@ export default [
     }: {
       body: {
         package?: string
+        amount_usd?: number
         success_url?: string
         cancel_url?: string
       }
     }) => {
-      const pkg = getPackage(body.package ?? '')
-      if (!pkg) {
-        return fail('Invalid package', 400)
+      const customAmountUsd = Number(body.amount_usd)
+      const hasCustomAmount =
+        Number.isFinite(customAmountUsd) && customAmountUsd > 0 && !body.package
+
+      let amountUsd: number
+      let packageId: CreditPackageId | 'custom' | null
+
+      if (hasCustomAmount) {
+        amountUsd = Math.round(customAmountUsd * 100) / 100
+        packageId = 'custom'
+      } else {
+        const pkg = getPackage(body.package ?? '')
+        if (!pkg) {
+          return fail('Invalid package or amount', 400)
+        }
+        amountUsd = pkg.price_usd
+        packageId = pkg.id
       }
 
       const sessionId = `cs_mock_${Date.now()}`
@@ -207,23 +222,34 @@ export default [
       transactions.unshift({
         id: transactionId,
         type: 'topup',
-        amountUsd: pkg.price_usd,
+        amountUsd,
         description: 'Top Up',
         createdAt,
         status: 'pending',
         paymentMethod: 'stripe',
-        packageId: pkg.id,
+        packageId,
       })
 
       pendingCheckouts.set(sessionId, {
         sessionId,
-        packageId: pkg.id,
+        packageId,
         transactionId,
-        amountUsd: pkg.price_usd,
+        amountUsd,
       })
 
       const successBase = body.success_url?.split('?')[0] ?? 'http://localhost:5173/en/billing'
-      const checkoutUrl = `${successBase}?stripe_checkout=1&session_id=${encodeURIComponent(sessionId)}&package=${pkg.id}`
+      const checkoutParams = new URLSearchParams({
+        stripe_checkout: '1',
+        session_id: sessionId,
+      })
+
+      if (packageId === 'custom') {
+        checkoutParams.set('amount', String(amountUsd))
+      } else if (packageId) {
+        checkoutParams.set('package', packageId)
+      }
+
+      const checkoutUrl = `${successBase}?${checkoutParams.toString()}`
 
       return success({ checkout_url: checkoutUrl })
     },
