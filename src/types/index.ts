@@ -203,13 +203,16 @@ export interface TopUpPreset {
 
 export type CreditPackageId = 'starter' | 'pro' | 'business'
 
+export type TopUpSelectionId = CreditPackageId | 'custom'
+
 export interface CreditPackage {
   id: CreditPackageId
   priceUsd: number
 }
 
 export interface CreateCheckoutPayload {
-  package: CreditPackageId
+  package?: CreditPackageId
+  amountUsd?: number
   successUrl: string
   cancelUrl: string
 }

@@ -1,13 +1,14 @@
 <script setup lang="ts">
-import { NConfigProvider, NMessageProvider, NDialogProvider } from 'naive-ui'
+import { NConfigProvider, NDialogProvider } from 'naive-ui'
+import AppMessageProvider from '@/components/common/AppMessageProvider.vue'
 </script>
 
 <template>
   <NConfigProvider>
-    <NMessageProvider>
+    <AppMessageProvider>
       <NDialogProvider>
         <RouterView />
       </NDialogProvider>
-    </NMessageProvider>
+    </AppMessageProvider>
   </NConfigProvider>
 </template>

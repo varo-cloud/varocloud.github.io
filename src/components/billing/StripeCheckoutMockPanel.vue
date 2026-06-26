@@ -6,6 +6,7 @@ import type { CreditPackage } from '@/types'
 const props = defineProps<{
   sessionId: string
   pkg: CreditPackage | null
+  amountUsd?: number | null
   paying: boolean
 }>()
 
@@ -17,9 +18,18 @@ const emit = defineEmits<{
 const { t } = useI18n()
 
 const amountLabel = computed(() => {
-  if (!props.pkg) return '—'
-  return `$${props.pkg.priceUsd.toFixed(2)}`
+  const amount = props.amountUsd ?? props.pkg?.priceUsd
+  if (amount == null || !Number.isFinite(amount)) return '—'
+  return `$${amount.toFixed(2)}`
 })
+
+const packageLabel = computed(() => {
+  if (props.pkg) return t(`pages.billing.topUpDetail.packages.${props.pkg.id}`)
+  if (props.amountUsd != null) return t('pages.billing.topUpDetail.packages.custom')
+  return '—'
+})
+
+const canPay = computed(() => props.pkg != null || (props.amountUsd != null && props.amountUsd > 0))
 </script>
 
 <template>
@@ -30,10 +40,10 @@ const amountLabel = computed(() => {
         <h3 class="stripe-mock__title">{{ t('pages.billing.stripeMock.title') }}</h3>
         <p class="stripe-mock__desc">{{ t('pages.billing.stripeMock.description') }}</p>
 
-        <div v-if="pkg" class="stripe-mock__summary">
+        <div v-if="canPay" class="stripe-mock__summary">
           <div class="stripe-mock__row">
             <span>{{ t('pages.billing.stripeMock.package') }}</span>
-            <strong>{{ t(`pages.billing.topUpDetail.packages.${pkg.id}`) }}</strong>
+            <strong>{{ packageLabel }}</strong>
           </div>
           <div class="stripe-mock__row">
             <span>{{ t('pages.billing.stripeMock.amount') }}</span>
@@ -47,7 +57,7 @@ const amountLabel = computed(() => {
           <button type="button" class="stripe-mock__cancel" :disabled="paying" @click="emit('cancel')">
             {{ t('pages.billing.stripeMock.cancel') }}
           </button>
-          <button type="button" class="stripe-mock__pay" :disabled="paying || !pkg" @click="emit('pay')">
+          <button type="button" class="stripe-mock__pay" :disabled="paying || !canPay" @click="emit('pay')">
             {{ paying ? t('pages.billing.stripeMock.paying') : t('pages.billing.stripeMock.pay') }}
           </button>
         </div>

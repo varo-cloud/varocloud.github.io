@@ -2,7 +2,8 @@
 import { computed, nextTick, onBeforeUnmount, ref, useId, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useLocaleRouter } from '@/composables/useLocaleRouter'
-import { NTooltip, useMessage } from 'naive-ui'
+import { NTooltip } from 'naive-ui'
+import { useAppMessage } from '@/composables/useAppMessage'
 import AppIcon from '@/components/common/AppIcon.vue'
 import HighlightedCodeBlock from '@/components/common/HighlightedCodeBlock.vue'
 import HighlightedCodeEditor from '@/components/common/HighlightedCodeEditor.vue'
@@ -50,7 +51,7 @@ const emit = defineEmits<{
 const { push } = useLocaleRouter()
 const { t } = useI18n()
 const userStore = useUserStore()
-const message = useMessage()
+const message = useAppMessage()
 
 const inputViewMode = ref<PlaygroundInputViewMode>('form')
 const jsonDraft = ref(buildPlaygroundJsonSnippet(props.modelId, formValues.value, batchSize.value))

@@ -23,6 +23,11 @@ const ICONS = {
   email: '/assets/icons/email.svg',
   x: '/assets/icons/x.svg',
   youtube: '/assets/icons/youtube.svg',
+  'check-circle': '/assets/icons/check-circle.svg',
+  'toast-success': '/assets/icons/toast-success.svg',
+  'toast-error': '/assets/icons/toast-error.svg',
+  'toast-warning': '/assets/icons/toast-warning.svg',
+  'toast-info': '/assets/icons/toast-info.svg',
   twitter: '/assets/footer/twitter.svg',
   telegram: '/assets/footer/telegram.svg',
 } as const
@@ -33,9 +38,12 @@ const props = withDefaults(
   defineProps<{
     name: AppIconName
     size?: number
+    /** 保留 SVG 原始配色（用于 Toast 等多色图标） */
+    colored?: boolean
   }>(),
   {
     size: 16,
+    colored: false,
   },
 )
 
@@ -43,7 +51,17 @@ const iconUrl = computed(() => assetUrl(ICONS[props.name]))
 </script>
 
 <template>
+  <img
+    v-if="colored"
+    class="app-icon app-icon--colored"
+    :src="iconUrl"
+    :width="size"
+    :height="size"
+    alt=""
+    aria-hidden="true"
+  />
   <span
+    v-else
     class="app-icon"
     :style="{
       width: `${props.size}px`,
@@ -66,5 +84,10 @@ const iconUrl = computed(() => assetUrl(ICONS[props.name]))
   mask-size: contain;
   mask-repeat: no-repeat;
   mask-position: center;
+}
+
+.app-icon--colored {
+  display: block;
+  background-color: transparent;
 }
 </style>

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useMessage } from 'naive-ui'
+import { useAppMessage } from '@/composables/useAppMessage'
 import { AnalyticsEvents, trackEvent } from '@/analytics'
 import AppIcon from '@/components/common/AppIcon.vue'
 import HighlightedCodeBlock from '@/components/common/HighlightedCodeBlock.vue'
@@ -31,7 +31,7 @@ const props = defineProps<{
 }>()
 
 const { t } = useI18n()
-const message = useMessage()
+const message = useAppMessage()
 
 const codeViewMode = ref<ApiCodeViewMode>('http')
 const expandedFaq = ref<number | null>(0)

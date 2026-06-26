@@ -1,7 +1,7 @@
 import { onBeforeUnmount, ref, watch, type Ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useLocaleRouter } from '@/composables/useLocaleRouter'
-import { useMessage } from 'naive-ui'
+import { useAppMessage } from '@/composables/useAppMessage'
 import { uploadFile } from '@/api/upload'
 import { useUserStore } from '@/stores/user'
 import type { UploadKind } from '@/types'
@@ -15,7 +15,7 @@ interface UseMediaUploadOptions {
 export function useMediaUpload({ model, kind, mimePrefix }: UseMediaUploadOptions) {
   const { t } = useI18n()
   const { push } = useLocaleRouter()
-  const message = useMessage()
+  const message = useAppMessage()
   const userStore = useUserStore()
 
   const previewUrl = ref<string | null>(null)

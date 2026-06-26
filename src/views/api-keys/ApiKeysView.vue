@@ -2,7 +2,8 @@
 import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useLocaleRouter } from '@/composables/useLocaleRouter'
-import { NSpin, useMessage } from 'naive-ui'
+import { NSpin } from 'naive-ui'
+import { useAppMessage } from '@/composables/useAppMessage'
 import AppIcon from '@/components/common/AppIcon.vue'
 import ApiKeyTableRow from '@/components/api-keys/ApiKeyTableRow.vue'
 import { assetUrl } from '@/utils/assetUrl'
@@ -11,7 +12,7 @@ import type { ApiKey } from '@/types'
 
 const { push } = useLocaleRouter()
 const { t } = useI18n()
-const message = useMessage()
+const message = useAppMessage()
 
 const keys = ref<ApiKey[]>([])
 const loading = ref(true)

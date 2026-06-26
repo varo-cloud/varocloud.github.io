@@ -3,14 +3,14 @@ import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useLocaleRouter } from '@/composables/useLocaleRouter'
-import { useMessage } from 'naive-ui'
+import { useAppMessage } from '@/composables/useAppMessage'
 import { requestOtp, verifyOtp } from '@/api/auth'
 import { AnalyticsEvents, setAnalyticsUserId, trackEvent } from '@/analytics'
 import { useUserStore } from '@/stores/user'
 import AppHeader from '@/components/layout/AppHeader.vue'
 import AppFooter from '@/components/layout/AppFooter.vue'
 import TurnstileWidget from '@/components/auth/TurnstileWidget.vue'
-import { assetUrl } from '@/utils/assetUrl'
+// import { assetUrl } from '@/utils/assetUrl'
 import {
   getLastAuthMethod,
   setLastAuthMethod,
@@ -20,7 +20,7 @@ import {
 const route = useRoute()
 const { push, replace, localePath } = useLocaleRouter()
 const { t, locale } = useI18n()
-const message = useMessage()
+const message = useAppMessage()
 const userStore = useUserStore()
 
 const email = ref('')
@@ -186,6 +186,7 @@ async function handleLogin() {
   }
 }
 
+/*
 function handleGoogleLogin() {
   if (!ensureHumanVerified()) return
   // rememberAuthMethod('google') — call after OAuth succeeds
@@ -197,6 +198,7 @@ function handleGithubLogin() {
   // rememberAuthMethod('github') — call after OAuth succeeds
   message.info(t('pages.auth.githubComingSoon'))
 }
+*/
 
 onMounted(() => {
   lastAuthMethod.value = getLastAuthMethod()
@@ -285,6 +287,7 @@ onUnmounted(() => {
             {{ t('pages.auth.loginButton') }}
           </button>
 
+          <!-- OAuth login hidden for this release
           <div class="auth-card__divider" aria-hidden="true">
             <span class="auth-card__divider-line" />
             <span class="auth-card__divider-text">{{ t('pages.auth.or') }}</span>
@@ -330,6 +333,7 @@ onUnmounted(() => {
               <span>{{ t('pages.auth.githubLogin') }}</span>
             </button>
           </div>
+          -->
 
           <p class="auth-card__terms">
             {{ t('pages.auth.termsPrefix') }}

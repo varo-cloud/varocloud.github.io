@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { NTooltip, useMessage } from 'naive-ui'
+import { NTooltip } from 'naive-ui'
+import { useAppMessage } from '@/composables/useAppMessage'
 import GenerationStatusDisplay from './GenerationStatusDisplay.vue'
 import GenerationPreviewLightbox from './GenerationPreviewLightbox.vue'
 import type { GenerationStatus, PlaygroundGenerationResult } from '@/types'
@@ -18,7 +19,7 @@ const props = defineProps<{
 }>()
 
 const { t } = useI18n()
-const message = useMessage()
+const message = useAppMessage()
 
 const viewMode = ref<'preview' | 'json'>('preview')
 const lightboxIndex = ref<number | null>(null)
