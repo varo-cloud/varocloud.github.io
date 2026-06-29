@@ -19,7 +19,7 @@ const slides = [
   },
 ] as const
 
-const activeIndex = ref(0)
+const activeIndex = defineModel<number>('activeIndex', { default: 0 })
 const progressKey = ref(0)
 const videoRef = ref<HTMLVideoElement | null>(null)
 

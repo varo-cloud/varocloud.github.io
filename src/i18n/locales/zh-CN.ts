@@ -19,7 +19,7 @@ export default {
   },
   nav: {
     models: '模型',
-    aiGenerator: 'AI Generator',
+    aiGenerator: 'AI 生成器',
     pricing: '价格',
     apiKeys: 'API 密钥',
     billing: '账单',
@@ -43,6 +43,13 @@ export default {
       placeholder: '浏览可用的视频生成模型。',
       heroSubtitle:
         '通过统一 API 接入领先的视频、图像、音频与语言模型——更优价格与稳定性能。',
+      heroSlides: {
+        seedance: {
+          title: 'Seedance 2.5 即将上线',
+          subtitle:
+            'Seedance 2.5 将于 7 月初上线，支持 30 秒单镜头视频、扩展参考素材容量、更精细的生成与编辑控制，以及最多 50 个参考文件。',
+        },
+      },
       heroCtaPrimary: '免费开始 · $3 体验金',
       heroCtaSecondary: '查看文档',
       heroSignup: '免费开始',

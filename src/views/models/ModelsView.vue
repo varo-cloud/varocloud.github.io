@@ -28,6 +28,21 @@ const loadingMore = ref(false)
 const error = ref<string | null>(null)
 const activeTab = ref<'latest' | 'favourite' | 'recent'>('latest')
 const searchQuery = ref('')
+const heroActiveIndex = ref(0)
+
+const heroSlideContent = computed(() => {
+  if (heroActiveIndex.value === 1) {
+    return {
+      title: t('pages.models.heroSlides.seedance.title'),
+      subtitle: t('pages.models.heroSlides.seedance.subtitle'),
+    }
+  }
+
+  return {
+    title: t('common.slogan'),
+    subtitle: t('pages.models.heroSubtitle'),
+  }
+})
 
 let searchDebounceTimer: ReturnType<typeof setTimeout> | undefined
 
@@ -178,15 +193,15 @@ onMounted(() => {
 <template>
   <div class="models-page">
     <section class="models-hero" aria-labelledby="models-hero-title">
-      <ModelsHeroCarousel />
+      <ModelsHeroCarousel v-model:active-index="heroActiveIndex" />
 
       <div class="models-hero__inner">
         <div class="models-hero__content">
           <h1 id="models-hero-title" class="models-hero__title">
-            {{ t('common.slogan') }}
+            {{ heroSlideContent.title }}
           </h1>
           <p class="models-hero__subtitle">
-            {{ t('pages.models.heroSubtitle') }}
+            {{ heroSlideContent.subtitle }}
           </p>
           <div class="models-hero__actions">
             <button type="button" class="models-hero__btn models-hero__btn--primary" @click="goToAuth">

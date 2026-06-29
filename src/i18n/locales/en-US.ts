@@ -43,6 +43,13 @@ export default {
       placeholder: 'Explore available video generation models.',
       heroSubtitle:
         'Access leading video, image, audio, and language models through one unified API—with better pricing and reliable performance.',
+      heroSlides: {
+        seedance: {
+          title: 'Seedance 2.5 Coming Soon',
+          subtitle:
+            'Seedance 2.5 arrives in Early July with 30-second single-shot videos, expanded reference capacity, tighter generation and editing control, and support for up to 50 reference files.',
+        },
+      },
       heroCtaPrimary: 'Star Free-$3 Credit',
       heroCtaSecondary: 'View Docs',
       heroSignup: 'Star Free',
