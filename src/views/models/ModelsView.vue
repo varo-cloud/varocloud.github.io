@@ -329,6 +329,9 @@ onMounted(() => {
 }
 
 .models-hero__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   height: 40px;
   padding: 0 24px;
   border: none;
@@ -533,8 +536,38 @@ onMounted(() => {
 @media (max-width: 767px) {
   .models-hero {
     align-items: flex-end;
-    min-height: 520px;
-    padding: 0 16px 40px;
+    min-height: min(100svh - 54px, 640px);
+    padding: 72px 16px 16px;
+  }
+
+  .models-hero__inner {
+    padding-bottom: 52px;
+  }
+
+  .models-hero__content {
+    gap: 16px;
+  }
+
+  .models-hero__title {
+    font-size: clamp(28px, 8vw, 36px);
+    line-height: 1.15;
+  }
+
+  .models-hero__subtitle {
+    font-size: 15px;
+    line-height: 1.35;
+  }
+
+  .models-hero__actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    width: 100%;
+  }
+
+  .models-hero__btn {
+    width: 100%;
+    justify-content: center;
   }
 
   .models-toolbar {

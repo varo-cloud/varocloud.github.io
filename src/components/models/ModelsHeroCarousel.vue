@@ -95,32 +95,32 @@ onBeforeUnmount(() => {
       playsinline
       preload="auto"
     />
+  </div>
 
-    <div class="hero-carousel__nav-wrap">
-      <div class="hero-carousel__nav" role="tablist" aria-label="Hero carousel">
-        <button
-          v-for="(slide, index) in slides"
-          :key="slide.poster"
-          type="button"
-          role="tab"
-          class="hero-carousel__thumb"
-          :class="{ 'is-active': index === activeIndex }"
-          :aria-selected="index === activeIndex"
-          :aria-label="`Slide ${index + 1}`"
-          @click="goToSlide(index)"
-        >
-          <span class="hero-carousel__thumb-image">
-            <img :src="slide.poster" alt="" />
-          </span>
-          <span v-if="index === activeIndex" class="hero-carousel__progress">
-            <span
-              :key="progressKey"
-              class="hero-carousel__progress-fill"
-              :style="{ animationDuration: `${SLIDE_DURATION_MS}ms` }"
-            />
-          </span>
-        </button>
-      </div>
+  <div class="hero-carousel__nav-wrap">
+    <div class="hero-carousel__nav" role="tablist" aria-label="Hero carousel">
+      <button
+        v-for="(slide, index) in slides"
+        :key="slide.poster"
+        type="button"
+        role="tab"
+        class="hero-carousel__thumb"
+        :class="{ 'is-active': index === activeIndex }"
+        :aria-selected="index === activeIndex"
+        :aria-label="`Slide ${index + 1}`"
+        @click="goToSlide(index)"
+      >
+        <span class="hero-carousel__thumb-image">
+          <img :src="slide.poster" alt="" />
+        </span>
+        <span v-if="index === activeIndex" class="hero-carousel__progress">
+          <span
+            :key="progressKey"
+            class="hero-carousel__progress-fill"
+            :style="{ animationDuration: `${SLIDE_DURATION_MS}ms` }"
+          />
+        </span>
+      </button>
     </div>
   </div>
 </template>
@@ -129,7 +129,21 @@ onBeforeUnmount(() => {
 .hero-carousel {
   position: absolute;
   inset: 0;
+  z-index: 0;
   overflow: hidden;
+}
+
+.hero-carousel::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.15) 0%,
+    rgba(0, 0, 0, 0.05) 35%,
+    rgba(0, 0, 0, 0.55) 100%
+  );
+  pointer-events: none;
 }
 
 .hero-carousel__video {
@@ -138,6 +152,7 @@ onBeforeUnmount(() => {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
   pointer-events: none;
 }
 
@@ -230,8 +245,27 @@ onBeforeUnmount(() => {
 }
 
 @media (max-width: 767px) {
+  .hero-carousel__video {
+    object-position: center 35%;
+  }
+
   .hero-carousel__nav-wrap {
-    padding-bottom: 40px;
+    padding: 0 16px 16px;
+  }
+
+  .hero-carousel__nav {
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .hero-carousel__thumb {
+    width: 56px;
+    height: 36px;
+  }
+
+  .hero-carousel__thumb-image {
+    width: 54px;
+    height: 34px;
   }
 }
 </style>
