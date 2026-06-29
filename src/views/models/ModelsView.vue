@@ -6,6 +6,7 @@ import { useLocaleRouter } from '@/composables/useLocaleRouter'
 import { NEmpty, NSpin } from 'naive-ui'
 import { fetchModels, fetchModelsByIds } from '@/api/models'
 import ModelCard from '@/components/models/ModelCard.vue'
+import ModelsHeroCarousel from '@/components/models/ModelsHeroCarousel.vue'
 import { useModelPreferencesStore } from '@/stores/modelPreferences'
 import { useUserStore } from '@/stores/user'
 import { assetUrl } from '@/utils/assetUrl'
@@ -177,12 +178,7 @@ onMounted(() => {
 <template>
   <div class="models-page">
     <section class="models-hero" aria-labelledby="models-hero-title">
-      <img
-        class="models-hero__bg"
-        :src="assetUrl('/assets/models/hero-bg.jpg')"
-        alt=""
-        aria-hidden="true"
-      />
+      <ModelsHeroCarousel />
 
       <div class="models-hero__inner">
         <div class="models-hero__content">
@@ -287,15 +283,6 @@ onMounted(() => {
   min-height: 724px;
   padding: 0 16px 49px;
   overflow: hidden;
-}
-
-.models-hero__bg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  pointer-events: none;
 }
 
 .models-hero__inner {

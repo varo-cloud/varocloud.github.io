@@ -15,6 +15,7 @@ export default {
     myBilling: 'My Billing',
     signOut: 'Sign Out',
     userId: 'ID:{id}',
+    defaultUserName: 'User',
   },
   nav: {
     models: 'Models',
