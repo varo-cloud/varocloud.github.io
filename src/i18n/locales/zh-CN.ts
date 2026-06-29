@@ -16,6 +16,9 @@ export default {
     signOut: '退出登录',
     userId: 'ID:{id}',
     defaultUserName: '用户',
+    openMenu: '打开菜单',
+    closeMenu: '关闭菜单',
+    menu: '菜单',
   },
   nav: {
     models: '模型',

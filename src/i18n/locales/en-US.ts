@@ -16,6 +16,9 @@ export default {
     signOut: 'Sign Out',
     userId: 'ID:{id}',
     defaultUserName: 'User',
+    openMenu: 'Open menu',
+    closeMenu: 'Close menu',
+    menu: 'Menu',
   },
   nav: {
     models: 'Models',

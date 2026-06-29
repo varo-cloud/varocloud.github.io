@@ -18,6 +18,7 @@ const userStore = useUserStore()
 const headerSearch = ref('')
 const isScrolled = ref(false)
 const userMenuOpen = ref(false)
+const mobileMenuOpen = ref(false)
 
 let userMenuCloseTimer: ReturnType<typeof setTimeout> | null = null
 
@@ -83,6 +84,14 @@ function openUserMenu() {
   userMenuOpen.value = true
 }
 
+function toggleUserMenu() {
+  if (userMenuOpen.value) {
+    userMenuOpen.value = false
+    return
+  }
+  openUserMenu()
+}
+
 function scheduleCloseUserMenu() {
   if (userMenuCloseTimer) clearTimeout(userMenuCloseTimer)
   userMenuCloseTimer = setTimeout(() => {
@@ -107,6 +116,29 @@ function isActive(name: string) {
 
 function goTo(name: string) {
   push({ name })
+}
+
+function toggleMobileMenu() {
+  mobileMenuOpen.value = !mobileMenuOpen.value
+}
+
+function closeMobileMenu() {
+  mobileMenuOpen.value = false
+}
+
+function goToFromMobile(name: string) {
+  closeMobileMenu()
+  goTo(name)
+}
+
+function submitMobileSearch() {
+  submitHeaderSearch()
+  closeMobileMenu()
+}
+
+function setBodyScrollLocked(locked: boolean) {
+  if (typeof document === 'undefined') return
+  document.body.style.overflow = locked ? 'hidden' : ''
 }
 
 function handleUserMenuSelect(key: string) {
@@ -148,18 +180,30 @@ watch(
   () => route.fullPath,
   () => {
     updateScrollState()
+    closeMobileMenu()
   },
 )
+
+watch(mobileMenuOpen, (open) => {
+  setBodyScrollLocked(open)
+})
+
+function handleMobileMenuKeydown(event: KeyboardEvent) {
+  if (event.key === 'Escape') closeMobileMenu()
+}
 
 onMounted(() => {
   userStore.loadProfile()
   updateScrollState()
   window.addEventListener('scroll', updateScrollState, { passive: true })
+  window.addEventListener('keydown', handleMobileMenuKeydown)
 })
 
 onUnmounted(() => {
   window.removeEventListener('scroll', updateScrollState)
+  window.removeEventListener('keydown', handleMobileMenuKeydown)
   if (userMenuCloseTimer) clearTimeout(userMenuCloseTimer)
+  setBodyScrollLocked(false)
 })
 </script>
 
@@ -246,6 +290,9 @@ onUnmounted(() => {
               class="app-header__user-trigger"
               :aria-expanded="userMenuOpen"
               aria-haspopup="menu"
+              @click="toggleUserMenu"
+              @mouseenter="openUserMenu"
+              @mouseleave="scheduleCloseUserMenu"
             >
               <span class="app-header__user-name">{{ displayUserName }}</span>
               <AppIcon name="chevron-down" />
@@ -291,8 +338,86 @@ onUnmounted(() => {
         >
           {{ t('common.login') }}
         </button>
+
+        <button
+          type="button"
+          class="app-header__menu-btn md:hidden"
+          :aria-label="mobileMenuOpen ? t('header.closeMenu') : t('header.openMenu')"
+          :aria-expanded="mobileMenuOpen"
+          aria-controls="app-header-mobile-nav"
+          @click="toggleMobileMenu"
+        >
+          <AppIcon v-if="mobileMenuOpen" name="close" :size="20" />
+          <svg
+            v-else
+            class="app-header__menu-icon"
+            width="20"
+            height="20"
+            viewBox="0 0 20 20"
+            fill="none"
+            aria-hidden="true"
+          >
+            <path
+              d="M2.5 5H17.5"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+            />
+            <path
+              d="M2.5 10H17.5"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+            />
+            <path
+              d="M2.5 15H17.5"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+            />
+          </svg>
+        </button>
       </div>
     </div>
+
+    <Teleport to="body">
+      <Transition name="app-header-mobile">
+        <div
+          v-if="mobileMenuOpen"
+          class="app-header__mobile-backdrop md:hidden"
+          @click="closeMobileMenu"
+        >
+          <nav
+            id="app-header-mobile-nav"
+            class="app-header__mobile-nav"
+            :aria-label="t('header.menu')"
+            @click.stop
+          >
+            <label v-if="userStore.isLoggedIn" class="app-header__mobile-search">
+              <AppIcon name="search" class="app-header__search-icon" />
+              <input
+                v-model="headerSearch"
+                type="search"
+                class="app-header__search-input"
+                :placeholder="t('header.searchModels')"
+                @keydown.enter.prevent="submitMobileSearch"
+              />
+            </label>
+
+            <button
+              v-for="item in navItems"
+              :key="item.name"
+              type="button"
+              class="app-header__mobile-nav-item"
+              :class="{ 'is-active': isActive(item.name) }"
+              @click="goToFromMobile(item.name)"
+            >
+              {{ item.label }}
+            </button>
+          </nav>
+        </div>
+      </Transition>
+    </Teleport>
   </header>
 </template>
 
@@ -575,9 +700,119 @@ onUnmounted(() => {
   background: #d8d8dc;
 }
 
+.app-header__menu-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #ebf4fb;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.app-header__menu-btn:hover {
+  opacity: 0.85;
+}
+
+.app-header__menu-icon {
+  display: block;
+}
+
+.app-header__mobile-backdrop {
+  position: fixed;
+  inset: 54px 0 0;
+  z-index: 99;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.app-header__mobile-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 16px 20px;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-page);
+}
+
+.app-header__mobile-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  margin-bottom: 8px;
+  padding: 0 12px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  cursor: text;
+}
+
+.app-header__mobile-nav-item {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 44px;
+  padding: 0 12px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #9b9dab;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.2;
+  text-align: left;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+}
+
+.app-header__mobile-nav-item.is-active {
+  color: #ebf4fb;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.app-header__mobile-nav-item:hover {
+  color: #ebf4fb;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.app-header-mobile-enter-active,
+.app-header-mobile-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.app-header-mobile-enter-active .app-header__mobile-nav,
+.app-header-mobile-leave-active .app-header__mobile-nav {
+  transition: transform 0.2s ease;
+}
+
+.app-header-mobile-enter-from,
+.app-header-mobile-leave-to {
+  opacity: 0;
+}
+
+.app-header-mobile-enter-from .app-header__mobile-nav,
+.app-header-mobile-leave-to .app-header__mobile-nav {
+  transform: translateY(-8px);
+}
+
 @media (max-width: 767px) {
   .app-header__inner {
     padding: 0 12px;
+    gap: 8px;
+  }
+
+  .app-header__right {
+    gap: 6px;
+  }
+
+  .app-header__menu-btn {
+    display: inline-flex;
   }
 
   .app-header__logo {
@@ -589,12 +824,27 @@ onUnmounted(() => {
     display: none;
   }
 
+  .app-header__wallet-balance span {
+    max-width: 64px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
   .app-header__wallet-deposit span {
     display: none;
   }
 
   .app-header__wallet-deposit {
     padding: 0 8px;
+  }
+
+  .app-header__user-name {
+    display: none;
+  }
+
+  .app-header__login-btn {
+    min-width: 0;
+    padding: 0 12px;
   }
 }
 </style>
