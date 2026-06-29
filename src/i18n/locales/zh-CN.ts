@@ -15,6 +15,7 @@ export default {
     myBilling: '我的账单',
     signOut: '退出登录',
     userId: 'ID:{id}',
+    defaultUserName: '用户',
   },
   nav: {
     models: '模型',

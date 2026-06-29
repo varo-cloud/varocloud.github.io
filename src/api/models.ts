@@ -44,19 +44,19 @@ interface ApiModelsPage {
   limit: number
 }
 
-function mapModel(raw: ApiModel): Model {
+function mapModel(raw: Partial<ApiModel> & Pick<ApiModel, 'id'>): Model {
   return {
     id: raw.id,
-    name: raw.name,
+    name: raw.name ?? raw.id,
     displayName: raw.display_name ?? undefined,
-    provider: raw.provider,
-    capabilities: raw.capabilities,
-    startingPriceUsd: raw.starting_price_usd,
+    provider: raw.provider ?? '',
+    capabilities: raw.capabilities ?? [],
+    startingPriceUsd: raw.starting_price_usd ?? 0,
     originalPriceUsd: raw.standard_price_usd ?? undefined,
-    priceUnit: raw.price_unit,
+    priceUnit: raw.price_unit ?? 'per_second',
     priceDetail: raw.price_detail ?? undefined,
     discountPercent: raw.discount_percent ?? undefined,
-    description: raw.description,
+    description: raw.description ?? '',
     thumbnailUrl: raw.thumbnail_url ?? undefined,
     iconUrl: raw.icon_url ?? undefined,
     isHot: raw.is_hot ?? undefined,
@@ -80,15 +80,52 @@ function mapModelDetail(raw: ApiModelDetail): ModelDetail {
 
 function mapModelsPage(raw: ApiModelsPage): ModelsPage {
   return {
-    items: raw.items.map(mapModel),
-    total: raw.total,
-    offset: raw.offset,
-    limit: raw.limit,
+    items: (raw.items ?? []).map(mapModel),
+    total: raw.total ?? raw.items?.length ?? 0,
+    offset: raw.offset ?? 0,
+    limit: raw.limit ?? raw.items?.length ?? 0,
   }
 }
 
+function filterModelsByQuery(items: ApiModel[], query?: string): ApiModel[] {
+  const q = query?.trim().toLowerCase()
+  if (!q) return items
+
+  return items.filter((model) => {
+    const name = (model.display_name ?? model.name ?? model.id).toLowerCase()
+    return (
+      name.includes(q) ||
+      (model.provider ?? '').toLowerCase().includes(q) ||
+      (model.description ?? '').toLowerCase().includes(q)
+    )
+  })
+}
+
+/** 兼容后端返回 data 为数组，或 data 为 { items, total, ... } 两种形态 */
+function normalizeModelsPage(
+  raw: ApiModelsPage | ApiModel[],
+  params?: FetchModelsParams,
+): ModelsPage {
+  if (Array.isArray(raw)) {
+    const offset = Math.max(0, params?.offset ?? 0)
+    const limit = Math.min(100, Math.max(1, params?.limit ?? 20))
+    const filtered = filterModelsByQuery(raw, params?.q)
+
+    return {
+      items: filtered.slice(offset, offset + limit).map(mapModel),
+      total: filtered.length,
+      offset,
+      limit,
+    }
+  }
+
+  return mapModelsPage(raw)
+}
+
 export function fetchModels(params?: FetchModelsParams) {
-  return unwrap<ApiModelsPage>(http.get('/models', { params })).then(mapModelsPage)
+  return unwrap<ApiModelsPage | ApiModel[]>(http.get('/models', { params })).then((raw) =>
+    normalizeModelsPage(raw, params),
+  )
 }
 
 export function fetchModelDetail(id: string) {

@@ -58,7 +58,7 @@ const isLightPage = computed(() => route.meta.lightPage === true)
 }
 
 .app-layout--full-bleed .app-layout__main {
-  margin-top: -80px;
+  margin-top: -54px;
 }
 
 .app-layout--light {

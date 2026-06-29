@@ -32,12 +32,6 @@ const navItems = computed(() => [
   { label: t('nav.models'), name: 'models' },
   { label: t('nav.aiGenerator'), name: 'ai-generator' },
   { label: t('nav.pricing'), name: 'pricing' },
-  ...(userStore.isLoggedIn
-    ? [
-        { label: t('nav.apiKeys'), name: 'api-keys' },
-        { label: t('nav.billing'), name: 'billing' },
-      ]
-    : []),
   { label: t('nav.docs'), name: 'docs' },
 ])
 
@@ -60,9 +54,13 @@ const balanceLabel = computed(() => {
   return formatUsd(value)
 })
 
-const userInitial = computed(() => {
-  const name = userStore.profile?.name ?? userStore.profile?.email ?? ''
-  return name.charAt(0).toUpperCase() || '?'
+const displayUserName = computed(() => {
+  const name = userStore.profile?.name?.trim()
+  if (name) return name
+
+  const email = userStore.profile?.email ?? ''
+  const local = email.split('@')[0]?.trim()
+  return local || t('header.defaultUserName')
 })
 
 const displayEmail = computed(() => {
@@ -181,7 +179,9 @@ onUnmounted(() => {
             :key="item.name"
             type="button"
             class="app-header__nav-item"
-            :class="{ 'is-active': isActive(item.name) }"
+            :class="{
+              'is-active': isActive(item.name),
+            }"
             @click="goTo(item.name)"
           >
             {{ item.label }}
@@ -247,7 +247,7 @@ onUnmounted(() => {
               :aria-expanded="userMenuOpen"
               aria-haspopup="menu"
             >
-              <span class="app-header__avatar">{{ userInitial }}</span>
+              <span class="app-header__user-name">{{ displayUserName }}</span>
               <AppIcon name="chevron-down" />
             </button>
 
@@ -302,7 +302,7 @@ onUnmounted(() => {
   top: 0;
   z-index: 100;
   width: 100%;
-  height: 80px;
+  height: 54px;
   color: #ebf4fb;
   transition:
     background-color 0.2s ease,
@@ -333,7 +333,7 @@ onUnmounted(() => {
 .app-header__left {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 24px;
   min-width: 0;
   flex-shrink: 0;
 }
@@ -355,11 +355,10 @@ onUnmounted(() => {
 
 .app-header__nav {
   gap: 24px;
-  margin-left: 8px;
 }
 
 .app-header__nav-item {
-  padding: 6px 0;
+  padding: 0;
   border: none;
   border-radius: 0;
   background: transparent;
@@ -367,6 +366,8 @@ onUnmounted(() => {
   cursor: pointer;
   font-size: 14px;
   font-weight: 600;
+  line-height: 14px;
+  white-space: nowrap;
 }
 
 .app-header__nav-item.is-active {
@@ -392,7 +393,7 @@ onUnmounted(() => {
   height: 36px;
   padding: 0 12px;
   border-radius: 8px;
-  background: #13131c;
+  background: rgba(255, 255, 255, 0.1);
   cursor: text;
 }
 
@@ -424,10 +425,10 @@ onUnmounted(() => {
   justify-content: center;
   gap: 4px;
   height: 36px;
-  padding: 0 12px;
+  padding: 8px 12px;
   border: none;
   border-radius: 8px;
-  background: #13131c;
+  background: rgba(255, 255, 255, 0.1);
   color: #ebf4fb;
   cursor: pointer;
   transition: opacity 0.15s ease;
@@ -523,7 +524,7 @@ onUnmounted(() => {
   height: 36px;
   padding: 0 8px;
   border: none;
-  background: #13131c;
+  background: rgba(255, 255, 255, 0.1);
   color: #ebf4fb;
   font-size: 14px;
   font-weight: 500;
@@ -541,18 +542,11 @@ onUnmounted(() => {
   transition: opacity 0.15s ease;
 }
 
-.app-header__avatar {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 8px;
-  background: #ff9c39;
-  color: #13131c;
-  font-size: 13px;
-  font-weight: 700;
+.app-header__user-name {
+  font-size: 14px;
+  font-weight: 500;
   line-height: 1;
+  white-space: nowrap;
 }
 
 .app-header__login-btn {
@@ -587,8 +581,12 @@ onUnmounted(() => {
   }
 
   .app-header__logo {
-    transform: scale(0.9);
+    transform: scale(0.88);
     transform-origin: left center;
+  }
+
+  .app-header__logo :deep(.varo-cloud-logo__wordmark) {
+    display: none;
   }
 
   .app-header__wallet-deposit span {

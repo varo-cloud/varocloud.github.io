@@ -6,6 +6,7 @@ import { useLocaleRouter } from '@/composables/useLocaleRouter'
 import { NEmpty, NSpin } from 'naive-ui'
 import { fetchModels, fetchModelsByIds } from '@/api/models'
 import ModelCard from '@/components/models/ModelCard.vue'
+import ModelsHeroCarousel from '@/components/models/ModelsHeroCarousel.vue'
 import { useModelPreferencesStore } from '@/stores/modelPreferences'
 import { useUserStore } from '@/stores/user'
 import { assetUrl } from '@/utils/assetUrl'
@@ -177,12 +178,7 @@ onMounted(() => {
 <template>
   <div class="models-page">
     <section class="models-hero" aria-labelledby="models-hero-title">
-      <img
-        class="models-hero__bg"
-        :src="assetUrl('/assets/models/hero-bg.jpg')"
-        alt=""
-        aria-hidden="true"
-      />
+      <ModelsHeroCarousel />
 
       <div class="models-hero__inner">
         <div class="models-hero__content">
@@ -289,15 +285,6 @@ onMounted(() => {
   overflow: hidden;
 }
 
-.models-hero__bg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  pointer-events: none;
-}
-
 .models-hero__inner {
   position: relative;
   z-index: 1;
@@ -342,6 +329,9 @@ onMounted(() => {
 }
 
 .models-hero__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   height: 40px;
   padding: 0 24px;
   border: none;
@@ -546,8 +536,38 @@ onMounted(() => {
 @media (max-width: 767px) {
   .models-hero {
     align-items: flex-end;
-    min-height: 520px;
-    padding: 0 16px 40px;
+    min-height: min(100svh - 54px, 640px);
+    padding: 72px 16px 16px;
+  }
+
+  .models-hero__inner {
+    padding-bottom: 52px;
+  }
+
+  .models-hero__content {
+    gap: 16px;
+  }
+
+  .models-hero__title {
+    font-size: clamp(28px, 8vw, 36px);
+    line-height: 1.15;
+  }
+
+  .models-hero__subtitle {
+    font-size: 15px;
+    line-height: 1.35;
+  }
+
+  .models-hero__actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    width: 100%;
+  }
+
+  .models-hero__btn {
+    width: 100%;
+    justify-content: center;
   }
 
   .models-toolbar {
