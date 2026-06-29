@@ -137,12 +137,7 @@ onBeforeUnmount(() => {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    180deg,
-    rgba(0, 0, 0, 0.15) 0%,
-    rgba(0, 0, 0, 0.05) 35%,
-    rgba(0, 0, 0, 0.55) 100%
-  );
+  background: rgba(0, 0, 0, 0.5);
   pointer-events: none;
 }
 
