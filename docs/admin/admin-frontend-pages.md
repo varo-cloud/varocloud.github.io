@@ -1,7 +1,7 @@
 # 管理后台 — 前端页面专章
 
-> **版本：** v1.1  
-> **日期：** 2026-06-25  
+> **版本：** v1.2  
+> **日期：** 2026-06-29  
 > **受众：** 管理后台前端团队  
 > **姊妹文档：** [后端 API 专章](./admin-backend-api.md) · [总览索引](./admin-platform-requirements.md)
 
@@ -115,6 +115,7 @@ router.beforeEach(async (to) => {
 │ 充值订单  │                                      │
 │ API Keys │  (P1)                                │
 │ 定价     │  (P1)                                │
+│ Hero轮播  │  (P1)                                │
 │ 系统配置  │  (P1)                                │
 └──────────┴──────────────────────────────────────┘
 ```
@@ -141,6 +142,7 @@ router.beforeEach(async (to) => {
 | `/api-keys` | API Key 管理 | P1 | `GET/DELETE /api/admin/api-keys` |
 | `/pricing` | 定价目录 | P1 | pricing CRUD |
 | `/settings` | 系统配置 | P1 | `GET/PUT /api/admin/config` |
+| `/content/hero-carousel` | 首页 Hero 轮播 | P1 | `GET/PUT /api/admin/hero-carousel` + slides CRUD |
 | `/audit-logs` | 审计日志 | P1 | `GET /api/admin/audit-logs` |
 
 ---
@@ -538,6 +540,53 @@ Task: cgt-20260611195952-9l74f          [退还费用]
 
 ---
 
+### 5.14 首页 Hero 轮播 `/content/hero-carousel`（P1）
+
+管理 Models 首页顶部视频轮播：背景视频、底部缩略图、随 slide 切换的 slogan / 副标题。
+
+> **用户端 frontend-web 对接可后置**；本页仅 Admin Console 配置能力。详见 [后端 API §5.11](./admin-backend-api.md#511-hero-轮播配置p1)。
+
+#### 布局
+
+```
+┌─────────────────────────────────────────────────────────┐
+│  全局设置                                                │
+│  轮播间隔(ms) [5000]  自动轮播 [✓]  静音 [✓]              │
+│  默认 Slogan / 副标题 — 语言子 Tab (en-US · zh-CN)        │
+└─────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────┐
+│  [+ 新增 Slide]                              [保存排序]  │
+├────┬──────────┬──────────┬────────────┬────────┬────────┤
+│ ≡  │ 缩略图    │ 视频      │ Slogan      │ 状态   │ 操作   │
+├────┼──────────┼──────────┼────────────┼────────┼────────┤
+│ ≡  │ [preview]│ 已上传    │ Seedance…  │ 启用   │ 编辑 删│
+└────┴──────────┴──────────┴────────────┴────────┴────────┘
+```
+
+#### 编辑 Slide 抽屉 / 弹窗
+
+| 字段 | 控件 | 说明 |
+|---|---|---|
+| 视频 | Upload + URL 预览 | `POST .../assets` `kind=video`；建议 ≥ 1920×1080 |
+| 缩略图 | Upload + URL 预览 | `kind=poster`；底部导航 + 视频 poster |
+| Slogan | 语言子 Tab `LocalizedString` | 留空则使用全局默认 |
+| 副标题 | 语言子 Tab `LocalizedString` | 留空则使用全局默认 |
+| 启用 | Switch | 对应 `active` |
+
+#### 交互
+
+- 拖拽 `≡` 调整顺序 → `PUT .../slides/reorder`
+- 停用 slide 需二次确认
+- 删除 slide 不删 CDN 文件（提示运营自行清理）
+- 保存后公开 `GET /api/site/hero-carousel` 缓存失效
+
+#### API 模块
+
+`src/api/hero-carousel.ts` — 映射见 [后端 §5.11](./admin-backend-api.md#511-hero-轮播配置p1)
+
+---
+
 ## 6. 通用组件规范
 
 ### 6.1 金额展示
@@ -597,6 +646,7 @@ admin-web/src/
 │   ├── billing.ts
 │   ├── api-keys.ts       # P1
 │   ├── pricing.ts        # P1
+│   ├── hero-carousel.ts  # P1
 │   └── config.ts         # P1
 ├── types/
 │   └── admin.ts          # Admin 专用类型
@@ -633,6 +683,7 @@ admin-web/src/
 | 用户端页面 | Admin 对应能力 |
 |---|---|
 | Models 首页 | 模型列表 + 编辑：展示字段、上下架、排序 |
+| Models 首页 Hero | Hero 轮播页：视频、缩略图、slogan、副标题 |
 | Model Detail / Playground | 模型编辑：Schema、定价 |
 | Model API Tab | 模型编辑：api_model_id、readme、faq |
 | Pricing | 定价目录 或 模型定价 Tab |
@@ -655,6 +706,7 @@ admin-web/src/
 ### Phase 2 — P1（约 1 周）
 
 - [ ] Settings / API Keys / Pricing（或合并到模型页，含定价名称多语言）
+- [ ] Hero 轮播配置页 `/content/hero-carousel`
 - [ ] 用户禁用、充值异常处理、审计日志页
 - [ ] 模型文档 FAQ 多语言编辑（readme + FAQ 语言子 Tab）
 

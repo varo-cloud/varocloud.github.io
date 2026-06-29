@@ -1,7 +1,7 @@
 # 管理后台 — 后端 API 专章
 
-> **版本：** v1.1  
-> **日期：** 2026-06-25  
+> **版本：** v1.2  
+> **日期：** 2026-06-29  
 > **受众：** 后端团队  
 > **姊妹文档：** [前端页面专章](./admin-frontend-pages.md) · [总览索引](./admin-platform-requirements.md)
 
@@ -16,6 +16,7 @@
 1. 模型与定价 — `model_rates`、展示字段、Input Schema
 2. 运营管理 — 用户、充值订单、生成任务查询与干预
 3. 系统配置 — 套餐、注册体验金、限流等
+4. 首页运营 — Models 页 Hero 轮播（视频、缩略图、slogan、副标题）
 
 ---
 
@@ -126,6 +127,7 @@ FAQ 条目内 `question`、`answer` 同样为 `LocalizedString`。
 | `models` | `name`、`display_name`、`description` | P0 |
 | `model_docs` | `readme_md`、`faq[].question`、`faq[].answer` | P1 |
 | `pricing_items` | `name` | P1 |
+| `hero_carousel` | `default_title`、`default_subtitle`；各 slide 的 `title`、`subtitle` | P1 |
 
 #### 3.3.4 Admin API 与公开 API 的差异
 
@@ -187,6 +189,15 @@ Content-Type: application/json
 | P1 | POST | `/api/admin/billing/transactions/{id}/complete` | 手动标记充值完成 |
 | P1 | POST | `/api/admin/billing/transactions/{id}/fail` | 手动标记充值失败 |
 | P1 | GET | `/api/admin/audit-logs` | 审计日志查询 |
+| P1 | GET | `/api/admin/hero-carousel` | 读取 Hero 轮播配置（含全部 slide） |
+| P1 | PUT | `/api/admin/hero-carousel` | 更新轮播全局设置 |
+| P1 | POST | `/api/admin/hero-carousel/slides` | 创建 slide |
+| P1 | PUT | `/api/admin/hero-carousel/slides/{slide_id}` | 更新 slide |
+| P1 | PATCH | `/api/admin/hero-carousel/slides/{slide_id}/status` | 启用 / 停用 slide |
+| P1 | DELETE | `/api/admin/hero-carousel/slides/{slide_id}` | 删除 slide |
+| P1 | PUT | `/api/admin/hero-carousel/slides/reorder` | 批量调整排序 |
+| P1 | POST | `/api/admin/hero-carousel/assets` | 上传轮播视频或缩略图 |
+| P1 | GET | `/api/site/hero-carousel` | **用户端公开读**（无需鉴权） |
 | P2 | POST | `/api/admin/promo-codes` | 创建兑换码 |
 | P2 | GET | `/api/admin/promo-codes` | 兑换码列表 |
 | P2 | POST | `/api/admin/users/batch-bonus` | 批量赠送体验金 |
@@ -768,6 +779,267 @@ Webhook 丢失时人工补入账。需二次确认 Stripe 侧已支付。
 
 ---
 
+### 5.11 Hero 轮播配置（P1）
+
+配置用户端 Models 首页（`/`）顶部 Hero 区域：背景视频轮播、底部缩略导航图，以及随当前 slide 切换的 **slogan（标题）** 与 **subtitle（副标题）**。
+
+> **用户端现状（硬编码）：** [ModelsHeroCarousel.vue](../../src/components/models/ModelsHeroCarousel.vue) 内写死 `public/assets/cover/*.mp4` / `*.jpg`；[ModelsView.vue](../../src/views/models/ModelsView.vue) 按 slide 索引切换 i18n 文案。本节后端落地后，用户端改为请求公开接口 `GET /api/site/hero-carousel`（**用户端对接可后置**）。
+
+#### 5.11.1 业务规则
+
+| 规则 | 说明 |
+|---|---|
+| 展示范围 | 仅 `active=true` 的 slide，按 `sort_order` 升序 |
+| 最少条数 | 公开 API 至少返回 1 条可用 slide；否则 fallback 至内置默认（与当前硬编码一致） |
+| 默认文案 | slide 未配置 `title` / `subtitle` 时，公开 API 回填全局 `default_title` / `default_subtitle` |
+| 自动轮播 | 由 `autoplay_enabled` 控制；`slide_duration_ms` 默认 `5000` |
+| 静音播放 | `muted` 默认 `true`（浏览器自动播放策略要求；用户端可后续加「开启声音」交互） |
+| 资源 URL | `video_url`、`poster_url` 为 **HTTPS 绝对地址**（CDN）；由 Admin 上传接口或外部 URL 填入 |
+| 多语言 | `default_title`、`default_subtitle`、各 slide 的 `title`、`subtitle` 均为 `LocalizedString`；`en-US` 必填 |
+| 审计 | 写操作记入 `admin_audit_logs`，`action` 如 `hero_carousel_update`、`hero_slide_create` |
+
+**用户端消费字段映射：**
+
+| 后端字段 | 用户端用途 |
+|---|---|
+| `slides[].video_url` | Hero 背景 `<video src>` |
+| `slides[].poster_url` | 底部缩略导航图 + 视频 `poster` |
+| `slides[].title` | Hero 主标题（slogan） |
+| `slides[].subtitle` | Hero 副标题 |
+| `slide_duration_ms` | 自动轮播间隔与进度条动画时长 |
+| `autoplay_enabled` | 是否自动切换 slide |
+| `muted` | 视频是否静音 |
+
+#### 5.11.2 用户端公开读 — `GET /api/site/hero-carousel`
+
+**鉴权：** 无需登录（与 `GET /api/models` 一致，建议公开可读）。
+
+**请求头：** `X-Locale` / `Accept-Language`（可选，默认 `en-US`）。
+
+**响应 200 — `data`**
+
+```json
+{
+  "slide_duration_ms": 5000,
+  "autoplay_enabled": true,
+  "muted": true,
+  "default_title": "The AI Model Cloud for Creator",
+  "default_subtitle": "Access leading video, image, audio, and language models through one unified API—with better pricing and reliable performance.",
+  "slides": [
+    {
+      "id": "hero-slide-2",
+      "sort_order": 0,
+      "video_url": "https://cdn.varo.cloud/assets/cover/2.mp4",
+      "poster_url": "https://cdn.varo.cloud/assets/cover/2.jpg",
+      "title": "The AI Model Cloud for Creator",
+      "subtitle": "Access leading video, image, audio, and language models through one unified API—with better pricing and reliable performance."
+    },
+    {
+      "id": "hero-slide-3",
+      "sort_order": 1,
+      "video_url": "https://cdn.varo.cloud/assets/cover/3.mp4",
+      "poster_url": "https://cdn.varo.cloud/assets/cover/3.jpg",
+      "title": "Seedance 2.5 Coming Soon",
+      "subtitle": "Seedance 2.5 arrives in Early July with 30-second single-shot videos, expanded reference capacity, tighter generation and editing control, and support for up to 50 reference files."
+    },
+    {
+      "id": "hero-slide-4",
+      "sort_order": 2,
+      "video_url": "https://cdn.varo.cloud/assets/cover/4.mp4",
+      "poster_url": "https://cdn.varo.cloud/assets/cover/4.jpg",
+      "title": "The AI Model Cloud for Creator",
+      "subtitle": "Access leading video, image, audio, and language models through one unified API—with better pricing and reliable performance."
+    }
+  ]
+}
+```
+
+> 公开 API 中 `title`、`subtitle`、`default_title`、`default_subtitle` 已按 locale 解析为 **单语言 string**（§3.3.4）。slide 级 `title` / `subtitle` 为空时，服务端合并全局默认值后返回。
+
+**缓存建议：** `Cache-Control: public, max-age=60`；Admin 写操作后 CDN / 应用层失效缓存。
+
+#### 5.11.3 Admin 读 — `GET /api/admin/hero-carousel`
+
+**响应 200 — `data`**
+
+```json
+{
+  "slide_duration_ms": 5000,
+  "autoplay_enabled": true,
+  "muted": true,
+  "default_title": {
+    "en-US": "The AI Model Cloud for Creator",
+    "zh-CN": "The AI Model Cloud for Creator"
+  },
+  "default_subtitle": {
+    "en-US": "Access leading video, image, audio, and language models through one unified API—with better pricing and reliable performance.",
+    "zh-CN": "通过统一 API 接入领先的视频、图像、音频与语言模型——更优价格与稳定性能。"
+  },
+  "slides": [
+    {
+      "id": "hero-slide-2",
+      "sort_order": 0,
+      "active": true,
+      "video_url": "https://cdn.varo.cloud/assets/cover/2.mp4",
+      "poster_url": "https://cdn.varo.cloud/assets/cover/2.jpg",
+      "title": {
+        "en-US": "The AI Model Cloud for Creator",
+        "zh-CN": "The AI Model Cloud for Creator"
+      },
+      "subtitle": {
+        "en-US": "Access leading video, image, audio, and language models through one unified API—with better pricing and reliable performance.",
+        "zh-CN": "通过统一 API 接入领先的视频、图像、音频与语言模型——更优价格与稳定性能。"
+      },
+      "created_at": 1751203200000,
+      "updated_at": 1751203200000
+    },
+    {
+      "id": "hero-slide-3",
+      "sort_order": 1,
+      "active": true,
+      "video_url": "https://cdn.varo.cloud/assets/cover/3.mp4",
+      "poster_url": "https://cdn.varo.cloud/assets/cover/3.jpg",
+      "title": {
+        "en-US": "Seedance 2.5 Coming Soon",
+        "zh-CN": "Seedance 2.5 即将上线"
+      },
+      "subtitle": {
+        "en-US": "Seedance 2.5 arrives in Early July with 30-second single-shot videos, expanded reference capacity, tighter generation and editing control, and support for up to 50 reference files.",
+        "zh-CN": "Seedance 2.5 将于 7 月初上线，支持 30 秒单镜头视频、扩展参考素材容量、更精细的生成与编辑控制，以及最多 50 个参考文件。"
+      },
+      "created_at": 1751203200000,
+      "updated_at": 1751203200000
+    }
+  ],
+  "updated_at": 1751203200000
+}
+```
+
+> slide 级 `title` / `subtitle` 可为 `null` 或省略某 locale，表示该 slide 使用全局 `default_*` 文案。
+
+#### 5.11.4 Admin 写 — 全局设置 `PUT /api/admin/hero-carousel`
+
+部分更新，仅提交需修改的键：
+
+```json
+{
+  "slide_duration_ms": 5000,
+  "autoplay_enabled": true,
+  "muted": true,
+  "default_title": {
+    "en-US": "The AI Model Cloud for Creator",
+    "zh-CN": "The AI Model Cloud for Creator"
+  },
+  "default_subtitle": {
+    "en-US": "Access leading video, image, audio, and language models through one unified API—with better pricing and reliable performance.",
+    "zh-CN": "通过统一 API 接入领先的视频、图像、音频与语言模型——更优价格与稳定性能。"
+  }
+}
+```
+
+| 字段 | 类型 | 说明 |
+|---|---|---|
+| `slide_duration_ms` | number | 单张 slide 展示时长，范围 `3000`～`30000`，默认 `5000` |
+| `autoplay_enabled` | boolean | 是否自动轮播 |
+| `muted` | boolean | 是否静音播放 |
+| `default_title` | LocalizedString | 未单独配置 title 的 slide 使用的 slogan |
+| `default_subtitle` | LocalizedString | 未单独配置 subtitle 的 slide 使用的副标题 |
+
+#### 5.11.5 Admin 写 — Slide CRUD
+
+##### `POST /api/admin/hero-carousel/slides`
+
+**请求体**
+
+```json
+{
+  "id": "hero-slide-5",
+  "sort_order": 3,
+  "active": true,
+  "video_url": "https://cdn.varo.cloud/assets/cover/5.mp4",
+  "poster_url": "https://cdn.varo.cloud/assets/cover/5.jpg",
+  "title": {
+    "en-US": "New Model Launch",
+    "zh-CN": "新模型上线"
+  },
+  "subtitle": {
+    "en-US": "Try the latest generation capabilities today.",
+    "zh-CN": "立即体验最新生成能力。"
+  }
+}
+```
+
+| 字段 | 类型 | 必填 | 说明 |
+|---|---|---|---|
+| `id` | string | | 自定义 slug；省略则由服务端生成 uuid |
+| `sort_order` | number | ✅ | 排序权重，越小越靠前 |
+| `active` | boolean | | 默认 `true` |
+| `video_url` | string | ✅ | HTTPS 视频地址 |
+| `poster_url` | string | ✅ | HTTPS 缩略图地址（底部导航 + 视频 poster） |
+| `title` | LocalizedString | | 省略则公开 API 使用 `default_title` |
+| `subtitle` | LocalizedString | | 省略则公开 API 使用 `default_subtitle` |
+
+**校验：**
+
+- `video_url`：后缀 `.mp4` / `.webm` 或 `Content-Type: video/*`（上传校验）
+- `poster_url`：后缀 `.jpg` / `.jpeg` / `.png` / `.webp`
+- 建议视频分辨率 ≥ `1920×1080`，缩略图宽度 ≥ `960px`（避免用户端放大发糊）
+
+##### `PUT /api/admin/hero-carousel/slides/{slide_id}`
+
+全量或部分更新；`id` 不可修改。
+
+##### `PATCH /api/admin/hero-carousel/slides/{slide_id}/status`
+
+```json
+{ "active": false }
+```
+
+停用后不出现在公开 API `slides` 列表。
+
+##### `DELETE /api/admin/hero-carousel/slides/{slide_id}`
+
+硬删除 slide 记录；**不自动删除** CDN 上的媒体文件（可选异步清理任务）。
+
+##### `PUT /api/admin/hero-carousel/slides/reorder`
+
+```json
+{
+  "slide_ids": ["hero-slide-3", "hero-slide-2", "hero-slide-4"]
+}
+```
+
+按数组顺序重写 `sort_order`（0, 1, 2, …）。
+
+#### 5.11.6 Admin 写 — 媒体上传 `POST /api/admin/hero-carousel/assets`
+
+`multipart/form-data`：
+
+| 字段 | 类型 | 必填 | 说明 |
+|---|---|---|---|
+| `file` | file | ✅ | 视频或图片 |
+| `kind` | string | ✅ | `video` \| `poster` |
+
+**响应 200**
+
+```json
+{
+  "url": "https://cdn.varo.cloud/assets/hero/2026/06/abc123.mp4",
+  "kind": "video",
+  "content_type": "video/mp4",
+  "size_bytes": 15728640
+}
+```
+
+| `kind` | 限制（建议） |
+|---|---|
+| `video` | `video/mp4` / `video/webm`；单文件 ≤ `30MB` |
+| `poster` | `image/jpeg` / `image/png` / `image/webp`；单文件 ≤ `2MB` |
+
+上传成功后，将返回的 `url` 填入 slide 的 `video_url` 或 `poster_url`。
+
+---
+
 ## 6. 数据模型
 
 | 表 | 用途 | 关键字段 |
@@ -783,6 +1055,8 @@ Webhook 丢失时人工补入账。需二次确认 Stripe 侧已支付。
 | `generations` | 生成任务 | `status`、`cost`、`invocation_channel`、`refunded` |
 | `admin_audit_logs` | 审计 | §2.3 |
 | `config` | 系统 KV | `credits_per_usd`、`credit_packages` 等 |
+| `hero_carousel_settings` | Hero 全局 | `slide_duration_ms`、`autoplay_enabled`、`muted`、`default_title`、`default_subtitle`（jsonb 多语言） |
+| `hero_carousel_slides` | Hero 单条 | `sort_order`、`active`、`video_url`、`poster_url`、`title`、`subtitle`（jsonb 多语言） |
 | `promo_codes` | 兑换码（P2） | `code`、`bonus_usd`、`redemptions` |
 
 **建议：** 将现有 `config.model_rates` 迁移为独立 `models` 表，Admin CRUD 直接操作该表，公开 `GET /api/models` 读同一数据源。
@@ -799,6 +1073,7 @@ Webhook 丢失时人工补入账。需二次确认 Stripe 侧已支付。
 | balance-adjustment | `GET /api/user/profile`、`GET /api/billing/balance`、`GET /api/billing/records` |
 | generation refund | 用户余额 + 账单流水 |
 | config signup_bonus | `POST /api/auth/verify-otp` 首次注册逻辑 |
+| Hero 轮播 CRUD | `GET /api/site/hero-carousel`（公开读，按 `X-Locale` 返回单语言文案） |
 
 ---
 
@@ -820,6 +1095,7 @@ Webhook 丢失时人工补入账。需二次确认 Stripe 侧已支付。
 - [ ] billing 异常手动 complete/fail
 - [ ] audit-logs 查询
 - [ ] `readme_md` / `faq` / 定价 `name` 多语言；公开 API locale 解析与 fallback
+- [ ] Hero 轮播配置（`hero_carousel_settings` + `hero_carousel_slides`）+ 公开 `GET /api/site/hero-carousel`
 
 ### Phase 3 — P2
 
@@ -848,3 +1124,5 @@ Webhook 丢失时人工补入账。需二次确认 Stripe 侧已支付。
 | 3 | 定价目录 V1 是否独立表 | 模型 ≤4 时与 models 合并，pricing API 读 models |
 | 4 | legacy topup 废弃时间表 | Phase 2 标记 deprecated |
 | 5 | Admin 界面 i18n | **不做**；用户端内容用 `LocalizedString`（§3.3） |
+| 6 | Hero 轮播无 slide 时 | 公开 API 返回内置默认单条 slide（与当前 `public/assets/cover` 硬编码一致） |
+| 7 | 轮播媒体存储 | V1 走对象存储 + CDN；`video_url` / `poster_url` 存绝对 URL |
