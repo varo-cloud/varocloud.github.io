@@ -3,6 +3,7 @@ import { getToken } from '@/api/http'
 import i18n, { getStoredLocale, setStoredLocale } from '@/i18n'
 import {
   DEFAULT_LOCALE,
+  getCanonicalPath,
   localeFromRouteParam,
   localeToRouteParam,
   withLocalePrefix,
@@ -16,6 +17,16 @@ export function setupGuards(router: Router) {
     if (routeLocale !== i18n.global.locale.value) {
       i18n.global.locale.value = routeLocale
       setStoredLocale(routeLocale)
+    }
+
+    const canonicalPath = getCanonicalPath(to.path, routeLocale)
+    if (to.path !== canonicalPath) {
+      return {
+        path: canonicalPath,
+        query: to.query,
+        hash: to.hash,
+        replace: true,
+      }
     }
 
     if (!to.params.locale && storedLocale !== DEFAULT_LOCALE && to.name) {

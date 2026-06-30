@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
+import { LOCALE_ROUTE_PARAM } from '@/i18n/locale-path'
 import { setupGuards } from './guards'
 
 const appLayoutChildren: RouteRecordRaw[] = [
@@ -61,7 +62,7 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      path: '/:locale(zh-CN)?',
+      path: `/:locale(${LOCALE_ROUTE_PARAM})?`,
       children: [
         {
           path: '',
