@@ -49,6 +49,11 @@ a {
   --border-color: rgba(255, 255, 255, 0.1);
 }
 
+/* Naive UI Spin defaults to green; align with app accent. */
+.n-spin-body {
+  --n-color: var(--text-accent);
+}
+
 .scrollbar-subtle {
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
