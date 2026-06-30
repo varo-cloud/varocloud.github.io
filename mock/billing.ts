@@ -192,8 +192,6 @@ export default [
       body: {
         package?: string
         amount_usd?: number
-        success_url?: string
-        cancel_url?: string
       }
     }) => {
       const customAmountUsd = Number(body.amount_usd)
@@ -237,7 +235,7 @@ export default [
         amountUsd,
       })
 
-      const successBase = body.success_url?.split('?')[0] ?? 'http://localhost:5173/en/billing'
+      const successBase = 'http://localhost:5173/en/billing'
       const checkoutParams = new URLSearchParams({
         stripe_checkout: '1',
         session_id: sessionId,
@@ -265,32 +263,33 @@ export default [
       return success({ completed: true })
     },
   },
-  {
-    url: '/api/billing/auto-top-up',
-    method: 'post',
-    response: ({
-      body,
-    }: {
-      body: {
-        enabled?: boolean
-        threshold_usd?: number
-        top_up_amount_usd?: number
-        thresholdUsd?: number
-        topUpAmountUsd?: number
-      }
-    }) => {
-      summary = {
-        ...summary,
-        auto_top_up: {
-          enabled: Boolean(body?.enabled),
-          threshold_usd: Number(body?.threshold_usd ?? body?.thresholdUsd ?? summary.auto_top_up.threshold_usd),
-          top_up_amount_usd: Number(
-            body?.top_up_amount_usd ?? body?.topUpAmountUsd ?? summary.auto_top_up.top_up_amount_usd,
-          ),
-        },
-      }
-
-      return success(summary.auto_top_up)
-    },
-  },
+  // Auto top-up mock — re-enable when feature ships
+  // {
+  //   url: '/api/billing/auto-top-up',
+  //   method: 'post',
+  //   response: ({
+  //     body,
+  //   }: {
+  //     body: {
+  //       enabled?: boolean
+  //       threshold_usd?: number
+  //       top_up_amount_usd?: number
+  //       thresholdUsd?: number
+  //       topUpAmountUsd?: number
+  //     }
+  //   }) => {
+  //     summary = {
+  //       ...summary,
+  //       auto_top_up: {
+  //         enabled: Boolean(body?.enabled),
+  //         threshold_usd: Number(body?.threshold_usd ?? body?.thresholdUsd ?? summary.auto_top_up.threshold_usd),
+  //         top_up_amount_usd: Number(
+  //           body?.top_up_amount_usd ?? body?.topUpAmountUsd ?? summary.auto_top_up.top_up_amount_usd,
+  //         ),
+  //       },
+  //     }
+  //
+  //     return success(summary.auto_top_up)
+  //   },
+  // },
 ] as MockMethod[]

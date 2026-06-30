@@ -53,6 +53,10 @@ export const useUserStore = defineStore('user', () => {
     profile.value = null
   }
 
+  function restoreSessionFromStorage() {
+    token.value = getToken()
+  }
+
   return {
     token,
     profile,
@@ -64,5 +68,6 @@ export const useUserStore = defineStore('user', () => {
     setProfile,
     logout,
     clearSession,
+    restoreSessionFromStorage,
   }
 })

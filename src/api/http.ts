@@ -4,7 +4,7 @@ import { getCurrentLocale } from '@/i18n'
 import { authHttp } from '@/api/authHttp'
 import { apiBaseUrl } from '@/utils/apiBaseUrl'
 import { handleUnauthorizedSession } from '@/utils/authRedirect'
-import { resolveRequestBearerToken } from '@/utils/devAuthToken'
+import { resolveRefreshToken, resolveRequestBearerToken } from '@/utils/devAuthToken'
 
 const TOKEN_KEY = 'auth_token'
 const REFRESH_TOKEN_KEY = 'refresh_token'
@@ -44,7 +44,7 @@ async function tryRecoverFromUnauthorized(
 let refreshPromise: Promise<string | null> | null = null
 
 async function tryRefreshAccessToken(): Promise<string | null> {
-  const refreshToken = getRefreshToken()
+  const refreshToken = getRefreshToken() ?? resolveRefreshToken()
   if (!refreshToken) return null
 
   if (!refreshPromise) {

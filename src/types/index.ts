@@ -213,8 +213,6 @@ export interface CreditPackage {
 export interface CreateCheckoutPayload {
   package?: CreditPackageId
   amountUsd?: number
-  successUrl: string
-  cancelUrl: string
 }
 
 export interface CheckoutSessionResult {

@@ -7,12 +7,20 @@ import type {
   CreateCheckoutPayload,
   CreditPackage,
   Transaction,
-  UpdateAutoTopUpPayload,
+  // UpdateAutoTopUpPayload,
 } from '@/types'
 
-interface ApiCreditPackage {
-  id: string
-  price_usd: number
+interface ApiBillingBalance {
+  balance_usd?: number
+}
+
+interface ApiUsageRecord {
+  task_id: string
+  model: string
+  duration?: number
+  cost_usd: number
+  status: string
+  created_at?: string | number
 }
 
 interface ApiCheckoutResponse {
@@ -93,6 +101,23 @@ function mapBillingSummary(raw: ApiBillingSummary): BillingSummary {
   }
 }
 
+function mapUsageToBillingRecord(raw: ApiUsageRecord): BillingRecord {
+  const durationPart = raw.duration != null ? ` · ${raw.duration}s` : ''
+  return {
+    id: raw.task_id,
+    style: 'api',
+    key: `${raw.model}${durationPart}`,
+    apiKey: null,
+    amountUsd: -Math.abs(raw.cost_usd),
+    createdAt: parseTimestamp(raw.created_at),
+  }
+}
+
+interface ApiCreditPackage {
+  id: string
+  price_usd: number
+}
+
 function mapBillingRecord(raw: ApiBillingRecord): BillingRecord {
   if (raw.amountUsd != null) {
     return {
@@ -154,8 +179,19 @@ function mapCreditPackage(raw: ApiCreditPackage): CreditPackage {
   }
 }
 
-export function fetchBillingSummary() {
-  return unwrap<ApiBillingSummary>(http.get('/billing/summary')).then(mapBillingSummary)
+export async function fetchBillingSummary(): Promise<BillingSummary> {
+  try {
+    const raw = await unwrap<ApiBillingSummary>(http.get('/billing/summary'))
+    return mapBillingSummary(raw)
+  } catch {
+    const balance = await unwrap<ApiBillingBalance>(http.get('/billing/balance'))
+    return {
+      balanceUsd: balance.balance_usd ?? 0,
+      spentThisMonthUsd: 0,
+      spentChangePercent: 0,
+      autoTopUp: { enabled: false, thresholdUsd: 5, topUpAmountUsd: 20 },
+    }
+  }
 }
 
 export function fetchCreditPackages() {
@@ -170,17 +206,22 @@ export function fetchTransactions() {
   )
 }
 
-export function fetchBillingRecords() {
-  return unwrap<ApiBillingRecord[]>(http.get('/billing/records')).then((items) =>
-    items.map(mapBillingRecord),
-  )
+export async function fetchBillingRecords(): Promise<BillingRecord[]> {
+  try {
+    const items = await unwrap<ApiBillingRecord[]>(http.get('/billing/records'))
+    return items.map(mapBillingRecord)
+  } catch {
+    try {
+      const usage = await unwrap<ApiUsageRecord[]>(http.get('/usage'))
+      return usage.map(mapUsageToBillingRecord)
+    } catch {
+      return []
+    }
+  }
 }
 
 export function createCheckoutSession(payload: CreateCheckoutPayload) {
-  const body: Record<string, string | number> = {
-    success_url: payload.successUrl,
-    cancel_url: payload.cancelUrl,
-  }
+  const body: Record<string, string | number> = {}
 
   if (payload.package) {
     body.package = payload.package
@@ -203,12 +244,12 @@ export function completeMockCheckout(sessionId: string) {
   )
 }
 
-export function updateAutoTopUp(payload: UpdateAutoTopUpPayload) {
-  return unwrap<ApiAutoTopUp>(
-    http.post('/billing/auto-top-up', {
-      enabled: payload.enabled,
-      threshold_usd: payload.thresholdUsd,
-      top_up_amount_usd: payload.topUpAmountUsd,
-    }),
-  ).then(mapAutoTopUp)
-}
+// export function updateAutoTopUp(payload: UpdateAutoTopUpPayload) {
+//   return unwrap<ApiAutoTopUp>(
+//     http.post('/billing/auto-top-up', {
+//       enabled: payload.enabled,
+//       threshold_usd: payload.thresholdUsd,
+//       top_up_amount_usd: payload.topUpAmountUsd,
+//     }),
+//   ).then(mapAutoTopUp)
+// }
