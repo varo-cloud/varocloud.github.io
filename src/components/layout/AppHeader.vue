@@ -15,7 +15,7 @@ const { push, localePath, switchLocale } = useLocaleRouter()
 const { t } = useI18n()
 const userStore = useUserStore()
 
-const headerSearch = ref('')
+// const headerSearch = ref('')
 const isScrolled = ref(false)
 const userMenuOpen = ref(false)
 const mobileMenuOpen = ref(false)
@@ -131,10 +131,12 @@ function goToFromMobile(name: string) {
   goTo(name)
 }
 
+/*
 function submitMobileSearch() {
   submitHeaderSearch()
   closeMobileMenu()
 }
+*/
 
 function setBodyScrollLocked(locked: boolean) {
   if (typeof document === 'undefined') return
@@ -160,6 +162,7 @@ function handleLanguageSelect(key: string) {
   switchLocale(key as LocaleType)
 }
 
+/*
 function submitHeaderSearch() {
   const q = headerSearch.value.trim()
   push({
@@ -175,6 +178,7 @@ watch(
   },
   { immediate: true },
 )
+*/
 
 watch(
   () => route.fullPath,
@@ -233,6 +237,7 @@ onUnmounted(() => {
         </nav>
       </div>
 
+      <!-- 模型搜索 — 暂未启用
       <div
         v-if="userStore.isLoggedIn"
         class="app-header__center hidden lg:block"
@@ -248,6 +253,7 @@ onUnmounted(() => {
           />
         </label>
       </div>
+      -->
 
       <div class="app-header__right">
         <NDropdown
@@ -393,6 +399,7 @@ onUnmounted(() => {
             :aria-label="t('header.menu')"
             @click.stop
           >
+            <!-- 模型搜索 — 暂未启用
             <label v-if="userStore.isLoggedIn" class="app-header__mobile-search">
               <AppIcon name="search" class="app-header__search-icon" />
               <input
@@ -403,6 +410,7 @@ onUnmounted(() => {
                 @keydown.enter.prevent="submitMobileSearch"
               />
             </label>
+            -->
 
             <button
               v-for="item in navItems"
