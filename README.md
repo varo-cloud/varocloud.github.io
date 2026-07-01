@@ -67,6 +67,23 @@ VITE_DEV_REFRESH_TOKEN=<staging 登录后的 refresh_token>
 
 修改 `.env.*` 后需**重启** dev server 才会生效。
 
+### GitHub Actions 部署
+
+`.env.staging` / `.env.production` 不会进入 Git 仓库，CI 构建时在 workflow 中注入环境变量（见 [`.github/workflows/`](./.github/workflows/)）。
+
+请在 GitHub 仓库中配置：
+
+| 名称 | 类型 | 用途 |
+|---|---|---|
+| `VITE_TURNSTILE_SITE_KEY` | Secret | Turnstile site key（staging / production 共用，或按环境拆分） |
+| `VITE_GA_MEASUREMENT_ID` | Variable | GA4 测量 ID，留空则关闭统计 |
+
+**Staging / Production 固定值**（已写在 `deploy-staging.yml`、`deploy-production.yml`）：
+
+- `VITE_USE_MOCK=false`
+- `VITE_API_BASE_URL=https://staging.api.varo.cloud/api`
+- `VITE_BASE=/staging.github.io/`
+
 ## 路由清单
 
 | 路径 | 页面 | 需登录 |
