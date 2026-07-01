@@ -53,10 +53,10 @@ defineProps<{
 
 .switch-field__label {
   display: block;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 500;
   color: #ebf4fb;
-  line-height: 14px;
+  line-height: 12px;
 }
 
 .switch-field--invalid .switch-field__label {
