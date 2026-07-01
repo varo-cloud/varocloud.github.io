@@ -391,9 +391,9 @@ async function handleCheckoutReturn() {
 //   }
 // }
 
-function handleAddBillingAddress() {
-  message.info(t('pages.billing.addBillingAddressSoon'))
-}
+// function handleAddBillingAddress() {
+//   message.info(t('pages.billing.addBillingAddressSoon'))
+// }
 
 function handleExportCsv() {
   if (billingRecords.value.length === 0) {
@@ -520,11 +520,12 @@ onMounted(async () => {
         <section ref="rechargeSectionRef" class="billing-recharge" aria-label="Account recharge">
           <h2 class="billing-section-title">{{ t('pages.billing.accountRecharge') }}</h2>
 
-          <div class="billing-recharge__grid billing-recharge__grid--single">
-            <div class="billing-panel">
-              <p class="billing-panel__subtitle">{{ t('pages.billing.choosePackage') }}</p>
+          <div class="billing-recharge__grid">
+            <div class="billing-panel billing-panel--checkout">
+              <div class="billing-panel__packages">
+                <p class="billing-panel__subtitle">{{ t('pages.billing.choosePackage') }}</p>
 
-              <div class="billing-amount-list" role="radiogroup" :aria-label="t('pages.billing.choosePackage')">
+                <div class="billing-amount-list" role="radiogroup" :aria-label="t('pages.billing.choosePackage')">
                 <label
                   v-for="pkg in packages"
                   :key="pkg.id"
@@ -595,23 +596,26 @@ onMounted(async () => {
                   />
                 </label>
               </div>
-
-              <p class="billing-panel__subtitle billing-panel__subtitle--payment">
-                {{ t('pages.billing.paymentMethod') }}
-              </p>
-
-              <div class="billing-payment-stripe" aria-label="Stripe">
-                <img :src="STRIPE_LOGO" alt="Stripe" />
               </div>
 
-              <button
-                type="button"
-                class="billing-buy-btn"
-                :disabled="purchasing || !isCheckoutReady"
-                @click="handleBuy"
-              >
-                {{ buyButtonLabel }}
-              </button>
+              <div class="billing-panel__checkout">
+                <p class="billing-panel__subtitle billing-panel__subtitle--payment">
+                  {{ t('pages.billing.paymentMethod') }}
+                </p>
+
+                <div class="billing-payment-stripe" aria-label="Stripe">
+                  <img :src="STRIPE_LOGO" alt="Stripe" />
+                </div>
+
+                <button
+                  type="button"
+                  class="billing-buy-btn"
+                  :disabled="purchasing || !isCheckoutReady"
+                  @click="handleBuy"
+                >
+                  {{ buyButtonLabel }}
+                </button>
+              </div>
             </div>
 
             <!-- Auto top-up panel — re-enable when feature ships
@@ -693,16 +697,22 @@ onMounted(async () => {
               </button>
             </div>
 
+            <!-- Add Billing Address — 暂未启用
             <button
               type="button"
               class="billing-history__address-btn"
-              @click="activeTab === 'billing' ? handleExportCsv() : handleAddBillingAddress()"
+              @click="handleAddBillingAddress()"
             >
-              {{
-                activeTab === 'billing'
-                  ? t('pages.billing.exportToCsv')
-                  : t('pages.billing.addBillingAddress')
-              }}
+              {{ t('pages.billing.addBillingAddress') }}
+            </button>
+            -->
+            <button
+              v-if="activeTab === 'billing'"
+              type="button"
+              class="billing-history__address-btn"
+              @click="handleExportCsv()"
+            >
+              {{ t('pages.billing.exportToCsv') }}
             </button>
           </div>
 
@@ -941,13 +951,35 @@ onMounted(async () => {
 
 .billing-recharge__grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: 24px;
 }
 
-.billing-recharge__grid--single {
-  grid-template-columns: minmax(0, 1fr);
-  max-width: 560px;
+.billing-panel--checkout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 300px);
+  gap: 32px 48px;
+  align-items: start;
+}
+
+.billing-panel__packages {
+  min-width: 0;
+}
+
+.billing-panel__checkout {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-left: 48px;
+  border-left: 0.5px solid #2d2d38;
+}
+
+.billing-panel__checkout .billing-panel__subtitle--payment {
+  margin-top: 0;
+}
+
+.billing-panel__checkout .billing-payment-stripe {
+  margin-bottom: 8px;
 }
 
 .billing-panel {
@@ -1330,6 +1362,18 @@ onMounted(async () => {
   .billing-summary,
   .billing-recharge__grid {
     grid-template-columns: 1fr;
+  }
+
+  .billing-panel--checkout {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .billing-panel__checkout {
+    padding-left: 0;
+    border-left: 0;
+    padding-top: 24px;
+    border-top: 0.5px solid #2d2d38;
   }
 
   .billing-amount-option {
