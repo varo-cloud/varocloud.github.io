@@ -46,7 +46,7 @@ const CUSTOM_AMOUNT_MAX_USD = 10_000
 const DEFAULT_CUSTOM_AMOUNT_USD = 20
 
 const STRIPE_LOGO = assetUrl('/assets/billing/stripe.svg')
-// const ALIPAY_LOGO = assetUrl('/assets/billing/alipay.svg')
+const ALIPAY_LOGO = assetUrl('/assets/billing/alipay.svg')
 
 /** Re-enable when WeChat Pay ships. */
 const SHOW_WECHAT_PAY = false
@@ -59,7 +59,7 @@ const PAYMENT_METHODS: Array<{
   hidden?: boolean
 }> = [
   { id: 'card', logo: STRIPE_LOGO, alt: 'Stripe' },
-  { id: 'alipay', alt: 'Alipay', textClass: 'billing-payment-method__text--alipay' },
+  { id: 'alipay', logo: ALIPAY_LOGO, alt: 'Alipay', textClass: 'billing-payment-method__text--alipay' },
   { id: 'wechat_pay', alt: 'WeChat Pay', textClass: 'billing-payment-method__text--wechat', hidden: !SHOW_WECHAT_PAY },
 ]
 
@@ -1195,6 +1195,24 @@ onMounted(async () => {
   height: 100%;
   border-radius: inherit;
   object-fit: cover;
+}
+
+.billing-payment-method__text {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.billing-payment-method__text--alipay {
+  color: #1677ff;
+}
+
+.billing-payment-method__text--wechat {
+  color: #07c160;
+}
+
+.billing-payment-method--selected {
+  opacity: 1;
 }
 
 .billing-payment-method__text {

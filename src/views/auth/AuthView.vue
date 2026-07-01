@@ -53,6 +53,7 @@ const turnstileStatus = computed(() => {
 const isHumanVerified = computed(() => Boolean(turnstileToken.value))
 
 function handleTurnstileVerified(token: string) {
+  console.log('handleTurnstileVerified', token)
   turnstileToken.value = token
   turnstileFailed.value = false
   if (error.value === t('pages.auth.turnstileRequired') || error.value === t('pages.auth.turnstileExpired')) {
