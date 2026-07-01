@@ -4,7 +4,7 @@ import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useLocaleRouter } from '@/composables/useLocaleRouter'
 import { NSpin } from 'naive-ui'
-import { fetchModelDetail } from '@/api/models'
+import { fetchModelDetail, fetchModels } from '@/api/models'
 import { fetchModelInputSchema } from '@/api/modelSchema'
 import ModelDetailHeader from '@/components/models/ModelDetailHeader.vue'
 import ModelApiTab from '@/components/models/ModelApiTab.vue'
@@ -16,16 +16,17 @@ import { assetUrl } from '@/utils/assetUrl'
 import { createDefaultFormValues } from '@/utils/schema-form'
 import { usePlaygroundQuote } from '@/composables/usePlaygroundQuote'
 import { AnalyticsEvents, trackEvent } from '@/analytics'
-import type { GenerationStatus, ModelDetail, PlaygroundGenerationResult } from '@/types'
+import type { GenerationStatus, Model, ModelDetail, PlaygroundGenerationResult } from '@/types'
 import type { InputSchema, SchemaFormValues } from '@/types/schema'
 
 const route = useRoute()
-const { localePath } = useLocaleRouter()
+const { localePath, push } = useLocaleRouter()
 const { t } = useI18n()
 const userStore = useUserStore()
 const modelPrefs = useModelPreferencesStore()
 
 const model = ref<ModelDetail | null>(null)
+const modelOptions = ref<Model[]>([])
 const inputSchema = ref<InputSchema | null>(null)
 const loading = ref(true)
 const error = ref<string | null>(null)
@@ -88,6 +89,27 @@ const displayTitle = computed(() => {
   if (!model.value) return ''
   return `${model.value.name} by ${model.value.provider}`
 })
+
+const modelSwitcherOptions = computed(() =>
+  modelOptions.value.map((item) => ({
+    id: item.id,
+    label: item.displayName || item.name,
+  })),
+)
+
+async function loadModelOptions() {
+  try {
+    const page = await fetchModels({ limit: 100 })
+    modelOptions.value = page.items
+  } catch {
+    modelOptions.value = []
+  }
+}
+
+function handleModelSelect(id: string) {
+  if (id === model.value?.id) return
+  void push({ name: 'model-detail', params: { id } })
+}
 
 let generationTimers: ReturnType<typeof setTimeout>[] = []
 let progressInterval: ReturnType<typeof setInterval> | null = null
@@ -219,6 +241,7 @@ watch(
 
 onMounted(() => {
   userStore.loadProfile()
+  void loadModelOptions()
 })
 
 onUnmounted(() => {
@@ -243,9 +266,12 @@ onUnmounted(() => {
       <div class="model-detail-page__inner">
         <ModelDetailHeader
           :title="displayTitle"
+          :model-id="model.id"
           :model-path="model.modelPath"
           :description="model.description"
           :thumbnail-url="model.thumbnailUrl"
+          :model-options="modelSwitcherOptions"
+          @select="handleModelSelect"
         />
       </div>
 
