@@ -70,7 +70,9 @@ function getOrCreateUser(email: string): UserProfile {
     id: `user-${Date.now()}`,
     email: normalized,
     name: localPart,
+    role: 'user',
     balanceUsd: 0,
+    createdAt: Date.now(),
   }
   users.set(normalized, user)
   return user
@@ -208,7 +210,9 @@ export default [
           return success({
             id: user.id,
             email: user.email,
+            role: user.role,
             balance_usd: getAccountBalanceUsd(),
+            created_at: user.createdAt,
           })
         }
       }

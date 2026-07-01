@@ -35,17 +35,22 @@ export function revokeRefreshToken(refreshToken: string) {
 interface ApiUserProfile {
   id: string
   email: string
-  name?: string
+  role: string
   balance_usd: number
+  created_at: number
 }
 
 function mapUserProfile(raw: ApiUserProfile): UserProfile {
   const localPart = raw.email.split('@')[0] ?? 'user'
+  const role: UserProfile['role'] = raw.role === 'admin' ? 'admin' : 'user'
+
   return {
     id: raw.id,
     email: raw.email,
-    name: raw.name ?? localPart,
+    name: localPart,
+    role,
     balanceUsd: raw.balance_usd,
+    createdAt: raw.created_at,
   }
 }
 

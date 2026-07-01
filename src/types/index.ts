@@ -87,12 +87,18 @@ export interface ModelPreferences {
   recent: ModelRecentEntry[]
 }
 
+export type UserRole = 'user' | 'admin'
+
 export interface UserProfile {
   id: string
   email: string
+  /** Derived from email local-part when API does not return a display name */
   name: string
+  role: UserRole
   /** USD balance — maps from API field `balance_usd` */
   balanceUsd: number
+  /** Maps from API field `created_at` — 13-digit Unix timestamp (ms) */
+  createdAt: number
 }
 
 export interface OtpRequestPayload {
