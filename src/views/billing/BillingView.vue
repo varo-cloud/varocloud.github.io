@@ -48,11 +48,7 @@ const CUSTOM_AMOUNT_MAX_USD = 10_000
 const DEFAULT_CUSTOM_AMOUNT_USD = 20
 
 const STRIPE_LOGO = assetUrl('/assets/billing/stripe.svg')
-const ALIPAY_LOGO = assetUrl('/assets/billing/alipay.svg')
-const CRYPTO_LOGO = assetUrl('/assets/billing/npay.svg')
-
-/** Re-enable when WeChat Pay ships. */
-const SHOW_WECHAT_PAY = false
+const ALIPAY_WECHAT_LOGO = assetUrl('/assets/billing/alipay-wechat.svg')
 
 const PAYMENT_METHODS: Array<{
   id: PaymentMethodId
@@ -63,9 +59,8 @@ const PAYMENT_METHODS: Array<{
   requiresCrypto?: boolean
 }> = [
   { id: 'card', logo: STRIPE_LOGO, alt: 'Stripe' },
-  { id: 'alipay', logo: ALIPAY_LOGO, alt: 'Alipay', textClass: 'billing-payment-method__text--alipay' },
-  { id: 'wechat_pay', alt: 'WeChat Pay', textClass: 'billing-payment-method__text--wechat', hidden: !SHOW_WECHAT_PAY },
-  { id: 'crypto', logo: CRYPTO_LOGO, alt: 'Crypto', requiresCrypto: true },
+  { id: '', logo: ALIPAY_WECHAT_LOGO, alt: 'AliWechatPay', textClass: 'billing-payment-method__text--alipay' },
+  { id: 'crypto', alt: 'Crypto', requiresCrypto: true },
 ]
 
 const cryptoEnabled = ref(false)
@@ -81,6 +76,11 @@ const visiblePaymentMethods = computed(() =>
 const route = useRoute()
 const { localePath, replace } = useLocaleRouter()
 const { t, locale } = useI18n()
+
+function paymentMethodLabel(id: PaymentMethodId): string {
+  if (id === '') return t('pages.billing.paymentMethods.alipayWechat')
+  return t(`pages.billing.paymentMethods.${id}`)
+}
 const message = useAppMessage()
 const userStore = useUserStore()
 
@@ -131,7 +131,7 @@ const buyButtonLabel = computed(() => {
   const amountLabel = isCheckoutReady.value
     ? formatUsd(selectedCheckoutAmountUsd.value ?? 0)
     : '—'
-  const methodLabel = t(`pages.billing.paymentMethods.${selectedPaymentMethod.value}`)
+  const methodLabel = paymentMethodLabel(selectedPaymentMethod.value)
 
   return t('pages.billing.continueToCheckout', {
     amount: amountLabel,
@@ -315,7 +315,7 @@ async function handleBuy() {
     const checkoutProvider = selectedPaymentMethod.value === 'crypto' ? 'nowpayments' : 'stripe'
     trackEvent(AnalyticsEvents.CHECKOUT_START, {
       amount_usd: amountUsd,
-      payment_method: selectedPaymentMethod.value,
+      payment_method: selectedPaymentMethod.value || undefined,
       provider: checkoutProvider,
       preset_id: presetId ?? undefined,
     })
@@ -326,11 +326,7 @@ async function handleBuy() {
     const { checkoutUrl } = await createCheckout({
       amountUsd,
       presetId,
-      ...(checkoutProvider === 'stripe'
-        ? {
-            paymentMethod: selectedPaymentMethod.value as Exclude<PaymentMethodId, 'crypto'>,
-          }
-        : {}),
+      ...(selectedPaymentMethod.value === 'card' ? { paymentMethod: 'card' } : {}),
     })
     window.location.assign(checkoutUrl)
   } catch {
@@ -670,7 +666,7 @@ onMounted(async () => {
                 >
                   <label
                     v-for="method in visiblePaymentMethods"
-                    :key="method.id"
+                    :key="method.id || 'alipay-wechat'"
                     class="billing-payment-method"
                     :class="{
                       'billing-payment-method--selected': selectedPaymentMethod === method.id,
