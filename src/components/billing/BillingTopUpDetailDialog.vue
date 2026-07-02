@@ -19,10 +19,8 @@ const status = computed<TopUpTransactionStatus>(
 )
 
 const paymentDetail = computed(() => {
-  if (!props.transaction) return '—'
-  if (props.transaction.paymentDetail) return props.transaction.paymentDetail
-  if (status.value === 'completed') return 'Visa ••4242'
-  return '—'
+  if (!props.transaction?.paymentDetail) return '—'
+  return props.transaction.paymentDetail
 })
 
 const createdLabel = computed(() => {
@@ -42,13 +40,6 @@ const amountLabel = computed(() => {
 
 const statusLabel = computed(() => t(`pages.billing.topUpDetail.statuses.${status.value}`))
 
-const paymentMethodLabel = computed(() => {
-  if (!props.transaction?.paymentMethod) return '—'
-  const key = `pages.billing.paymentMethods.${props.transaction.paymentMethod}`
-  const translated = t(key)
-  return translated === key ? props.transaction.paymentMethod : translated
-})
-
 const detailRows = computed(() => {
   if (!props.transaction) return []
 
@@ -56,7 +47,6 @@ const detailRows = computed(() => {
     { label: t('pages.billing.topUpDetail.transactionId'), value: props.transaction.id },
     { label: t('pages.billing.topUpDetail.status'), value: statusLabel.value, isStatus: true },
     { label: t('pages.billing.topUpDetail.amount'), value: amountLabel.value },
-    { label: t('pages.billing.topUpDetail.paymentMethod'), value: paymentMethodLabel.value },
     { label: t('pages.billing.topUpDetail.paymentDetail'), value: paymentDetail.value },
     { label: t('pages.billing.topUpDetail.createdAt'), value: createdLabel.value },
     { label: t('pages.billing.topUpDetail.completedAt'), value: completedLabel.value },
@@ -72,7 +62,7 @@ const detailRows = computed(() => {
       @click.self="emit('close')"
     >
       <div
-        class="billing-topup-detail"
+        class="billing-topup-detail scrollbar-subtle"
         role="dialog"
         aria-modal="true"
         :aria-label="t('pages.billing.topUpDetail.title')"

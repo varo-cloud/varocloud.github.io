@@ -582,6 +582,7 @@ onMounted(async () => {
                   />
                   <span class="billing-amount-option__amount">{{ packageLabel(pkg.id) }}</span>
                   <span class="billing-amount-option__price">{{ formatUsd(pkg.priceUsd) }}</span>
+                  <span v-if="pkg.label" class="billing-amount-option__hint">{{ pkg.label }}</span>
                 </label>
 
                 <label
@@ -789,6 +790,7 @@ onMounted(async () => {
             >
               <span role="columnheader">{{ t('pages.billing.columns.description') }}</span>
               <span role="columnheader">{{ t('pages.billing.columns.status') }}</span>
+              <span role="columnheader">{{ t('pages.billing.columns.paymentMethod') }}</span>
               <span role="columnheader">{{ t('pages.billing.columns.initiatedAt') }}</span>
               <span role="columnheader">{{ t('pages.billing.columns.completedAt') }}</span>
               <span role="columnheader">{{ t('pages.billing.columns.amount') }}</span>
@@ -1423,6 +1425,7 @@ onMounted(async () => {
   grid-template-columns:
     minmax(90px, 1fr)
     minmax(88px, 0.75fr)
+    minmax(88px, 0.75fr)
     minmax(110px, 0.95fr)
     minmax(110px, 0.95fr)
     minmax(72px, 0.6fr)
@@ -1435,7 +1438,7 @@ onMounted(async () => {
 
 .billing-table--topup .billing-table__header--topup,
 .billing-table--topup :deep(.billing-tx-row) {
-  min-width: 760px;
+  min-width: 860px;
 }
 
 .billing-table__empty {

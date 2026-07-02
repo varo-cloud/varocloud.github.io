@@ -311,6 +311,7 @@ export default {
         description: 'Description',
         date: 'Date',
         status: 'Status',
+        paymentMethod: 'Payment method',
         initiatedAt: 'Initiated',
         completedAt: 'Completed',
         amount: 'Amount',

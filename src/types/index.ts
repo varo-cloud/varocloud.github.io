@@ -212,6 +212,7 @@ export type TopUpSelectionId = CreditPackageId | 'custom'
 
 export interface CreditPackage {
   id: CreditPackageId
+  label: string
   priceUsd: number
 }
 

@@ -113,6 +113,7 @@ function mapUsageToBillingRecord(raw: ApiUsageRecord): BillingRecord {
 
 interface ApiCreditPackage {
   id: string
+  label: string
   price_usd: number
 }
 
@@ -161,7 +162,7 @@ function mapTransaction(raw: ApiTransaction): Transaction {
     description: 'Top Up',
     createdAt: parseTimestamp(raw.created_at),
     status: raw.status as Transaction['status'],
-    paymentMethod: (raw.payment_method as Transaction['paymentMethod']) ?? 'card',
+    paymentMethod: raw.payment_method as Transaction['paymentMethod'],
     paymentDetail: raw.payment_detail ?? null,
     completedAt: raw.completed_at != null ? parseTimestamp(raw.completed_at) : null,
     receiptUrl: raw.receipt_url ?? null,
@@ -171,6 +172,7 @@ function mapTransaction(raw: ApiTransaction): Transaction {
 function mapCreditPackage(raw: ApiCreditPackage): CreditPackage {
   return {
     id: raw.id as CreditPackage['id'],
+    label: raw.label,
     priceUsd: raw.price_usd,
   }
 }

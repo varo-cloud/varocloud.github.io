@@ -308,6 +308,7 @@ export default {
         description: '描述',
         date: '日期',
         status: '状态',
+        paymentMethod: '支付方式',
         initiatedAt: '发起时间',
         completedAt: '完成时间',
         amount: '金额',
