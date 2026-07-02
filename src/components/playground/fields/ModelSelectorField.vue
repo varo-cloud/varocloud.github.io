@@ -26,7 +26,16 @@ const { t } = useI18n()
 const open = ref(false)
 const triggerRef = ref<HTMLElement | null>(null)
 const panelRef = ref<HTMLElement | null>(null)
-const panelStyle = ref({ top: '0px', left: '0px', width: '0px' })
+const PANEL_MAX_HEIGHT = 320
+const VIEWPORT_PADDING = 8
+const PANEL_GAP = 4
+
+const panelStyle = ref<Record<string, string>>({
+  top: '0px',
+  left: '0px',
+  width: '0px',
+  maxHeight: `${PANEL_MAX_HEIGHT}px`,
+})
 const panelId = useId()
 
 const selectedOption = computed(() => props.options.find((item) => item.id === model.value))
@@ -60,11 +69,32 @@ function updatePanelPosition() {
   if (!el) return
 
   const rect = el.getBoundingClientRect()
-  panelStyle.value = {
-    top: `${rect.bottom + 4}px`,
-    left: `${rect.left}px`,
-    width: `${rect.width}px`,
-  }
+  const spaceBelow = window.innerHeight - rect.bottom - VIEWPORT_PADDING
+  const spaceAbove = rect.top - VIEWPORT_PADDING
+  const openBelow = spaceBelow >= spaceAbove
+  const availableSpace = (openBelow ? spaceBelow : spaceAbove) - PANEL_GAP
+  const maxHeight = Math.min(PANEL_MAX_HEIGHT, Math.max(availableSpace, 120))
+
+  panelStyle.value = openBelow
+    ? {
+        top: `${rect.bottom + PANEL_GAP}px`,
+        bottom: 'auto',
+        left: `${rect.left}px`,
+        width: `${rect.width}px`,
+        maxHeight: `${maxHeight}px`,
+      }
+    : {
+        top: 'auto',
+        bottom: `${window.innerHeight - rect.top + PANEL_GAP}px`,
+        left: `${rect.left}px`,
+        width: `${rect.width}px`,
+        maxHeight: `${maxHeight}px`,
+      }
+}
+
+function onViewportScroll(event: Event) {
+  if (panelRef.value?.contains(event.target as Node)) return
+  updatePanelPosition()
 }
 
 function toggleOpen() {
@@ -86,20 +116,20 @@ function onDocumentPointerDown(event: PointerEvent) {
 watch(open, (isOpen) => {
   if (!isOpen) {
     window.removeEventListener('resize', updatePanelPosition)
-    window.removeEventListener('scroll', updatePanelPosition, true)
+    window.removeEventListener('scroll', onViewportScroll, true)
     document.removeEventListener('pointerdown', onDocumentPointerDown)
     return
   }
 
   nextTick(updatePanelPosition)
   window.addEventListener('resize', updatePanelPosition)
-  window.addEventListener('scroll', updatePanelPosition, true)
+  window.addEventListener('scroll', onViewportScroll, true)
   document.addEventListener('pointerdown', onDocumentPointerDown)
 })
 
 onBeforeUnmount(() => {
   window.removeEventListener('resize', updatePanelPosition)
-  window.removeEventListener('scroll', updatePanelPosition, true)
+  window.removeEventListener('scroll', onViewportScroll, true)
   document.removeEventListener('pointerdown', onDocumentPointerDown)
 })
 </script>
