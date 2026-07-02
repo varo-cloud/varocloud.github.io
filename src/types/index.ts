@@ -228,6 +228,8 @@ export interface BillingConfig {
 export interface CreateCheckoutPayload {
   amountUsd: number
   presetId?: string | null
+  /** Stripe checkout only: card | alipay | wechat_pay */
+  paymentMethod?: Exclude<PaymentMethodId, 'crypto'>
 }
 
 export interface CheckoutSessionResult {

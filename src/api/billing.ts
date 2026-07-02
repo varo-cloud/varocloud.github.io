@@ -247,7 +247,15 @@ export async function fetchBillingRecords(): Promise<BillingRecord[]> {
   }
 }
 
-function buildCheckoutBody(payload: CreateCheckoutPayload) {
+function buildStripeCheckoutBody(payload: CreateCheckoutPayload) {
+  return {
+    amount_usd: payload.amountUsd,
+    ...(payload.presetId ? { preset_id: payload.presetId } : {}),
+    ...(payload.paymentMethod ? { payment_method: payload.paymentMethod } : {}),
+  }
+}
+
+function buildCryptoCheckoutBody(payload: CreateCheckoutPayload) {
   return {
     amount_usd: payload.amountUsd,
     ...(payload.presetId ? { preset_id: payload.presetId } : {}),
@@ -256,7 +264,7 @@ function buildCheckoutBody(payload: CreateCheckoutPayload) {
 
 export function createStripeCheckoutSession(payload: CreateCheckoutPayload) {
   return unwrap<ApiCheckoutResponse>(
-    http.post('/billing/stripe/checkout', buildCheckoutBody(payload)),
+    http.post('/billing/stripe/checkout', buildStripeCheckoutBody(payload)),
   ).then(
     (data): CheckoutSessionResult => ({
       checkoutUrl: data.checkout_url,
@@ -266,7 +274,7 @@ export function createStripeCheckoutSession(payload: CreateCheckoutPayload) {
 
 export function createCryptoCheckoutSession(payload: CreateCheckoutPayload) {
   return unwrap<ApiCheckoutResponse>(
-    http.post('/billing/nowpayments/checkout', buildCheckoutBody(payload)),
+    http.post('/billing/nowpayments/checkout', buildCryptoCheckoutBody(payload)),
   ).then(
     (data): CheckoutSessionResult => ({
       checkoutUrl: data.checkout_url,
