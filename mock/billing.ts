@@ -138,16 +138,16 @@ function completeCheckout(sessionId: string) {
 
   const now = Date.now()
   const isCrypto = pending.provider === 'nowpayments'
-  const stripeMethod = pending.paymentMethod ?? 'card'
+  const stripeMethod = pending.paymentMethod ?? 'alipay'
   const completed: Transaction = {
     ...transactions[index],
     status: 'completed',
     paymentMethod: isCrypto ? 'usdttrc20' : stripeMethod,
     paymentDetail: isCrypto
       ? 'TXyz1234567890abcdef'
-      : stripeMethod === 'alipay'
-        ? 'Alipay'
-        : 'Visa ••4242',
+      : stripeMethod === 'card'
+        ? 'Visa ••4242'
+        : 'Alipay',
     completedAt: now,
     receiptUrl: isCrypto
       ? 'https://nowpayments.io/payment/?iid=example'
@@ -164,9 +164,9 @@ function completeCheckout(sessionId: string) {
     style: 'topup',
     key: isCrypto
       ? 'Crypto · USDT-TRC20'
-      : stripeMethod === 'alipay'
-        ? 'Stripe · Alipay'
-        : 'Stripe · Visa ••4242',
+      : stripeMethod === 'card'
+        ? 'Stripe · Visa ••4242'
+        : 'Stripe · Alipay',
     amountUsd: pending.amountUsd,
     createdAt: now,
   })
@@ -184,14 +184,16 @@ function createCheckoutResponse(
     return fail('amount_usd must be between 1 and 10000', 400)
   }
 
-  let paymentMethod: Transaction['paymentMethod'] = null
+  let paymentMethod: Transaction['paymentMethod'] | undefined
   if (provider === 'stripe') {
-    const requested = body.payment_method ?? 'card'
-    const allowedMethods = new Set(['card', 'alipay', 'wechat_pay'])
-    if (!allowedMethods.has(requested)) {
+    const requested = body.payment_method
+    if (requested === undefined || requested === '') {
+      paymentMethod = undefined
+    } else if (requested === 'card') {
+      paymentMethod = 'card'
+    } else {
       return fail('payment_method is invalid', 400)
     }
-    paymentMethod = requested as Transaction['paymentMethod']
   }
 
   const roundedAmountUsd = Math.round(amountUsd * 100) / 100

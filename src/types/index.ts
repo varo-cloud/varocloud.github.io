@@ -228,15 +228,16 @@ export interface BillingConfig {
 export interface CreateCheckoutPayload {
   amountUsd: number
   presetId?: string | null
-  /** Stripe checkout only: card | alipay | wechat_pay */
-  paymentMethod?: Exclude<PaymentMethodId, 'crypto'>
+  /** Stripe checkout only; omit for Alipay / WeChat Pay on Stripe hosted page */
+  paymentMethod?: 'card'
 }
 
 export interface CheckoutSessionResult {
   checkoutUrl: string
 }
 
-export type PaymentMethodId = 'card' | 'alipay' | 'wechat_pay' | 'crypto'
+/** `''` = Alipay / WeChat Pay (no payment_method in checkout request) */
+export type PaymentMethodId = 'card' | '' | 'crypto'
 
 export interface CreateTopUpPayload {
   amountUsd: number

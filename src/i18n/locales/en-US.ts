@@ -265,6 +265,7 @@ export default {
       paymentMethod: 'Payment Method',
       paymentMethods: {
         card: 'Card',
+        alipayWechat: 'Alipay / WeChat Pay',
         alipay: 'Alipay',
         wechat_pay: 'WeChat Pay',
         crypto: 'Crypto',

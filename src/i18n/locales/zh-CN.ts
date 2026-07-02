@@ -263,6 +263,7 @@ export default {
       paymentMethod: '支付方式',
       paymentMethods: {
         card: '银行卡',
+        alipayWechat: '支付宝 / 微信支付',
         alipay: '支付宝',
         wechat_pay: '微信支付',
         crypto: '加密货币',
