@@ -1,0 +1,58 @@
+---
+description: 共享 UI 工具类与可滚动下拉面板的实现规范
+globs: **/*.{vue,css,ts}
+alwaysApply: false
+---
+
+# 共享 UI 工具类与可滚动面板
+
+## 原则：组合复用，禁止拷贝样式
+
+全局工具类只维护一份。需要某样式时，在模板里**叠加 class**，不要在组件 CSS 里复制相同规则。
+
+| 场景 | 唯一来源 | 用法 |
+|------|----------|------|
+| 细滚动条 | `src/styles/global.css` → `.scrollbar-subtle` | 可滚动容器加 `scrollbar-subtle` |
+| Playground 下拉面板 | `src/styles/playground-select-panel.css` | 外层 `playground-select-panel` |
+| 浮动层 z-index | `src/styles/global.css` + `src/constants/overlayZIndex.ts` | CSS 用 `var(--z-*)`，JS 用同名常量 |
+
+```vue
+<!-- ✅ GOOD：组合复用 -->
+<div class="playground-select-panel">
+  <div class="playground-select-panel__scroll scrollbar-subtle">...</div>
+</div>
+
+<!-- ❌ BAD：在组件/模块 CSS 里重写 scrollbar 或 panel 样式 -->
+.my-panel::-webkit-scrollbar { width: 6px; }
+```
+
+## 可滚动下拉面板
+
+选项过多时，面板**内部滚动**，不要撑长页面。
+
+1. 外层 `playground-select-panel`（`position: fixed` + `Teleport to="body"`），**不设 overflow**
+2. 内层 `playground-select-panel__scroll scrollbar-subtle` 负责 `max-height` + `overflow-y: auto`
+3. 定位逻辑参考 `ModelSelectorField.vue`：
+   - 按视口空间动态算 `maxHeight`，空间不足时向上展开
+   - 监听页面 scroll 时，若事件来自面板内部则不要 reposition
+
+## 浮动层 z-index
+
+下拉面板内的 `NTooltip` / `NPopover` 必须显式高于面板，否则会被面板或相邻列遮挡。
+
+- 面板：`--z-playground-select-panel`（9999）
+- 面板内 tooltip：`--z-playground-select-tooltip`（10050）
+- `NTooltip` 需同时设置 `to="body"` 与 `:z-index="PLAYGROUND_SELECT_TOOLTIP_Z_INDEX"`
+
+新增浮动层时，在 `global.css` 与 `overlayZIndex.ts` 各维护一份，数值保持同步。
+
+## 新增全局工具类
+
+只有**多处复用**时才加到 `src/styles/global.css`，命名语义化（如 `scrollbar-subtle`）。单组件专用样式留在组件 scoped CSS，不要升格为全局类。
+
+## 检查清单
+
+- [ ] 没有复制 `::-webkit-scrollbar` / `scrollbar-width` 等已有工具类规则
+- [ ] 长列表下拉：外层定位 + 内层 `__scroll` 滚动
+- [ ] 可滚动区域叠加 `scrollbar-subtle`
+- [ ] 面板内 tooltip/popover 的 z-index 高于面板本身

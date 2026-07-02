@@ -3,6 +3,7 @@ import { computed, nextTick, onBeforeUnmount, ref, useId, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { NTooltip } from 'naive-ui'
 import AppIcon from '@/components/common/AppIcon.vue'
+import { PLAYGROUND_SELECT_TOOLTIP_Z_INDEX } from '@/constants/overlayZIndex'
 import SchemaFieldLabel from '../SchemaFieldLabel.vue'
 
 export type ModelSelectorOption = {
@@ -30,10 +31,12 @@ const PANEL_MAX_HEIGHT = 320
 const VIEWPORT_PADDING = 8
 const PANEL_GAP = 4
 
-const panelStyle = ref<Record<string, string>>({
+const panelShellStyle = ref<Record<string, string>>({
   top: '0px',
   left: '0px',
   width: '0px',
+})
+const panelScrollStyle = ref<Record<string, string>>({
   maxHeight: `${PANEL_MAX_HEIGHT}px`,
 })
 const panelId = useId()
@@ -75,21 +78,23 @@ function updatePanelPosition() {
   const availableSpace = (openBelow ? spaceBelow : spaceAbove) - PANEL_GAP
   const maxHeight = Math.min(PANEL_MAX_HEIGHT, Math.max(availableSpace, 120))
 
-  panelStyle.value = openBelow
+  panelShellStyle.value = openBelow
     ? {
         top: `${rect.bottom + PANEL_GAP}px`,
         bottom: 'auto',
         left: `${rect.left}px`,
         width: `${rect.width}px`,
-        maxHeight: `${maxHeight}px`,
       }
     : {
         top: 'auto',
         bottom: `${window.innerHeight - rect.top + PANEL_GAP}px`,
         left: `${rect.left}px`,
         width: `${rect.width}px`,
-        maxHeight: `${maxHeight}px`,
       }
+
+  panelScrollStyle.value = {
+    maxHeight: `${maxHeight}px`,
+  }
 }
 
 function onViewportScroll(event: Event) {
@@ -172,16 +177,22 @@ onBeforeUnmount(() => {
           :id="panelId"
           ref="panelRef"
           class="playground-select-panel"
-          :style="panelStyle"
+          :style="panelShellStyle"
           role="listbox"
         >
-          <NTooltip
-            v-for="opt in options"
-            :key="opt.id"
-            trigger="hover"
-            placement="right"
-            :disabled="!opt.description"
+          <div
+            class="playground-select-panel__scroll scrollbar-subtle"
+            :style="panelScrollStyle"
           >
+            <NTooltip
+              v-for="opt in options"
+              :key="opt.id"
+              to="body"
+              trigger="hover"
+              placement="right"
+              :z-index="PLAYGROUND_SELECT_TOOLTIP_Z_INDEX"
+              :disabled="!opt.description"
+            >
             <template #trigger>
               <button
                 type="button"
@@ -220,7 +231,8 @@ onBeforeUnmount(() => {
               </button>
             </template>
             <span class="model-selector__tooltip">{{ opt.description }}</span>
-          </NTooltip>
+            </NTooltip>
+          </div>
         </div>
       </Teleport>
     </div>

@@ -48,6 +48,8 @@ a {
   --text-accent: #06b6d4;
   --border-color: rgba(255, 255, 255, 0.1);
   --app-header-height: 80px;
+  --z-playground-select-panel: 9999;
+  --z-playground-select-tooltip: 10050;
 }
 
 /* Naive UI Spin inlines --n-color (primary green); override on the element that receives it. */

@@ -105,7 +105,7 @@ onBeforeUnmount(() => {
         v-if="open"
         :id="panelId"
         ref="panelRef"
-        class="playground-select-panel"
+        class="playground-select-panel scrollbar-subtle"
         :style="panelStyle"
         role="listbox"
       >
