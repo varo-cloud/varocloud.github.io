@@ -326,6 +326,11 @@ async function handleBuy() {
     const { checkoutUrl } = await createCheckout({
       amountUsd,
       presetId,
+      ...(checkoutProvider === 'stripe'
+        ? {
+            paymentMethod: selectedPaymentMethod.value as Exclude<PaymentMethodId, 'crypto'>,
+          }
+        : {}),
     })
     window.location.assign(checkoutUrl)
   } catch {

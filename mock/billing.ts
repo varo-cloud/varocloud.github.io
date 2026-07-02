@@ -14,6 +14,7 @@ interface PendingCheckout {
   transactionId: string
   amountUsd: number
   provider: 'stripe' | 'nowpayments'
+  paymentMethod?: Transaction['paymentMethod']
 }
 
 const pendingCheckouts = new Map<string, PendingCheckout>()
@@ -137,11 +138,16 @@ function completeCheckout(sessionId: string) {
 
   const now = Date.now()
   const isCrypto = pending.provider === 'nowpayments'
+  const stripeMethod = pending.paymentMethod ?? 'card'
   const completed: Transaction = {
     ...transactions[index],
     status: 'completed',
-    paymentMethod: isCrypto ? 'usdttrc20' : 'card',
-    paymentDetail: isCrypto ? 'TXyz1234567890abcdef' : 'Visa ••4242',
+    paymentMethod: isCrypto ? 'usdttrc20' : stripeMethod,
+    paymentDetail: isCrypto
+      ? 'TXyz1234567890abcdef'
+      : stripeMethod === 'alipay'
+        ? 'Alipay'
+        : 'Visa ••4242',
     completedAt: now,
     receiptUrl: isCrypto
       ? 'https://nowpayments.io/payment/?iid=example'
@@ -156,7 +162,11 @@ function completeCheckout(sessionId: string) {
   billingRecords.unshift({
     id: `br-topup-${now}`,
     style: 'topup',
-    key: isCrypto ? 'Crypto · USDT-TRC20' : 'Stripe · Visa ••4242',
+    key: isCrypto
+      ? 'Crypto · USDT-TRC20'
+      : stripeMethod === 'alipay'
+        ? 'Stripe · Alipay'
+        : 'Stripe · Visa ••4242',
     amountUsd: pending.amountUsd,
     createdAt: now,
   })
@@ -166,12 +176,22 @@ function completeCheckout(sessionId: string) {
 }
 
 function createCheckoutResponse(
-  body: { amount_usd?: number; preset_id?: string | null },
+  body: { amount_usd?: number; preset_id?: string | null; payment_method?: string },
   provider: 'stripe' | 'nowpayments',
 ) {
   const amountUsd = Number(body.amount_usd)
   if (!Number.isFinite(amountUsd) || amountUsd < 1 || amountUsd > 10_000) {
     return fail('amount_usd must be between 1 and 10000', 400)
+  }
+
+  let paymentMethod: Transaction['paymentMethod'] = null
+  if (provider === 'stripe') {
+    const requested = body.payment_method ?? 'card'
+    const allowedMethods = new Set(['card', 'alipay', 'wechat_pay'])
+    if (!allowedMethods.has(requested)) {
+      return fail('payment_method is invalid', 400)
+    }
+    paymentMethod = requested as Transaction['paymentMethod']
   }
 
   const roundedAmountUsd = Math.round(amountUsd * 100) / 100
@@ -195,6 +215,7 @@ function createCheckoutResponse(
     transactionId,
     amountUsd: roundedAmountUsd,
     provider,
+    paymentMethod,
   })
 
   const successBase = 'http://localhost:5173/en/billing'
@@ -255,7 +276,7 @@ export default [
   {
     url: '/api/billing/stripe/checkout',
     method: 'post',
-    response: ({ body }: { body: { amount_usd?: number; preset_id?: string | null } }) =>
+    response: ({ body }: { body: { amount_usd?: number; preset_id?: string | null; payment_method?: string } }) =>
       createCheckoutResponse(body, 'stripe'),
   },
   {
